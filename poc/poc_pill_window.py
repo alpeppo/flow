@@ -13,6 +13,7 @@ Manuell durchspielen, dann Strg+C im Terminal.
 import math
 import time
 
+import objc  # type: ignore[import-not-found]
 from AppKit import (  # type: ignore[import-not-found]
     NSApplication,
     NSBackingStoreBuffered,
@@ -45,7 +46,7 @@ POLL_INTERVAL = 0.02  # 20ms = 50Hz
 
 class WaveformView(NSView):
     def initWithFrame_(self, frame):
-        self = super().initWithFrame_(frame)
+        self = objc.super(WaveformView, self).initWithFrame_(frame)
         if self is None:
             return None
         self._level = 0.0
@@ -89,7 +90,7 @@ class WaveformView(NSView):
 
 class PocApp(NSObject):
     def init(self):
-        self = super().init()
+        self = objc.super(PocApp, self).init()
         if self is None:
             return None
         self._frame_count = 0
