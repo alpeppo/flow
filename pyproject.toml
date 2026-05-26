@@ -1,0 +1,32 @@
+[project]
+name = "worknetic-flow"
+version = "0.1.0"
+description = "Lokaler Wispr-Flow-Klon: System-weites Push-to-Talk-Diktat mit mlx-whisper"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "mlx-whisper>=0.4.0",
+    "sounddevice>=0.5.0",
+    "numpy>=1.26.0",
+    "pynput>=1.7.7",
+    "rumps>=0.4.0",
+    "pyperclip>=1.9.0",
+    "pyobjc-framework-ApplicationServices>=10.3",
+    "pyobjc-framework-Cocoa>=10.3",
+    "httpx>=0.27.0",
+    "python-dotenv>=1.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-mock>=3.12.0",
+    "respx>=0.21.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/wnflow"]
