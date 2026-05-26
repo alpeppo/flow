@@ -103,3 +103,34 @@ Mit folgenden Anpassungen am Plan:
 1. `hotkey.py` mit pyobjc statt pynput (POC 2 Pivot)
 2. Latenz-Ziel in Spec/Plan auf ~2.5-3.5s revidiert (akzeptiert)
 3. Modell-Swap (whisper.cpp + Metal) bleibt als Future-Hebel dokumentiert
+
+---
+
+## v0.2.0 POC: NSWindow Pill
+
+**Datum:** 2026-05-26
+**Spec-Referenz:** docs/superpowers/specs/2026-05-26-worknetic-flow-v0.2.0.md §10
+
+### PASS-Kriterien (alle 7 müssen erfüllt sein)
+
+- [ ] Window erscheint stabil unten mittig auf Main-Screen
+- [ ] Window bleibt über anderen Apps sichtbar
+- [ ] 30+fps Repaint (FPS-Output im Terminal beobachten)
+- [ ] Mausklicks gehen durch (öffne Notes.app, click durchs Pill-Fenster auf Notes-Textfeld)
+- [ ] Window stottert NICHT bei offenem Apple-Menü (Tracking-Mode-Test)
+- [ ] Window erscheint auch in Vollbild-Apps (Safari Vollbild via Strg+Cmd+F)
+- [ ] Multi-Monitor optional
+
+### Ergebnisse
+
+_Tim füllt nach manuellem Run aus._
+
+FPS gemessen: ___
+Sichtbar in Vollbild: ___
+Klick-durch: ___
+Tracking-Mode-Test: ___
+
+### Entscheidung
+
+[ ] PROCEED zu Phase 0.2 (Logo)
+[ ] FAIL — Alternative-Ansatz nötig (Spec §10)
