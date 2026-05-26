@@ -83,3 +83,46 @@ uv run python poc/poc_hotkey.py
 - Diese sind komplett konfliktfrei (kein System-Shortcut)
 
 ### ESC zum Beenden, dann Ergebnisse in RESULTS.md schreiben
+
+## POC 3: End-to-End Pipeline
+
+### Setup
+
+1. **`.env` Datei erstellen** mit deinem Groq API Key:
+   ```bash
+   cp .env.template .env
+   open .env  # GROQ_API_KEY=gsk_... eintragen
+   ```
+   Groq API Key bekommst du auf https://console.groq.com/keys (Free-Tier reicht).
+
+2. **Mikro-Permission** wird beim ersten Lauf vom System gefragt — erlauben.
+
+### Ausführen
+
+```bash
+cd ~/Developer/worknetic-flow
+uv run python poc/poc_e2e_pipeline.py
+```
+
+### Was passiert
+
+1. Modell-Warmup (~1-3s, einmalig pro Run)
+2. Du hast 5 Sekunden zum Sprechen — sag z.B.:
+   > "Äh, schreib mir bitte eine kurze Mail an Kevin."
+3. Script transkribiert, cleant, schreibt ins Clipboard
+4. Tail-Latenz wird angezeigt
+5. Du kannst Cmd+V irgendwo drücken um den Output zu checken
+
+### PASS-Kriterien (M4 Air)
+
+- **Tail-Latenz ≤ 1200ms** (das ist das Ziel)
+- **Cleanup entfernt Füllwörter** — "Äh" muss raus, "Schreib mir bitte eine kurze Mail" bleibt
+- **Output qualitativ akzeptabel** — keine Halluzinationen wenn du nichts sagst
+
+### Bei FAIL
+
+- Latenz zu hoch (STT-Anteil): probiere `mlx-community/whisper-medium-mlx`
+- Cleanup schlecht: System-Prompt iterieren
+- Halluzinationen: `condition_on_previous_text=False` ist schon gesetzt
+
+Ergebnisse in `RESULTS.md` festhalten.
