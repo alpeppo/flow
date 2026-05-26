@@ -121,16 +121,22 @@ Mit folgenden Anpassungen am Plan:
 - [ ] Window erscheint auch in Vollbild-Apps (Safari Vollbild via Strg+Cmd+F)
 - [ ] Multi-Monitor optional
 
-### Ergebnisse
+### Ergebnisse (Tim, 2026-05-26)
 
-_Tim füllt nach manuellem Run aus._
+Alle 7 Kriterien manuell validiert.
 
-FPS gemessen: ___
-Sichtbar in Vollbild: ___
-Klick-durch: ___
-Tracking-Mode-Test: ___
+- [x] Window mittig unten: PASS
+- [x] Über anderen Apps sichtbar: PASS
+- [x] ≥30 FPS: PASS
+- [x] Mausklick durchklickbar: PASS
+- [x] Kein Stottern bei Tracking-Mode: PASS
+- [x] Vollbild-App: PASS
+- [N/A] Multi-Monitor (1-Screen Setup)
 
-### Entscheidung
+Initial-Bug behoben (`ca2e3cd`): Python `super()` funktioniert nicht für
+NSObject-subclasses → `objc.super(Class, self)` erforderlich.
 
-[ ] PROCEED zu Phase 0.2 (Logo)
-[ ] FAIL — Alternative-Ansatz nötig (Spec §10)
+### Entscheidung: ✅ PROCEED zu Phase 0.2 (Logo)
+
+NSWindow-Approach validiert. Pill-Implementation in Phase 5 kann auf POC
+aufbauen ohne Alternative-Ansatz.
