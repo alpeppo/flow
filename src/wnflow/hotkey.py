@@ -13,6 +13,7 @@ WARUM pyobjc: pynput erkennt Fn-Taste auf macOS nicht
 
 import logging
 import queue
+import threading
 import time
 
 from AppKit import (  # type: ignore[import-not-found]
@@ -79,6 +80,11 @@ class HotkeyListener:
         self._modifier_active = False
         self._last_tap_time: float = 0.0
         self._toggle_active: bool = False
+        # v0.2.1 Debounce: bei mode='both' wird PTT verzögert, damit ein
+        # möglicher 2. Tap als Doppel-Tipp erkannt wird (Toggle) statt
+        # mit dem 1. PTT zu kollidieren.
+        self._pending_ptt_timer: threading.Timer | None = None
+        self._pending_ptt_mode: str | None = None
 
         self._global_monitor = None
         self._local_monitor = None
@@ -130,6 +136,7 @@ class HotkeyListener:
             self._handle_release()
 
     def _handle_press(self, mode: str | None) -> None:
+        # Toggle-Mode aktiv → 2. Press stoppt
         if self._toggle_active:
             self._toggle_active = False
             self._queue.put(("stop", None))
@@ -150,17 +157,58 @@ class HotkeyListener:
             self._queue.put(("mode_hint", mode))
 
         if is_double_tap:
+            # 2. Tap erkannt — wenn debounced PTT noch pending: canceln
+            if self._pending_ptt_timer is not None:
+                self._pending_ptt_timer.cancel()
+                self._pending_ptt_timer = None
+                self._pending_ptt_mode = None
+                log.debug("Pending PTT cancelled — toggle wins")
             self._toggle_active = True
             self._queue.put(("start", mode))
             log.debug("Toggle activated via double-tap (gap %.0fms, mode=%s)",
                       gap * 1000, mode)
             return
 
-        if self._mode in ("ptt", "both"):
+        # v0.2.1 Debounce für mode='both':
+        # PTT verzögert starten, damit ein 2. Tap als Doppel-Tipp erkannt wird.
+        # Pure 'ptt'-mode: kein Debounce nötig (Doppel-Tipp ist eh inaktiv).
+        if self._mode == "both":
+            self._pending_ptt_mode = mode
+            self._pending_ptt_timer = threading.Timer(
+                self._double_tap_window, self._fire_pending_ptt
+            )
+            self._pending_ptt_timer.daemon = True
+            self._pending_ptt_timer.start()
+            log.debug("PTT debounced %dms (mode=%s)",
+                      int(self._double_tap_window * 1000), mode)
+        elif self._mode == "ptt":
             self._queue.put(("start", mode))
             log.debug("PTT start (mode=%s)", mode)
 
+    def _fire_pending_ptt(self) -> None:
+        """Timer-Callback: PTT-Debounce abgelaufen, kein 2. Tap → PTT starten."""
+        if not self._modifier_active:
+            # User hat schon losgelassen bevor Debounce abgelaufen
+            log.debug("Pending PTT skipped — modifier already released")
+            self._pending_ptt_timer = None
+            self._pending_ptt_mode = None
+            return
+        mode = self._pending_ptt_mode
+        self._pending_ptt_timer = None
+        self._pending_ptt_mode = None
+        self._queue.put(("start", mode))
+        log.debug("Debounced PTT start (mode=%s)", mode)
+
     def _handle_release(self) -> None:
+        # Wenn PTT noch debounced ist (User hat zu kurz gehalten) → cancel,
+        # kein start, kein stop. Sieht aus wie ein "Klick" der nichts tut.
+        if self._pending_ptt_timer is not None:
+            self._pending_ptt_timer.cancel()
+            self._pending_ptt_timer = None
+            self._pending_ptt_mode = None
+            log.debug("PTT release before debounce — cancelled, no recording")
+            return
+
         if self._toggle_active:
             return
         if self._mode in ("ptt", "both"):
