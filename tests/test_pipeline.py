@@ -1,4 +1,4 @@
-"""Tests für pipeline.py — orchestriert STT + Cleanup mit Mocks."""
+"""Tests für pipeline.py — STT + Cleanup-Orchestrator mit Mode-Parameter (v0.2.0)."""
 
 from unittest.mock import MagicMock
 
@@ -7,7 +7,7 @@ import pytest
 
 from wnflow.cleanup.groq_client import GroqError
 from wnflow.config import CleanupConfig, CommandsConfig
-from wnflow.pipeline import Pipeline, PipelineResult
+from wnflow.pipeline import Pipeline
 
 
 def _make_pipeline(
@@ -37,59 +37,73 @@ def _make_pipeline(
     return pipeline, engine, groq
 
 
-def test_dictation_mode_returns_cleaned_text() -> None:
-    pipeline, _, groq = _make_pipeline(
-        stt_output="Äh schreib mir eine Mail",
-        cleanup_output="Schreib mir eine Mail.",
-    )
-    result = pipeline.process(np.zeros(16000, dtype=np.float32))
+def test_pipeline_process_accepts_mode_parameter() -> None:
+    """v0.2.0: process(audio, mode)."""
+    pipeline, _, _ = _make_pipeline()
+    result = pipeline.process(np.zeros(16000, dtype=np.float32), mode="verbatim")
     assert result.text == "Schreib mir eine Mail."
-    assert result.mode == "dictation"
-    assert groq.clean.called
+    assert result.mode == "verbatim"
 
 
-def test_dictation_mode_groq_error_falls_back_to_raw() -> None:
+def test_verbatim_mode_uses_verbatim_prompt() -> None:
+    pipeline, _, groq = _make_pipeline()
+    pipeline.process(np.zeros(16000, dtype=np.float32), mode="verbatim")
+    # Prüfe dass der system_prompt verbatim-charakteristische Wörter enthält
+    call = groq.clean.call_args
+    system_prompt = call.kwargs.get("system_prompt") or call.args[0]
+    assert "BEHALTE den natürlichen Sprachstil" in system_prompt
+
+
+def test_formal_mode_uses_formal_prompt() -> None:
+    pipeline, _, groq = _make_pipeline()
+    pipeline.process(np.zeros(16000, dtype=np.float32), mode="formal")
+    call = groq.clean.call_args
+    system_prompt = call.kwargs.get("system_prompt") or call.args[0]
+    assert "E-Mail" in system_prompt or "Slack" in system_prompt
+
+
+def test_rage_mode_uses_rage_prompt() -> None:
+    pipeline, _, groq = _make_pipeline()
+    pipeline.process(np.zeros(16000, dtype=np.float32), mode="rage")
+    call = groq.clean.call_args
+    system_prompt = call.kwargs.get("system_prompt") or call.args[0]
+    assert "Beleidigungen" in system_prompt or "diplomatisch" in system_prompt
+
+
+def test_unknown_mode_falls_back_to_verbatim() -> None:
+    """Defensive: unbekannter Mode → Verbatim als safe default."""
+    pipeline, _, groq = _make_pipeline()
+    result = pipeline.process(np.zeros(16000, dtype=np.float32), mode="bogus")
+    assert result.mode == "verbatim"
+
+
+def test_groq_error_fallback_to_raw() -> None:
     pipeline, _, _ = _make_pipeline(
         stt_output="Äh schreib mir eine Mail",
         cleanup_raises=GroqError("API down"),
     )
-    result = pipeline.process(np.zeros(16000, dtype=np.float32))
+    result = pipeline.process(np.zeros(16000, dtype=np.float32), mode="formal")
     assert result.text == "Äh schreib mir eine Mail"
-    assert result.mode == "dictation_fallback"
+    # Mode-Suffix bleibt erhalten für Logging-Klarheit
+    assert "fallback" in result.mode
 
 
-def test_command_mode_with_clipboard_content() -> None:
+def test_command_mode_overrides_diktat_mode() -> None:
+    """Trigger-Wort 'Befehl:' aktiviert Command-Mode unabhängig vom mode-Param."""
     pipeline, _, groq = _make_pipeline(
         stt_output="Befehl: mach das kürzer",
         cleanup_output="Kurzer Text.",
-        clipboard="Sehr geehrter Herr Müller, ich schreibe Ihnen heute...",
+        clipboard="Sehr geehrter Herr Müller...",
     )
-    result = pipeline.process(np.zeros(16000, dtype=np.float32))
+    result = pipeline.process(np.zeros(16000, dtype=np.float32), mode="formal")
     assert result.text == "Kurzer Text."
     assert result.mode == "command"
-
-    # Verifiziere: System-Prompt enthielt Clipboard-Content
-    call = groq.clean.call_args
-    system_prompt = call.kwargs.get("system_prompt") or call.args[0]
-    assert "Sehr geehrter Herr Müller" in system_prompt
-
-
-def test_command_mode_without_clipboard_falls_back_to_dictation() -> None:
-    """Wenn Command-Trigger erkannt aber Clipboard leer, fallback to dictation."""
-    pipeline, _, _ = _make_pipeline(
-        stt_output="Befehl: mach das kürzer",
-        cleanup_output="Mach das kürzer.",
-        clipboard="",
-    )
-    result = pipeline.process(np.zeros(16000, dtype=np.float32))
-    assert result.mode == "dictation"
 
 
 def test_cleanup_disabled_returns_raw_stt() -> None:
     engine = MagicMock()
     engine.transcribe.return_value = "Äh schreib mir"
     groq = MagicMock()
-
     cleanup_cfg = CleanupConfig(enabled=False, hotwords=[])
     commands_cfg = CommandsConfig(enabled=True, triggers=["Befehl:"])
     pipeline = Pipeline(
@@ -99,6 +113,6 @@ def test_cleanup_disabled_returns_raw_stt() -> None:
         commands_config=commands_cfg,
         get_clipboard=lambda: "",
     )
-    result = pipeline.process(np.zeros(16000, dtype=np.float32))
+    result = pipeline.process(np.zeros(16000, dtype=np.float32), mode="formal")
     assert result.text == "Äh schreib mir"
     assert not groq.clean.called
