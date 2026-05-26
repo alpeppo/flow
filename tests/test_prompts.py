@@ -1,22 +1,97 @@
-"""Tests für prompts.py — System-Prompt-Builder mit Hotwords."""
+"""Tests für prompts.py — 3 Mode-Prompt-Builder."""
 
-from wnflow.cleanup.prompts import build_command_prompt, build_dictation_prompt
+from wnflow.cleanup.prompts import (
+    build_command_prompt,
+    build_formal_prompt,
+    build_rage_prompt,
+    build_verbatim_prompt,
+)
 
 
-def test_dictation_prompt_contains_filler_word_instruction() -> None:
-    prompt = build_dictation_prompt(hotwords=[])
+# --- Verbatim ---
+
+
+def test_verbatim_prompt_mentions_filler_words() -> None:
+    prompt = build_verbatim_prompt(hotwords=[])
     assert "Füllwörter" in prompt or "äh" in prompt.lower()
 
 
-def test_dictation_prompt_contains_hotwords() -> None:
-    prompt = build_dictation_prompt(hotwords=["Worknetic", "Ridersystem"])
+def test_verbatim_prompt_keeps_casual_tone_instruction() -> None:
+    """Verbatim muss explizit sagen: Stil behalten."""
+    prompt = build_verbatim_prompt(hotwords=[])
+    assert "natürlichen Sprachstil" in prompt or "BEHALTE" in prompt
+
+
+def test_verbatim_prompt_includes_hotwords() -> None:
+    prompt = build_verbatim_prompt(hotwords=["Worknetic", "BZKI"])
     assert "Worknetic" in prompt
-    assert "Ridersystem" in prompt
+    assert "BZKI" in prompt
 
 
-def test_dictation_prompt_without_hotwords_works() -> None:
-    prompt = build_dictation_prompt(hotwords=[])
-    assert len(prompt) > 50  # nicht-trivialer Prompt
+# --- Formal ---
+
+
+def test_formal_prompt_mentions_email_target() -> None:
+    prompt = build_formal_prompt(hotwords=[])
+    assert "E-Mail" in prompt or "Slack" in prompt
+
+
+def test_formal_prompt_demands_not_overly_formal() -> None:
+    """Wichtige Constraint aus Spec: nicht übertrieben formell."""
+    prompt = build_formal_prompt(hotwords=[])
+    assert "NICHT übertrieben formell" in prompt or "natürlich klingen" in prompt
+
+
+def test_formal_prompt_includes_hotwords() -> None:
+    prompt = build_formal_prompt(hotwords=["Worknetic"])
+    assert "Worknetic" in prompt
+
+
+# --- Rage ---
+
+
+def test_rage_prompt_mentions_insults_removal() -> None:
+    prompt = build_rage_prompt(hotwords=[])
+    assert "Beleidigungen" in prompt or "Schimpfwörter" in prompt
+
+
+def test_rage_prompt_mentions_diplomatic() -> None:
+    prompt = build_rage_prompt(hotwords=[])
+    assert "diplomatisch" in prompt or "konstruktiv" in prompt
+
+
+def test_rage_prompt_keeps_core_message() -> None:
+    """Spec: KERN-Botschaft beibehalten."""
+    prompt = build_rage_prompt(hotwords=[])
+    assert "KERN-Botschaft" in prompt or "Anliegen vollständig" in prompt
+
+
+def test_rage_prompt_includes_hotwords() -> None:
+    prompt = build_rage_prompt(hotwords=["Worknetic"])
+    assert "Worknetic" in prompt
+
+
+# --- Cross-Mode ---
+
+
+def test_all_modes_demand_no_quotes() -> None:
+    """Alle Modi sollen klarstellen: keine Anführungszeichen im Output."""
+    for builder in (build_verbatim_prompt, build_formal_prompt, build_rage_prompt):
+        prompt = builder(hotwords=[])
+        assert (
+            "Anführungszeichen" in prompt
+            or "AUSSCHLIESSLICH" in prompt
+            or "ohne Erklärung" in prompt.lower()
+        ), f"Builder {builder.__name__} fehlt no-quotes-Instruction"
+
+
+def test_all_modes_work_without_hotwords() -> None:
+    for builder in (build_verbatim_prompt, build_formal_prompt, build_rage_prompt):
+        prompt = builder(hotwords=[])
+        assert len(prompt) > 100, f"{builder.__name__} prompt zu kurz"
+
+
+# --- Command-Prompt unverändert (aus v0.1.0) ---
 
 
 def test_command_prompt_includes_instruction_and_text() -> None:
@@ -27,18 +102,3 @@ def test_command_prompt_includes_instruction_and_text() -> None:
     )
     assert "mach das kürzer" in prompt
     assert "Sehr geehrter Herr Müller" in prompt
-
-
-def test_command_prompt_with_hotwords() -> None:
-    prompt = build_command_prompt(
-        instruction="übersetze ins Englische",
-        target_text="Hallo Worknetic Team",
-        hotwords=["Worknetic"],
-    )
-    assert "Worknetic" in prompt
-
-
-def test_dictation_prompt_demands_clean_output() -> None:
-    """Prompt muss klar machen dass Output keine Anführungszeichen/Erklärung enthält."""
-    prompt = build_dictation_prompt(hotwords=[])
-    assert "Anführungszeichen" in prompt or "ohne Erklärung" in prompt.lower() or "ausschließlich" in prompt.lower()

@@ -1,36 +1,70 @@
 """System-Prompt-Builder für Groq-Cleanup.
 
-Zwei Modi:
-- Diktat: rohes STT wird bereinigt (Füllwörter weg, Grammatik fix, Stil bleibt)
-- Command: User-Instruktion wird auf Clipboard-Text angewendet
+v0.2.0: Drei Mode-Builder + Command-Builder.
+
+- Verbatim: minimal-Cleanup, Stil bleibt
+- Formal: gesprochen → geschrieben, Mail/Slack/WhatsApp
+- Rage: Beleidigungen raus, diplomatisch
+- Command: Trigger-Wort wendet Instruktion auf Clipboard-Text an
 """
 
 
-def build_dictation_prompt(hotwords: list[str]) -> str:
-    """Prompt für Standard-Diktat-Bereinigung."""
-    hotwords_section = ""
-    if hotwords:
-        hotwords_section = (
-            f"\n\nBehalte folgende Eigennamen exakt bei: {', '.join(hotwords)}"
-        )
+def _hotwords_section(hotwords: list[str]) -> str:
+    if not hotwords:
+        return ""
+    return f"\n\nBehalte folgende Eigennamen exakt bei: {', '.join(hotwords)}"
 
-    return f"""Du erhältst rohes Diktat aus Speech-to-Text. Bereinige es:
-- Entferne Füllwörter (äh, ähm, also, halt, ne, so)
-- Korrigiere offensichtliche Grammatik- und Satzbaufehler
-- Behalte Bedeutung, Stil und Tonalität exakt bei
+
+def build_verbatim_prompt(hotwords: list[str]) -> str:
+    """Verbatim-Mode: minimal-Cleanup, Stil unverändert."""
+    return f"""Du erhältst rohes Diktat aus Speech-to-Text. Bereinige es minimal:
+- Entferne Füllwörter (äh, ähm, also, halt, ne, so, weißt du)
+- Korrigiere offensichtliche Versprecher und Wort-Verdopplungen
 - Korrigiere Zeichensetzung (Punkte, Kommas, Großschreibung)
+- BEHALTE den natürlichen Sprachstil exakt bei — keine Stilanpassung
+- BEHALTE Umgangssprache wenn vorhanden ("Hey", "Kannst du mal", etc.)
 - Antworte AUSSCHLIESSLICH mit dem bereinigten Text
-- Keine Anführungszeichen, keine Erklärung, kein Vor- oder Nachsatz{hotwords_section}"""
+- Keine Anführungszeichen, keine Erklärung, kein Vor- oder Nachsatz{_hotwords_section(hotwords)}"""
+
+
+def build_formal_prompt(hotwords: list[str]) -> str:
+    """Formal-Mode: gesprochene Sprache in geschriebene umformen.
+
+    Wichtige Constraint: NICHT übertrieben formell.
+    """
+    return f"""Du erhältst rohes Diktat aus Speech-to-Text. Verwandle es in eine gut geschriebene Nachricht für E-Mail/Slack/WhatsApp:
+
+- Entferne Füllwörter, Versprecher, Wort-Verdopplungen
+- Forme gesprochene Sprache in geschriebene Sprache um:
+  * Verkürzte Sätze ausformulieren ("Komm ich gleich" → "Ich komme gleich")
+  * Umgangssprache → Schriftsprache ("Krass" → "beeindruckend", "Hey" → "Hallo")
+  * Lange Schachtelsätze in klarere Sätze trennen
+- WICHTIG: NICHT übertrieben formell werden. Es soll natürlich klingen, nur eben geschrieben statt gesprochen.
+- Tonalität bleibt: locker bleibt locker, ernst bleibt ernst
+- Keine erfundenen Inhalte hinzufügen
+- Antworte AUSSCHLIESSLICH mit dem umgeformten Text
+- Keine Anführungszeichen, keine Erklärung{_hotwords_section(hotwords)}"""
+
+
+def build_rage_prompt(hotwords: list[str]) -> str:
+    """Anti-Wut-Mode: emotionale Eskalation in diplomatische Sachlichkeit."""
+    return f"""Du erhältst rohes Diktat aus Speech-to-Text. Der Sprecher ist gerade emotional/wütend. Deine Aufgabe: dasselbe Anliegen, aber diplomatisch.
+
+- Entferne alle Beleidigungen, Schimpfwörter, persönliche Angriffe
+- Übersetze emotionale Eskalation in sachliche Kritik:
+  * "Dieser Idiot soll endlich kapieren" → "Ich würde mir wünschen, dass..."
+  * "Das ist ein Scheißprodukt" → "Das Produkt erfüllt meine Erwartungen nicht weil..."
+  * "Verdammte..." → einfach weglassen
+- Behalte die KERN-Botschaft und das Anliegen vollständig bei
+- Wenn ein Vorwurf da war, mache daraus eine konstruktive Bitte
+- Tonalität: professionell-konstruktiv, nicht devot
+- Keine erfundenen Inhalte
+- Antworte AUSSCHLIESSLICH mit dem umgeformten Text
+- Keine Anführungszeichen, keine Erklärung{_hotwords_section(hotwords)}"""
 
 
 def build_command_prompt(instruction: str, target_text: str, hotwords: list[str]) -> str:
     """Prompt für Command-Mode: Instruktion auf Clipboard-Text anwenden."""
-    hotwords_section = ""
-    if hotwords:
-        hotwords_section = (
-            f"\nBehalte folgende Eigennamen exakt bei: {', '.join(hotwords)}\n"
-        )
-
     return f"""Du führst eine Text-Transformation aus.
 
 Anweisung des Users: {instruction}
@@ -41,4 +75,4 @@ Text auf den die Anweisung angewendet werden soll:
 \"\"\"
 
 Antworte AUSSCHLIESSLICH mit dem transformierten Text.
-Keine Anführungszeichen, keine Erklärung, kein Vor- oder Nachsatz.{hotwords_section}"""
+Keine Anführungszeichen, keine Erklärung, kein Vor- oder Nachsatz.{_hotwords_section(hotwords)}"""
