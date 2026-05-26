@@ -47,6 +47,15 @@ clipboard_restore_delay_ms = 300
 [logging]
 level = "info"
 keep_transcripts = false
+
+[modes]
+default = "verbatim"  # verbatim | formal | rage
+
+[pill]
+enabled = true
+mode_indicator = true
+waveform_bar_count = 5
+fade_out_ms = 200
 """
 
 
@@ -99,6 +108,19 @@ class LoggingConfig:
 
 
 @dataclass
+class ModesConfig:
+    default: str = "verbatim"  # verbatim | formal | rage
+
+
+@dataclass
+class PillConfig:
+    enabled: bool = True
+    mode_indicator: bool = True
+    waveform_bar_count: int = 5
+    fade_out_ms: int = 200
+
+
+@dataclass
 class Config:
     stt: STTConfig = field(default_factory=STTConfig)
     hotkey: HotkeyConfig = field(default_factory=HotkeyConfig)
@@ -107,6 +129,8 @@ class Config:
     commands: CommandsConfig = field(default_factory=CommandsConfig)
     output: OutputConfig = field(default_factory=OutputConfig)
     logging: LoggingConfig = field(default_factory=LoggingConfig)
+    modes: ModesConfig = field(default_factory=ModesConfig)  # NEU
+    pill: PillConfig = field(default_factory=PillConfig)  # NEU
 
 
 def load(config_path: Path | None = None) -> Config:
@@ -138,6 +162,10 @@ def load(config_path: Path | None = None) -> Config:
         cfg.output = OutputConfig(**data["output"])
     if "logging" in data:
         cfg.logging = LoggingConfig(**data["logging"])
+    if "modes" in data:
+        cfg.modes = ModesConfig(**data["modes"])
+    if "pill" in data:
+        cfg.pill = PillConfig(**data["pill"])
 
     # ENV-Override für Secrets
     cfg.cleanup.api_key = os.environ.get("GROQ_API_KEY", "")

@@ -59,3 +59,31 @@ def test_command_triggers_loaded(tmp_path: Path) -> None:
     config_path = tmp_path / "config.toml"
     cfg = load(config_path=config_path)
     assert "Befehl:" in cfg.commands.triggers
+
+
+def test_modes_default_is_verbatim(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.toml"
+    cfg = load(config_path=config_path)
+    assert cfg.modes.default == "verbatim"
+
+
+def test_pill_default_enabled(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.toml"
+    cfg = load(config_path=config_path)
+    assert cfg.pill.enabled is True
+    assert cfg.pill.mode_indicator is True
+    assert cfg.pill.waveform_bar_count == 5
+
+
+def test_modes_default_can_be_overridden(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.toml"
+    config_path.write_text('[modes]\ndefault = "formal"\n')
+    cfg = load(config_path=config_path)
+    assert cfg.modes.default == "formal"
+
+
+def test_pill_can_be_disabled(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.toml"
+    config_path.write_text('[pill]\nenabled = false\n')
+    cfg = load(config_path=config_path)
+    assert cfg.pill.enabled is False
