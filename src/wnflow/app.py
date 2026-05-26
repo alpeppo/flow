@@ -185,7 +185,7 @@ class WnflowApp(NSObject):
     def kickOffBoot_(self, _timer):
         """rumps.Timer-Callback. Startet Boot-Worker."""
         assert_main_thread("WnflowApp.kickOffBoot_")
-        _timer.invalidate()
+        _timer.stop()  # rumps.Timer has stop(), not invalidate() (NSTimer-API)
 
         if not self._config.cleanup.api_key:
             notify("worknetic-flow", "GROQ_API_KEY fehlt — Cleanup deaktiviert")
