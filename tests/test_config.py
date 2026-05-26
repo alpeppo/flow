@@ -1,0 +1,61 @@
+"""Tests für config.py — TOML laden mit Defaults und ENV-Override."""
+
+import os
+from pathlib import Path
+
+import pytest
+
+from wnflow.config import Config, load
+
+
+def test_load_returns_defaults_when_file_missing(tmp_path: Path) -> None:
+    config_path = tmp_path / "nonexistent.toml"
+    cfg = load(config_path=config_path)
+    assert cfg.stt.model == "mlx-community/whisper-large-v3-turbo-q4"
+    assert cfg.stt.language == "de"
+    assert cfg.hotkey.key == "fn"
+    assert cfg.hotkey.double_tap_window_ms == 350
+    assert cfg.recording.max_duration_s == 60.0
+
+
+def test_load_creates_default_file_if_missing(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.toml"
+    load(config_path=config_path)
+    assert config_path.exists()
+    content = config_path.read_text()
+    assert "[stt]" in content
+    assert "mlx-community" in content
+
+
+def test_load_respects_existing_file(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.toml"
+    config_path.write_text(
+        '[hotkey]\nkey = "right_shift"\ndouble_tap_window_ms = 500\n'
+    )
+    cfg = load(config_path=config_path)
+    assert cfg.hotkey.key == "right_shift"
+    assert cfg.hotkey.double_tap_window_ms == 500
+    # Defaults werden für nicht angegebene Werte verwendet
+    assert cfg.stt.language == "de"
+
+
+def test_groq_api_key_from_env(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("GROQ_API_KEY", "gsk_test_123")
+    config_path = tmp_path / "config.toml"
+    cfg = load(config_path=config_path)
+    assert cfg.cleanup.api_key == "gsk_test_123"
+
+
+def test_hotwords_loaded_as_list(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.toml"
+    config_path.write_text(
+        '[cleanup.hotwords]\nwords = ["Worknetic", "Ridersystem", "BZKI"]\n'
+    )
+    cfg = load(config_path=config_path)
+    assert cfg.cleanup.hotwords == ["Worknetic", "Ridersystem", "BZKI"]
+
+
+def test_command_triggers_loaded(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.toml"
+    cfg = load(config_path=config_path)
+    assert "Befehl:" in cfg.commands.triggers
