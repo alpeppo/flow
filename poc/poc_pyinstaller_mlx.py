@@ -80,4 +80,9 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    # PyInstaller-Bundle-Fix: mlx + multiprocessing forken sich endlos
+    # ohne freeze_support, weil jeder Child-Prozess das Bundle-Binary als
+    # "neuen Main" interpretiert. freeze_support() bricht den Loop.
+    import multiprocessing
+    multiprocessing.freeze_support()
     main()
