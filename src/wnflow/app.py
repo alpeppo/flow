@@ -36,7 +36,7 @@ from wnflow.cleanup.groq_client import GroqClient
 from wnflow.config import load
 from wnflow.hotkey import HotkeyListener
 from wnflow.menubar import MenubarController
-from wnflow.mic import MicCapture
+from wnflow.mic import MicCapture, compute_rms
 from wnflow.notify import notify, play_done_sound, play_error_sound, play_start_sound
 from wnflow.output import OutputInjector
 from wnflow.permissions import ensure_permissions
@@ -49,6 +49,11 @@ from wnflow.threading_guard import assert_main_thread
 log = logging.getLogger(__name__)
 
 POLL_INTERVAL_S = 0.02  # 20ms = 50Hz für smooth Waveform
+
+# v0.2.1: RMS-Threshold — Audio leiser als das wird als "Stille" verworfen.
+# Verhindert Whisper-Halluzinationen ("ja ja ja", YouTube-Subtitle-Garbage).
+# Bei normaler Sprache liegt RMS bei 0.05-0.15, klar oberhalb 0.005.
+RMS_SILENCE_THRESHOLD = 0.005
 
 
 @dataclass
@@ -327,6 +332,17 @@ class WnflowApp(NSObject):
 
         if self._mic.is_too_short(duration_s):
             log.info("Silent abort (too short)")
+            if self._pill is not None:
+                self._pill.hide()
+            self._state.try_transition(State.IDLE)
+            return
+
+        # v0.2.1 Halluzinations-Schutz: RMS-Check verhindert dass Whisper aus
+        # Stille "ja ja ja" oder YouTube-Subtitle-Garbage halluziniert.
+        avg_rms = compute_rms(audio)
+        if avg_rms < RMS_SILENCE_THRESHOLD:
+            log.info("Silent abort (rms=%.5f < %.5f, no speech detected)",
+                     avg_rms, RMS_SILENCE_THRESHOLD)
             if self._pill is not None:
                 self._pill.hide()
             self._state.try_transition(State.IDLE)
