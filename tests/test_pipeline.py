@@ -49,9 +49,11 @@ def test_verbatim_mode_uses_verbatim_prompt() -> None:
     pipeline, _, groq = _make_pipeline()
     pipeline.process(np.zeros(16000, dtype=np.float32), mode="verbatim")
     # Prüfe dass der system_prompt verbatim-charakteristische Wörter enthält
+    # v0.2.1: Verbatim-Prompt wurde härter formuliert (EXAKT/VERBOTEN-Liste)
     call = groq.clean.call_args
     system_prompt = call.kwargs.get("system_prompt") or call.args[0]
-    assert "BEHALTE den natürlichen Sprachstil" in system_prompt
+    assert "EXAKT" in system_prompt
+    assert "VERBOTEN" in system_prompt or "KEINE Umformulierungen" in system_prompt
 
 
 def test_formal_mode_uses_formal_prompt() -> None:

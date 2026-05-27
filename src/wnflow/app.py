@@ -94,6 +94,7 @@ class WnflowApp(NSObject):
             cleanup_config=self._config.cleanup,
             commands_config=self._config.commands,
             get_clipboard=pyperclip.paste,
+            logging_config=self._config.logging,
         )
         self._output = OutputInjector(
             restore_delay_ms=self._config.output.clipboard_restore_delay_ms

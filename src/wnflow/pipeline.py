@@ -21,7 +21,7 @@ from wnflow.cleanup.prompts import (
     build_rage_prompt,
     build_verbatim_prompt,
 )
-from wnflow.config import CleanupConfig, CommandsConfig
+from wnflow.config import CleanupConfig, CommandsConfig, LoggingConfig
 from wnflow.stt.engine import STTEngine
 
 log = logging.getLogger(__name__)
@@ -49,12 +49,17 @@ class Pipeline:
         cleanup_config: CleanupConfig,
         commands_config: CommandsConfig,
         get_clipboard: Callable[[], str],
+        logging_config: LoggingConfig | None = None,
     ) -> None:
         self._stt = stt_engine
         self._groq = groq_client
         self._cleanup_cfg = cleanup_config
         self._commands_cfg = commands_config
         self._get_clipboard = get_clipboard
+        # v0.2.1: keep_transcripts erlaubt opt-in Debug-Logging der Texte
+        self._keep_transcripts = (
+            logging_config.keep_transcripts if logging_config is not None else False
+        )
 
     def process(self, audio: np.ndarray, mode: str = "verbatim") -> PipelineResult:
         """STT → Cleanup → Result. Blockierend, im Worker-Thread aufrufen.
@@ -67,6 +72,8 @@ class Pipeline:
 
         raw = self._stt.transcribe(audio)
         log.info("STT done, mode=%s, raw_len=%d", mode, len(raw))
+        if self._keep_transcripts:
+            log.info("STT raw: %r", raw)
 
         if not self._cleanup_cfg.enabled:
             return PipelineResult(text=raw, mode=mode, raw_transcript=raw)
@@ -84,6 +91,8 @@ class Pipeline:
         prompt = builder(self._cleanup_cfg.hotwords)
         try:
             cleaned = self._groq.clean(system_prompt=prompt, user_text=raw)
+            if self._keep_transcripts:
+                log.info("Cleanup result (mode=%s): %r", mode, cleaned)
             return PipelineResult(text=cleaned, mode=mode, raw_transcript=raw)
         except GroqError as exc:
             log.warning("Groq cleanup failed (mode=%s), fallback to raw: %s", mode, exc)
