@@ -187,3 +187,24 @@ Pending — POC auf zweiten Mac kopieren via AirDrop und nochmal testen.
 
 - [x] PASS — PROCEED zu POC 1
 - [ ] FAIL — Distribution-Strategie wechseln (DMG-Installer-Wizard)
+
+---
+
+## v0.3.0 POC 1: rumps Hello-World im Bundle
+
+**Datum:** 2026-05-27
+**Build-Mac:** M4 Air
+
+### Resultat
+
+- [x] Build: PASS
+- [x] Codesign: PASS (valid on disk, satisfies Designated Requirement)
+- [x] Process Count nach 5s: 1 (OK, kein fork-loop)
+- [ ] Menubar-Icon "POC1" sichtbar: [TIM TESTET]
+- [ ] "Hello"-Click → Notification: [TIM TESTET]
+- [ ] "Quit"-Click beendet App sauber: [TIM TESTET]
+
+### Entscheidung
+
+- [ ] PASS — PROCEED zu POC 2
+- [ ] FAIL — rumps + PyInstaller incompatible, andere Strategie
