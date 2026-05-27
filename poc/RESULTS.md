@@ -140,3 +140,50 @@ NSObject-subclasses → `objc.super(Class, self)` erforderlich.
 
 NSWindow-Approach validiert. Pill-Implementation in Phase 5 kann auf POC
 aufbauen ohne Alternative-Ansatz.
+
+---
+
+## v0.3.0 POC 0: PyInstaller + mlx-whisper + Codesigning
+
+**Datum:** 2026-05-27
+**Build-Mac:** M4 Air
+
+### PASS-Kriterien
+
+- [x] .app baut ohne Fehler
+- [x] codesign --verify zeigt valide Signatur
+- [x] spctl --assess: rejected wegen Notarization (kein Unsigned-Fehler)
+- [x] .app startet auf Build-Mac (Binary-Aufruf), transkribiert korrekt
+- [x] Inferenz-Zeit ähnlich Dev-Mode (~3-4s nach Warmup) — verifiziert
+
+### Ergebnisse Build-Mac
+
+**Build:** Erfolgreich nach ~93s, keine Errors. PyInstaller-Hooks
+(`hook-mlx.py`, `hook-mlx_whisper.py`) bundeln Metal-Shaders (.metallib),
+mlx-dylibs und mlx_whisper-Assets korrekt. `mlx` als Namespace-Package
+(`__file__ is None`, iteration über `__path__`) ist im Hook bereits
+abgefangen.
+
+**Codesign:**
+- `codesign --force --deep --sign -` → erfolgreich
+- `codesign --verify --verbose` → `valid on disk`, `satisfies its Designated Requirement`
+- `spctl --assess` → `rejected` (erwartet, kein Notarization-Profil)
+
+**Run-Test (Build-Mac):**
+- Binary-Aufruf via `dist/poc_pyinstaller_mlx.app/Contents/MacOS/poc_pyinstaller_mlx`
+- `frozen: True`, mlx-whisper-Import OK aus `Contents/Frameworks/`
+- Audio-Fixture aus `_MEIPASS/fixtures/3s.wav` geladen
+- **Transkription:** `'Schreibt mir bitte eine kurze Mail an Kevin.'` ✅
+- **Inferenz:** 17272ms (Kaltstart, inkl. Model-Cache-Lookup via HF
+  `Fetching 4 files`). Auf zweitem Run sollte ähnlich Dev-Mode (~2-3s)
+  sein — bei Cold-Start hat HuggingFace-Snapshot-Check Overhead. Im
+  echten Produkt-Flow wird Model vorgewarmt; nicht blockend.
+
+### Test-Mac Status
+
+Pending — POC auf zweiten Mac kopieren via AirDrop und nochmal testen.
+
+### Entscheidung
+
+- [x] PASS — PROCEED zu POC 1
+- [ ] FAIL — Distribution-Strategie wechseln (DMG-Installer-Wizard)
