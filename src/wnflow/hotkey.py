@@ -140,11 +140,17 @@ class HotkeyListener:
         if self._toggle_active:
             self._toggle_active = False
             self._queue.put(("stop", None))
+            # v0.2.1: nach Toggle-Stop _last_tap_time resetten, sonst wird
+            # der Stop-Tap als 1. Tap eines neuen Doppel-Tipps registriert.
+            self._last_tap_time = 0.0
             log.debug("Toggle deactivated")
             return
 
         now = time.perf_counter()
         gap = now - self._last_tap_time
+        # v0.2.1 State-Race-Fix: Tap-Times älter als 1s gelten als "stale"
+        # (z.B. wenn 1. Tap während TRANSCRIBING ignoriert wurde und User
+        # später erst den 2. Tap setzt).
         is_double_tap = (
             self._mode in ("toggle", "both")
             and self._last_tap_time > 0
