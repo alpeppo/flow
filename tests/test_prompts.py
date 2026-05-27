@@ -17,9 +17,13 @@ def test_verbatim_prompt_mentions_filler_words() -> None:
 
 
 def test_verbatim_prompt_keeps_casual_tone_instruction() -> None:
-    """Verbatim muss explizit sagen: Stil behalten."""
+    """Verbatim muss explizit sagen: KEINE Stiländerung, kein Zusatz.
+
+    v0.2.1: Prompt umformuliert (EXAKT/VERBOTEN-Liste statt BEHALTE).
+    """
     prompt = build_verbatim_prompt(hotwords=[])
-    assert "natürlichen Sprachstil" in prompt or "BEHALTE" in prompt
+    assert "EXAKT" in prompt
+    assert "VERBOTEN" in prompt or "KEINE Umformulierungen" in prompt
 
 
 def test_verbatim_prompt_includes_hotwords() -> None:

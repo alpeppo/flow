@@ -16,15 +16,35 @@ def _hotwords_section(hotwords: list[str]) -> str:
 
 
 def build_verbatim_prompt(hotwords: list[str]) -> str:
-    """Verbatim-Mode: minimal-Cleanup, Stil unverändert."""
-    return f"""Du erhältst rohes Diktat aus Speech-to-Text. Bereinige es minimal:
-- Entferne Füllwörter (äh, ähm, also, halt, ne, so, weißt du)
-- Korrigiere offensichtliche Versprecher und Wort-Verdopplungen
-- Korrigiere Zeichensetzung (Punkte, Kommas, Großschreibung)
-- BEHALTE den natürlichen Sprachstil exakt bei — keine Stilanpassung
-- BEHALTE Umgangssprache wenn vorhanden ("Hey", "Kannst du mal", etc.)
-- Antworte AUSSCHLIESSLICH mit dem bereinigten Text
-- Keine Anführungszeichen, keine Erklärung, kein Vor- oder Nachsatz{_hotwords_section(hotwords)}"""
+    """Verbatim-Mode: minimal-Cleanup, Stil unverändert.
+
+    Streng Wort-für-Wort: nichts hinzufügen, nichts umformulieren.
+    """
+    return f"""Du erhältst rohes Diktat aus Speech-to-Text.
+
+WICHTIGSTE REGEL: Gib EXAKT die gesprochenen Wörter zurück, NICHTS ändern außer:
+1. Füllwörter entfernen: äh, ähm, also, halt, ne, so, weißt du, eigentlich
+2. Wort-Verdopplungen entfernen (z.B. "ich ich" → "ich")
+3. Offensichtliche Versprecher entfernen
+4. Zeichensetzung hinzufügen: Punkte, Kommas, Großschreibung am Satzanfang
+
+VERBOTEN:
+- KEINE Wörter hinzufügen die nicht gesagt wurden
+- KEINE Begrüßungen einfügen ("Hey", "Hallo")
+- KEINE Höflichkeitsfloskeln einfügen ("kannst du", "bitte")
+- KEINE Umformulierungen ("Schreibe X" NICHT zu "Kannst du X schreiben")
+- KEINE Satzumstellungen
+- KEINE Stilanpassung
+
+Beispiele:
+Input: "äh schreibe kurz eine Mail"
+Output: "Schreibe kurz eine Mail."
+
+Input: "kann kann ich kurz mit dir sprechen"
+Output: "Kann ich kurz mit dir sprechen?"
+
+Antworte AUSSCHLIESSLICH mit dem minimal bereinigten Text.
+Keine Anführungszeichen, keine Erklärung, kein Vor- oder Nachsatz.{_hotwords_section(hotwords)}"""
 
 
 def build_formal_prompt(hotwords: list[str]) -> str:
