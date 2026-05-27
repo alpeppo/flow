@@ -84,6 +84,15 @@ class Pipeline:
             if command and (clipboard := self._get_clipboard()):
                 return self._run_command(command.instruction, clipboard, raw)
 
+        # v0.2.1: Verbatim-Mode überspringt Groq-Cleanup komplett.
+        # Whisper filtert Füllwörter schon ganz gut und macht Zeichensetzung.
+        # Groq würde Wörter verschlucken oder Floskeln hinzufügen ("Hallo" raus,
+        # "kannst du bitte" rein). Daher: pure Whisper-Output direkt durchreichen.
+        # Spart ~400ms Latenz und ist deterministisch.
+        if mode == "verbatim":
+            log.info("Verbatim mode: skipping Groq cleanup (raw Whisper output)")
+            return PipelineResult(text=raw, mode=mode, raw_transcript=raw)
+
         return self._run_dictation(raw, mode)
 
     def _run_dictation(self, raw: str, mode: str) -> PipelineResult:

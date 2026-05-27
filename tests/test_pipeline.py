@@ -38,22 +38,22 @@ def _make_pipeline(
 
 
 def test_pipeline_process_accepts_mode_parameter() -> None:
-    """v0.2.0: process(audio, mode)."""
-    pipeline, _, _ = _make_pipeline()
+    """v0.2.1: process(audio, mode). Verbatim returns raw STT."""
+    pipeline, _, _ = _make_pipeline(stt_output="Schreib mir eine Mail")
     result = pipeline.process(np.zeros(16000, dtype=np.float32), mode="verbatim")
-    assert result.text == "Schreib mir eine Mail."
+    # Verbatim überspringt Groq → raw STT-Output
+    assert result.text == "Schreib mir eine Mail"
     assert result.mode == "verbatim"
 
 
-def test_verbatim_mode_uses_verbatim_prompt() -> None:
-    pipeline, _, groq = _make_pipeline()
-    pipeline.process(np.zeros(16000, dtype=np.float32), mode="verbatim")
-    # Prüfe dass der system_prompt verbatim-charakteristische Wörter enthält
-    # v0.2.1: Verbatim-Prompt wurde härter formuliert (EXAKT/VERBOTEN-Liste)
-    call = groq.clean.call_args
-    system_prompt = call.kwargs.get("system_prompt") or call.args[0]
-    assert "EXAKT" in system_prompt
-    assert "VERBOTEN" in system_prompt or "KEINE Umformulierungen" in system_prompt
+def test_verbatim_mode_skips_groq_cleanup() -> None:
+    """v0.2.1: Verbatim ruft Groq NICHT mehr — raw Whisper output direkt durch."""
+    pipeline, _, groq = _make_pipeline(stt_output="Hallo, schreibe eine Mail")
+    result = pipeline.process(np.zeros(16000, dtype=np.float32), mode="verbatim")
+    assert result.text == "Hallo, schreibe eine Mail"
+    assert result.mode == "verbatim"
+    # Groq darf NICHT aufgerufen worden sein
+    assert not groq.clean.called
 
 
 def test_formal_mode_uses_formal_prompt() -> None:
