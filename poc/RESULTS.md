@@ -199,12 +199,34 @@ Pending — POC auf zweiten Mac kopieren via AirDrop und nochmal testen.
 
 - [x] Build: PASS
 - [x] Codesign: PASS (valid on disk, satisfies Designated Requirement)
-- [x] Process Count nach 5s: 1 (OK, kein fork-loop)
-- [ ] Menubar-Icon "POC1" sichtbar: [TIM TESTET]
-- [ ] "Hello"-Click → Notification: [TIM TESTET]
-- [ ] "Quit"-Click beendet App sauber: [TIM TESTET]
+- [x] Process Count nach 5s: 1 (OK, kein fork-loop dank freeze_support)
+- [x] Menubar-Icon "POC1" sichtbar: PASS (in Menüleiste rechts der Notch)
+- [x] Menü öffnet mit "Hello" + "Quit": PASS
+- [⚠️] "Hello"-Click → Notification: **kein Effekt sichtbar**
+
+### Notification-Issue (akzeptiert)
+
+rumps `notification()` liefert keine sichtbare Notification bei
+ad-hoc-signierten Bundles. Bekannte Limitation: UNUserNotificationCenter
+verwirft Notifications stillschweigend ohne Developer-ID-Signatur.
+
+**Nicht relevant fürs Worknetic-Tool:** v0.2.0 nutzt `osascript display
+notification` in `notify.py` — das funktioniert auch ohne Code-Sign-Identity
+(getestet, läuft live). rumps.notification() wird im echten Code nirgends
+verwendet.
+
+### Bundle-ID in macOS-Notifications-DB
+
+`com.apple.ncprefs.plist` zeigt:
+```
+bundle-id = "de.worknetic.flow.poc1"
+content_visibility = 0
+flags = 8396814
+```
+
+App ist registriert, aber Notifications werden ohne Identity nicht zugestellt.
 
 ### Entscheidung
 
-- [ ] PASS — PROCEED zu POC 2
-- [ ] FAIL — rumps + PyInstaller incompatible, andere Strategie
+- [x] PASS — PROCEED zu POC 2 (rumps-Core-Funktionalität in Bundle bestätigt)
+- [ ] FAIL — rumps + PyInstaller incompatible
