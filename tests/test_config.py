@@ -87,3 +87,64 @@ def test_pill_can_be_disabled(tmp_path: Path) -> None:
     config_path.write_text('[pill]\nenabled = false\n')
     cfg = load(config_path=config_path)
     assert cfg.pill.enabled is False
+
+
+def test_config_save_writes_toml(tmp_path: Path) -> None:
+    from wnflow.config import save
+
+    config_path = tmp_path / "config.toml"
+    cfg = load(config_path=config_path)
+    cfg.stt.language = "en"
+    cfg.cleanup.api_key = "gsk_test_123"
+    save(cfg, config_path=config_path)
+
+    # Reload und checken
+    cfg2 = load(config_path=config_path)
+    assert cfg2.stt.language == "en"
+
+
+def test_config_save_atomic_via_tmp_file(tmp_path: Path) -> None:
+    """Save soll atomic sein: tmpfile, dann rename."""
+    from wnflow.config import save
+
+    config_path = tmp_path / "config.toml"
+    cfg = load(config_path=config_path)
+    save(cfg, config_path=config_path)
+    # Nach save existiert keine .tmp Datei
+    assert not (tmp_path / "config.toml.tmp").exists()
+    assert config_path.exists()
+
+
+def test_config_language_default_is_de(tmp_path: Path) -> None:
+    config_path = tmp_path / "config.toml"
+    cfg = load(config_path=config_path)
+    assert cfg.stt.language == "de"
+
+
+def test_config_save_preserves_modes_section(tmp_path: Path) -> None:
+    """Save soll alle Sections schreiben — auch wenn nur ein Feld geändert."""
+    from wnflow.config import save
+
+    config_path = tmp_path / "config.toml"
+    cfg = load(config_path=config_path)
+    cfg.modes.default = "formal"
+    save(cfg, config_path=config_path)
+    cfg2 = load(config_path=config_path)
+    assert cfg2.modes.default == "formal"
+
+
+def test_config_save_writes_api_key_when_set(tmp_path: Path, monkeypatch) -> None:
+    """Wenn api_key aus Settings-Window kommt, soll save es persistieren."""
+    from wnflow.config import save
+
+    # ENV temporär leeren
+    monkeypatch.delenv("GROQ_API_KEY", raising=False)
+
+    config_path = tmp_path / "config.toml"
+    cfg = load(config_path=config_path)
+    cfg.cleanup.api_key = "gsk_persistent"
+    save(cfg, config_path=config_path)
+
+    # Re-load liest aus TOML wenn ENV leer
+    cfg2 = load(config_path=config_path)
+    assert cfg2.cleanup.api_key == "gsk_persistent"

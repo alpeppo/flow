@@ -10,7 +10,19 @@ import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
 
+import tomli_w
+
 DEFAULT_CONFIG_PATH = Path.home() / ".worknetic-flow" / "config.toml"
+
+# Sprach-Liste für Settings-Window (Code, Display-Name)
+LANGUAGES = [
+    ("de", "Deutsch"),
+    ("en", "English"),
+    ("fr", "Français"),
+    ("es", "Español"),
+    ("it", "Italiano"),
+    ("nl", "Nederlands"),
+]
 
 DEFAULTS_TOML = """\
 [stt]
@@ -167,7 +179,72 @@ def load(config_path: Path | None = None) -> Config:
     if "pill" in data:
         cfg.pill = PillConfig(**data["pill"])
 
-    # ENV-Override für Secrets
-    cfg.cleanup.api_key = os.environ.get("GROQ_API_KEY", "")
+    # API-Key-Priorität: ENV > TOML > leer
+    env_key = os.environ.get("GROQ_API_KEY", "")
+    if env_key:
+        cfg.cleanup.api_key = env_key
+    elif "cleanup" in data and "api_key" in data["cleanup"]:
+        cfg.cleanup.api_key = data["cleanup"]["api_key"]
+    # sonst: bleibt "" (Default aus dataclass)
 
     return cfg
+
+
+def save(config: Config, config_path: Path | None = None) -> None:
+    """Atomic write: tmpfile + rename."""
+    path = config_path or DEFAULT_CONFIG_PATH
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    data = _serialize(config)
+    tmp = path.with_suffix(".toml.tmp")
+    tmp.write_bytes(tomli_w.dumps(data).encode("utf-8"))
+    tmp.replace(path)  # atomic on POSIX
+
+
+def _serialize(config: Config) -> dict:
+    """Config-dataclass zu dict für TOML-Schreiben."""
+    return {
+        "stt": {
+            "model": config.stt.model,
+            "language": config.stt.language,
+        },
+        "hotkey": {
+            "mode": config.hotkey.mode,
+            "key": config.hotkey.key,
+            "double_tap_window_ms": config.hotkey.double_tap_window_ms,
+        },
+        "recording": {
+            "min_duration_s": config.recording.min_duration_s,
+            "max_duration_s": config.recording.max_duration_s,
+            "sample_rate": config.recording.sample_rate,
+        },
+        "cleanup": {
+            "enabled": config.cleanup.enabled,
+            "provider": config.cleanup.provider,
+            "model": config.cleanup.model,
+            "timeout_s": config.cleanup.timeout_s,
+            "retry": config.cleanup.retry,
+            "api_key": config.cleanup.api_key,
+            "hotwords": {"words": config.cleanup.hotwords},
+        },
+        "commands": {
+            "enabled": config.commands.enabled,
+            "triggers": config.commands.triggers,
+        },
+        "output": {
+            "clipboard_restore_delay_ms": config.output.clipboard_restore_delay_ms,
+        },
+        "logging": {
+            "level": config.logging.level,
+            "keep_transcripts": config.logging.keep_transcripts,
+        },
+        "modes": {
+            "default": config.modes.default,
+        },
+        "pill": {
+            "enabled": config.pill.enabled,
+            "mode_indicator": config.pill.mode_indicator,
+            "waveform_bar_count": config.pill.waveform_bar_count,
+            "fade_out_ms": config.pill.fade_out_ms,
+        },
+    }
