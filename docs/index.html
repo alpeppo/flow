@@ -46,23 +46,17 @@
       line-height: 1.55;
     }
     a { color: inherit; }
+    code.mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
 
-    .container {
-      max-width: 1080px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
+    .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
     .container--narrow { max-width: 820px; }
 
     section { padding: 80px 0; }
     section:first-of-type { padding-top: 56px; }
+    section + section { border-top: 1px solid rgba(27,23,20,0.05); }
 
     /* Headings ---------------------------------------------------------- */
-    h1, h2, h3 {
-      font-family: 'Outfit', sans-serif;
-      letter-spacing: -0.6px;
-      margin: 0;
-    }
+    h1, h2, h3 { font-family: 'Outfit', sans-serif; letter-spacing: -0.6px; margin: 0; }
     h1 {
       font-size: clamp(38px, 6vw, 56px);
       line-height: 1.05;
@@ -90,11 +84,7 @@
       color: var(--fg-tertiary);
       margin-bottom: 12px;
     }
-    .lead {
-      font-size: 18px;
-      color: var(--fg-secondary);
-      max-width: 640px;
-    }
+    .lead { font-size: 18px; color: var(--fg-secondary); max-width: 640px; }
 
     /* Header ------------------------------------------------------------ */
     header.site {
@@ -107,11 +97,7 @@
       z-index: 50;
       border-bottom: 1px solid rgba(27,23,20,0.04);
     }
-    .site-inner {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+    .site-inner { display: flex; align-items: center; gap: 12px; }
     .glyph {
       width: 32px; height: 32px;
       border-radius: 9px;
@@ -120,12 +106,7 @@
       display: grid; place-items: center;
       flex-shrink: 0;
     }
-    .glyph.lg {
-      width: 48px; height: 48px;
-      border-radius: 14px;
-    }
     .glyph svg { width: 18px; height: 18px; }
-    .glyph.lg svg { width: 28px; height: 28px; }
     .brand-name {
       font-family: 'Outfit', sans-serif;
       font-weight: 700;
@@ -146,15 +127,39 @@
       border-radius: 999px;
       transition: background 0.12s, color 0.12s;
     }
-    .site-nav a:hover {
-      background: rgba(27,23,20,0.05);
-      color: var(--fg-primary);
+    .site-nav a:hover { background: rgba(27,23,20,0.05); color: var(--fg-primary); }
+    .site-nav a.cta { background: var(--bg-dark); color: var(--fg-on-dark); }
+    .site-nav a.cta:hover { filter: brightness(1.15); }
+
+    /* Language toggle --------------------------------------------------- */
+    .lang-toggle {
+      display: inline-flex;
+      background: var(--bg-card);
+      border-radius: 999px;
+      padding: 3px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      box-shadow: var(--shadow-card-sm);
     }
-    .site-nav a.cta {
+    .lang-toggle button {
+      background: transparent;
+      border: 0;
+      padding: 6px 12px;
+      border-radius: 999px;
+      color: var(--fg-tertiary);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: inherit;
+      letter-spacing: 0.05em;
+      transition: background 0.14s, color 0.14s;
+    }
+    .lang-toggle button.active {
       background: var(--bg-dark);
       color: var(--fg-on-dark);
     }
-    .site-nav a.cta:hover { filter: brightness(1.15); }
+    .lang-toggle button:not(.active):hover { color: var(--fg-primary); }
+
     @media (max-width: 600px) {
       .site-nav a:not(.cta) { display: none; }
     }
@@ -167,9 +172,7 @@
       gap: 60px;
       align-items: center;
     }
-    @media (max-width: 900px) {
-      .hero-grid { grid-template-columns: 1fr; gap: 40px; }
-    }
+    @media (max-width: 900px) { .hero-grid { grid-template-columns: 1fr; gap: 40px; } }
     .hero-tag {
       display: inline-flex;
       align-items: center;
@@ -212,10 +215,7 @@
       transition: transform 0.06s, filter 0.12s, background 0.12s;
     }
     .btn:active { transform: translateY(1px); }
-    .btn.primary {
-      background: var(--bg-dark);
-      color: var(--fg-on-dark);
-    }
+    .btn.primary { background: var(--bg-dark); color: var(--fg-on-dark); }
     .btn.primary:hover { filter: brightness(1.15); }
     .btn.ghost {
       background: transparent;
@@ -262,12 +262,7 @@
       0%, 100% { opacity: 1; transform: scale(1); }
       50% { opacity: 0.55; transform: scale(0.85); }
     }
-    .pill-wave {
-      display: flex;
-      align-items: center;
-      gap: 2.2px;
-      height: 24px;
-    }
+    .pill-wave { display: flex; align-items: center; gap: 2.2px; height: 24px; }
     .pill-wave-bar {
       width: 2px;
       background: rgba(255,255,255,0.78);
@@ -323,19 +318,12 @@
     }
 
     /* Sections shared --------------------------------------------------- */
-    section + section { border-top: 1px solid rgba(27,23,20,0.05); }
     .section-head { margin-bottom: 40px; text-align: center; }
     .section-head .lead { margin: 0 auto; }
 
-    /* What it does — 3-col features ------------------------------------- */
-    .features {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-    }
-    @media (max-width: 800px) {
-      .features { grid-template-columns: 1fr; }
-    }
+    /* Features (3-col) -------------------------------------------------- */
+    .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    @media (max-width: 800px) { .features { grid-template-columns: 1fr; } }
     .feature-card {
       background: var(--bg-card);
       border-radius: var(--radius-card);
@@ -353,21 +341,11 @@
     }
     .feature-icon svg { width: 22px; height: 22px; }
     .feature-card h3 { margin-bottom: 6px; }
-    .feature-card p {
-      font-size: 14px;
-      color: var(--fg-secondary);
-      margin: 0;
-    }
+    .feature-card p { font-size: 14px; color: var(--fg-secondary); margin: 0; }
 
-    /* Who it's for — 2x2 personas --------------------------------------- */
-    .personas {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
-    }
-    @media (max-width: 700px) {
-      .personas { grid-template-columns: 1fr; }
-    }
+    /* Personas (2x2) ---------------------------------------------------- */
+    .personas { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    @media (max-width: 700px) { .personas { grid-template-columns: 1fr; } }
     .persona {
       background: var(--bg-card);
       border-radius: var(--radius-card);
@@ -388,13 +366,9 @@
     }
     .persona-icon svg { width: 20px; height: 20px; }
     .persona-body h3 { font-size: 16px; margin-bottom: 4px; }
-    .persona-body p {
-      margin: 0;
-      font-size: 14px;
-      color: var(--fg-secondary);
-    }
+    .persona-body p { margin: 0; font-size: 14px; color: var(--fg-secondary); }
 
-    /* Why Flow — comparison table --------------------------------------- */
+    /* Comparison table -------------------------------------------------- */
     .compare {
       background: var(--bg-card);
       border-radius: var(--radius-card);
@@ -402,11 +376,7 @@
       box-shadow: var(--shadow-card-sm);
       overflow-x: auto;
     }
-    .compare table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-    }
+    .compare table { width: 100%; border-collapse: collapse; font-size: 14px; }
     .compare th, .compare td {
       padding: 14px 16px;
       text-align: left;
@@ -420,21 +390,13 @@
       letter-spacing: -0.2px;
     }
     .compare th.product { color: var(--fg-primary); }
-    .compare td.product {
-      font-weight: 600;
-      color: var(--fg-primary);
-    }
+    .compare td.product { font-weight: 600; color: var(--fg-primary); }
     .compare tr:last-child td { border-bottom: 0; }
     .compare .good { color: var(--accent-good); font-weight: 500; }
     .compare .bad { color: var(--accent-bad); }
     .compare .mid { color: var(--fg-tertiary); }
-    .compare-mark {
-      display: inline-block;
-      width: 18px;
-      text-align: center;
-    }
 
-    /* Privacy — dark card ----------------------------------------------- */
+    /* Privacy ----------------------------------------------------------- */
     .privacy-card {
       background: var(--bg-dark);
       color: var(--fg-on-dark);
@@ -451,14 +413,8 @@
       grid-template-columns: 1fr 1fr;
       gap: 20px 36px;
     }
-    @media (max-width: 700px) {
-      .privacy-list { grid-template-columns: 1fr; }
-    }
-    .privacy-list li {
-      display: flex;
-      gap: 14px;
-      align-items: flex-start;
-    }
+    @media (max-width: 700px) { .privacy-list { grid-template-columns: 1fr; } }
+    .privacy-list li { display: flex; gap: 14px; align-items: flex-start; }
     .privacy-check {
       width: 22px; height: 22px;
       border-radius: 50%;
@@ -482,7 +438,11 @@
       color: rgba(231,225,213,0.6);
       line-height: 1.5;
     }
-    .privacy-list a { color: var(--fg-on-dark); border-bottom: 1px solid rgba(231,225,213,0.4); text-decoration: none; }
+    .privacy-list a {
+      color: var(--fg-on-dark);
+      border-bottom: 1px solid rgba(231,225,213,0.4);
+      text-decoration: none;
+    }
 
     /* Donate ------------------------------------------------------------ */
     .donate-card {
@@ -495,10 +455,7 @@
       gap: 36px;
       align-items: center;
     }
-    @media (max-width: 800px) {
-      .donate-card { grid-template-columns: 1fr; }
-    }
-    .donate-card h2 { letter-spacing: -0.6px; }
+    @media (max-width: 800px) { .donate-card { grid-template-columns: 1fr; } }
     .donate-card p {
       font-size: 15px;
       color: var(--fg-secondary);
@@ -531,21 +488,13 @@
       padding: 32px;
       margin-bottom: 24px;
     }
-    .install-intro h3 {
-      color: var(--fg-on-dark);
-      margin-bottom: 10px;
-    }
-    .install-intro p {
-      color: rgba(231,225,213,0.7);
-      font-size: 14px;
-      margin: 0;
-    }
+    .install-intro h3 { color: var(--fg-on-dark); margin-bottom: 10px; }
+    .install-intro p { color: rgba(231,225,213,0.7); font-size: 14px; margin: 0; }
     .install-intro a {
       color: var(--accent-yellow);
       text-decoration: none;
       border-bottom: 1px dotted rgba(254,188,46,0.5);
     }
-
     .install-step {
       background: var(--bg-card);
       border-radius: var(--radius-card);
@@ -567,14 +516,9 @@
     }
     .step-num.optional { background: var(--bg-card-inner); color: var(--fg-secondary); }
     .install-step-body { padding-left: 42px; }
-    @media (max-width: 600px) {
-      .install-step-body { padding-left: 0; }
-    }
-    .install-step p {
-      margin: 12px 0;
-      font-size: 14px;
-      color: var(--fg-secondary);
-    }
+    @media (max-width: 600px) { .install-step-body { padding-left: 0; } }
+    .install-step p { margin: 12px 0; font-size: 14px; color: var(--fg-secondary); }
+    .install-step .small { font-size: 12px; color: var(--fg-tertiary); margin-top: 14px; }
 
     .terminal {
       background: var(--bg-terminal);
@@ -597,12 +541,12 @@
       color: rgba(255,255,255,0.25);
     }
     .terminal-code { padding-top: 22px; display: block; }
-    .terminal-code .prompt { color: rgba(255,255,255,0.4); user-select: none; }
-    .terminal-code .cmd { color: #fff; }
     .terminal-code .prompt {
+      color: rgba(255,255,255,0.4);
       -webkit-user-select: none;
       user-select: none;
     }
+    .terminal-code .cmd { color: #fff; }
     .copy-btn {
       position: absolute;
       top: 10px; right: 12px;
@@ -631,11 +575,7 @@
       vertical-align: 1px;
     }
 
-    ul.compact {
-      list-style: none;
-      padding: 0;
-      margin: 8px 0 0 0;
-    }
+    ul.compact { list-style: none; padding: 0; margin: 8px 0 0 0; }
     ul.compact li {
       padding: 10px 0;
       border-bottom: 1px solid rgba(27,23,20,0.05);
@@ -654,7 +594,6 @@
       margin-bottom: 10px;
       box-shadow: var(--shadow-card-sm);
       cursor: pointer;
-      transition: background 0.12s;
     }
     .faq summary {
       font-family: 'Outfit', sans-serif;
@@ -673,11 +612,8 @@
       font-family: 'JetBrains Mono', monospace;
       font-size: 18px;
       color: var(--fg-tertiary);
-      transition: transform 0.18s;
     }
-    .faq details[open] summary::after {
-      content: "−";
-    }
+    .faq details[open] summary::after { content: "−"; }
     .faq details p {
       margin: 12px 0 0 0;
       font-size: 14px;
@@ -727,10 +663,14 @@
       </div>
       <div class="brand-name">Flow</div>
       <nav class="site-nav">
-        <a href="#features">Features</a>
-        <a href="#privacy">Privacy</a>
-        <a href="#install">Install</a>
-        <a href="https://github.com/alpeppo/flow" class="cta">GitHub →</a>
+        <a href="#features" data-i18n="nav.features">Features</a>
+        <a href="#privacy" data-i18n="nav.privacy">Privacy</a>
+        <a href="#install" data-i18n="nav.install">Install</a>
+        <div class="lang-toggle" role="tablist" aria-label="Language">
+          <button type="button" data-lang="en" class="active">EN</button>
+          <button type="button" data-lang="de">DE</button>
+        </div>
+        <a href="https://github.com/alpeppo/flow" class="cta" data-i18n="nav.github">GitHub →</a>
       </nav>
     </div>
   </header>
@@ -742,15 +682,13 @@
         <div>
           <div class="hero-tag">
             <span class="hero-tag-dot"></span>
-            Community-driven · MIT · v0.3.4
+            <span data-i18n="hero.tag">Community-driven · MIT · v0.3.4</span>
           </div>
-          <h1>Stop typing.<br>Start talking.</h1>
-          <p class="hero-lead">
-            Local-first dictation for macOS. Tap <kbd>fn</kbd> twice, speak, and your words land in whatever app is focused. <strong>Whisper runs on your Mac</strong> — audio never leaves your device.
-          </p>
+          <h1 data-i18n="hero.title" data-i18n-html><span>Stop typing.</span><br><span>Start talking.</span></h1>
+          <p class="hero-lead" data-i18n="hero.lead" data-i18n-html>Local-first dictation for macOS. Tap <kbd>fn</kbd> twice, speak, and your words land in whatever app is focused. <strong>Whisper runs on your Mac</strong> — audio never leaves your device.</p>
           <div class="btn-row">
             <a href="#install" class="btn primary">
-              Install in one minute
+              <span data-i18n="hero.cta.primary">Install in one minute</span>
               <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
@@ -759,7 +697,7 @@
               <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M12 .3a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1.1-.7.1-.7.1-.7 1.2.1 1.9 1.3 1.9 1.3 1.1 1.9 2.9 1.3 3.6 1 .1-.8.4-1.3.8-1.6-2.7-.3-5.5-1.3-5.5-6 0-1.3.5-2.4 1.3-3.2-.1-.4-.6-1.6.1-3.2 0 0 1-.3 3.4 1.2a11.5 11.5 0 0 1 6.2 0c2.4-1.6 3.4-1.2 3.4-1.2.7 1.6.2 2.9.1 3.2.8.9 1.3 2 1.3 3.2 0 4.6-2.8 5.7-5.5 6 .4.4.8 1.1.8 2.2v3.2c0 .3.2.7.8.6A12 12 0 0 0 12 .3"/>
               </svg>
-              View on GitHub
+              <span data-i18n="hero.cta.secondary">View on GitHub</span>
             </a>
           </div>
         </div>
@@ -779,19 +717,19 @@
             <div class="pill-timer">0:07</div>
             <div class="pill-x">✕</div>
           </div>
-          <div class="pill-caption">The recording pill, live and on top of every app.</div>
+          <div class="pill-caption" data-i18n="hero.pill.caption">The recording pill, live and on top of every app.</div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- What it does ===================================================== -->
+  <!-- Features ========================================================= -->
   <section id="features">
     <div class="container">
       <div class="section-head">
-        <div class="eyebrow">What it does</div>
-        <h2>Three things, done well.</h2>
-        <p class="lead">No bloat, no cloud detours. Flow does one job — turning speech into text inside any app — and tries to do it without surprises.</p>
+        <div class="eyebrow" data-i18n="features.eyebrow">What it does</div>
+        <h2 data-i18n="features.title">Three things, done well.</h2>
+        <p class="lead" data-i18n="features.lead">No bloat, no cloud detours. Flow does one job — turning speech into text inside any app — and tries to do it without surprises.</p>
       </div>
       <div class="features">
         <div class="feature-card">
@@ -802,18 +740,18 @@
               <path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3"/>
             </svg>
           </div>
-          <h3>On-device transcription</h3>
-          <p>MLX-Whisper Large v3 Turbo runs locally on your Apple Silicon Mac. No upload, no streaming to a server — your voice never leaves the device.</p>
+          <h3 data-i18n="features.f1.title">On-device transcription</h3>
+          <p data-i18n="features.f1.body">MLX-Whisper Large v3 Turbo runs locally on your Apple Silicon Mac. No upload, no streaming to a server — your voice never leaves the device.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M4 7h16M4 12h10M4 17h16"/>
-              <path d="M15 12l4 4-4 4" />
+              <path d="M15 12l4 4-4 4"/>
             </svg>
           </div>
-          <h3>Three cleanup modes</h3>
-          <p><strong>Verbatim</strong> for the raw transcript, <strong>Formal</strong> for polished prose, <strong>Anti-Wut</strong> to de-escalate heated messages. Switch with a modifier key mid-tap.</p>
+          <h3 data-i18n="features.f2.title">Three cleanup modes</h3>
+          <p data-i18n="features.f2.body" data-i18n-html><strong>Verbatim</strong> for the raw transcript, <strong>Formal</strong> for polished prose, <strong>Anti-Wut</strong> to de-escalate heated messages. Switch with a modifier key mid-tap.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">
@@ -822,19 +760,19 @@
               <path d="M9 7h6M9 11h6M9 15h4"/>
             </svg>
           </div>
-          <h3>Works in any app</h3>
-          <p>Flow types the result wherever your cursor is — email, Slack, IDE, browser, terminal. No integrations, no plugins. It just pastes.</p>
+          <h3 data-i18n="features.f3.title">Works in any app</h3>
+          <p data-i18n="features.f3.body">Flow types the result wherever your cursor is — email, Slack, IDE, browser, terminal. No integrations, no plugins. It just pastes.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Who it's for ===================================================== -->
+  <!-- Personas ========================================================= -->
   <section>
     <div class="container">
       <div class="section-head">
-        <div class="eyebrow">Who it's for</div>
-        <h2>Built for people who think out loud.</h2>
+        <div class="eyebrow" data-i18n="personas.eyebrow">Who it's for</div>
+        <h2 data-i18n="personas.title">Built for people who think out loud.</h2>
       </div>
       <div class="personas">
         <div class="persona">
@@ -844,8 +782,8 @@
             </svg>
           </div>
           <div class="persona-body">
-            <h3>Developers in flow</h3>
-            <p>Brainstorm out loud, commit code with your fingers. Diktate Comments, PR-Beschreibungen, Slack-Antworten — ohne aus dem Editor zu wechseln.</p>
+            <h3 data-i18n="personas.p1.title">Developers in flow</h3>
+            <p data-i18n="personas.p1.body">Brainstorm out loud, commit code with your fingers. Dictate comments, PR descriptions, Slack replies — without leaving your editor.</p>
           </div>
         </div>
         <div class="persona">
@@ -856,8 +794,8 @@
             </svg>
           </div>
           <div class="persona-body">
-            <h3>Writers + journalists</h3>
-            <p>Interview transcripts, first drafts, voice notes. Verbatim-Mode captures exactly what was said; Formal cleans up your scratch dictation into prose.</p>
+            <h3 data-i18n="personas.p2.title">Writers + journalists</h3>
+            <p data-i18n="personas.p2.body">Interview transcripts, first drafts, voice notes. Verbatim mode captures exactly what was said; Formal cleans up scratch dictation into prose.</p>
           </div>
         </div>
         <div class="persona">
@@ -868,8 +806,8 @@
             </svg>
           </div>
           <div class="persona-body">
-            <h3>Multilingual professionals</h3>
-            <p>Switch between Deutsch, English, Français, Español, Italiano, Nederlands. Whisper auto-detects, or you fix it in the settings.</p>
+            <h3 data-i18n="personas.p3.title">Multilingual professionals</h3>
+            <p data-i18n="personas.p3.body">Switch between German, English, French, Spanish, Italian, and Dutch. Whisper auto-detects, or you fix it in the settings.</p>
           </div>
         </div>
         <div class="persona">
@@ -880,21 +818,21 @@
             </svg>
           </div>
           <div class="persona-body">
-            <h3>Privacy-conscious</h3>
-            <p>Local audio, MIT-licensed source you can audit line by line, no telemetry, no account, no subscription. Disable Groq cleanup and you're 100% offline.</p>
+            <h3 data-i18n="personas.p4.title">Privacy-conscious</h3>
+            <p data-i18n="personas.p4.body">Local audio, MIT-licensed source you can audit line by line, no telemetry, no account, no subscription. Disable Groq cleanup and you're 100% offline.</p>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Why Flow ========================================================= -->
+  <!-- Compare ========================================================== -->
   <section>
     <div class="container">
       <div class="section-head">
-        <div class="eyebrow">Why Flow</div>
-        <h2>Honest about the trade-offs.</h2>
-        <p class="lead">Flow isn't trying to win every category. It's optimized for one thing: dictation that respects your privacy and your wallet.</p>
+        <div class="eyebrow" data-i18n="compare.eyebrow">Why Flow</div>
+        <h2 data-i18n="compare.title">Honest about the trade-offs.</h2>
+        <p class="lead" data-i18n="compare.lead">Flow isn't trying to win every category. It's optimized for one thing: dictation that respects your privacy and your wallet.</p>
       </div>
       <div class="compare">
         <table>
@@ -903,51 +841,51 @@
               <th></th>
               <th class="product">Flow</th>
               <th>Wispr Flow</th>
-              <th>macOS Dictation</th>
+              <th data-i18n="compare.col.apple">macOS Dictation</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>Cost</td>
-              <td class="product good">Free (MIT)</td>
+              <td data-i18n="compare.row.cost">Cost</td>
+              <td class="product good" data-i18n="compare.flow.cost">Free (MIT)</td>
               <td class="bad">USD 12/mo</td>
-              <td class="good">Free</td>
+              <td class="good" data-i18n="compare.apple.cost">Free</td>
             </tr>
             <tr>
-              <td>Audio location</td>
-              <td class="product good">Local (MLX-Whisper)</td>
-              <td class="bad">Cloud</td>
-              <td class="good">Local (on-device)</td>
+              <td data-i18n="compare.row.audio">Audio location</td>
+              <td class="product good" data-i18n="compare.flow.audio">Local (MLX-Whisper)</td>
+              <td class="bad" data-i18n="compare.wispr.audio">Cloud</td>
+              <td class="good" data-i18n="compare.apple.audio">Local (on-device)</td>
             </tr>
             <tr>
-              <td>Cleanup modes (LLM rewrite)</td>
-              <td class="product good">3 modes, optional</td>
-              <td class="good">Yes, default</td>
-              <td class="bad">None</td>
+              <td data-i18n="compare.row.cleanup">Cleanup modes (LLM rewrite)</td>
+              <td class="product good" data-i18n="compare.flow.cleanup">3 modes, optional</td>
+              <td class="good" data-i18n="compare.wispr.cleanup">Yes, default</td>
+              <td class="bad" data-i18n="compare.apple.cleanup">None</td>
             </tr>
             <tr>
-              <td>Open source</td>
+              <td data-i18n="compare.row.oss">Open source</td>
               <td class="product good">MIT</td>
-              <td class="bad">Closed</td>
-              <td class="bad">Closed</td>
+              <td class="bad" data-i18n="compare.wispr.oss">Closed</td>
+              <td class="bad" data-i18n="compare.apple.oss">Closed</td>
             </tr>
             <tr>
-              <td>Customizable hotkey</td>
+              <td data-i18n="compare.row.hotkey">Customizable hotkey</td>
               <td class="product good">fn / right-Cmd / right-Shift</td>
-              <td class="mid">Limited</td>
-              <td class="mid">Limited</td>
+              <td class="mid" data-i18n="compare.wispr.hotkey">Limited</td>
+              <td class="mid" data-i18n="compare.apple.hotkey">Limited</td>
             </tr>
             <tr>
-              <td>Works in any app</td>
-              <td class="product good">Yes (paste)</td>
-              <td class="good">Yes</td>
-              <td class="good">Yes</td>
+              <td data-i18n="compare.row.everywhere">Works in any app</td>
+              <td class="product good" data-i18n="compare.flow.everywhere">Yes (paste)</td>
+              <td class="good" data-i18n="compare.wispr.everywhere">Yes</td>
+              <td class="good" data-i18n="compare.apple.everywhere">Yes</td>
             </tr>
             <tr>
-              <td>Multilingual</td>
-              <td class="product good">6 languages, switchable</td>
-              <td class="good">Many</td>
-              <td class="good">Many</td>
+              <td data-i18n="compare.row.langs">Multilingual</td>
+              <td class="product good" data-i18n="compare.flow.langs">6 languages, switchable</td>
+              <td class="good" data-i18n="compare.wispr.langs">Many</td>
+              <td class="good" data-i18n="compare.apple.langs">Many</td>
             </tr>
           </tbody>
         </table>
@@ -959,74 +897,50 @@
   <section id="privacy">
     <div class="container">
       <div class="privacy-card">
-        <div class="eyebrow" style="color: rgba(231,225,213,0.5);">Privacy &amp; security</div>
-        <h2>Privacy by default.</h2>
-        <p class="lead">Flow is built so that even the developer can't see your dictations. Here's exactly what happens — and what doesn't.</p>
+        <div class="eyebrow" style="color: rgba(231,225,213,0.5);" data-i18n="privacy.eyebrow">Privacy &amp; security</div>
+        <h2 data-i18n="privacy.title">Privacy by default.</h2>
+        <p class="lead" data-i18n="privacy.lead">Flow is built so that even the developer can't see your dictations. Here's exactly what happens — and what doesn't.</p>
         <ul class="privacy-list">
           <li>
-            <span class="privacy-check">
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M3 8l3 3 7-7"/>
-              </svg>
-            </span>
+            <span class="privacy-check"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l3 3 7-7"/></svg></span>
             <div>
-              <h3>Audio never leaves your Mac</h3>
-              <p>MLX-Whisper runs entirely on Apple Silicon. The recorded audio buffer is held in memory, transcribed, then discarded. No upload, no streaming, no cache.</p>
+              <h3 data-i18n="privacy.p1.title">Audio never leaves your Mac</h3>
+              <p data-i18n="privacy.p1.body">MLX-Whisper runs entirely on Apple Silicon. The recorded audio buffer is held in memory, transcribed, then discarded. No upload, no streaming, no cache.</p>
             </div>
           </li>
           <li>
-            <span class="privacy-check">
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M3 8l3 3 7-7"/>
-              </svg>
-            </span>
+            <span class="privacy-check"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l3 3 7-7"/></svg></span>
             <div>
-              <h3>Cleanup is opt-in</h3>
-              <p>Verbatim mode never contacts Groq. Formal/Anti-Wut send only the transcribed text — not the audio — and only if you've entered an API key.</p>
+              <h3 data-i18n="privacy.p2.title">Cleanup is opt-in</h3>
+              <p data-i18n="privacy.p2.body">Verbatim mode never contacts Groq. Formal/Anti-Wut send only the transcribed text — not the audio — and only if you've entered an API key.</p>
             </div>
           </li>
           <li>
-            <span class="privacy-check">
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M3 8l3 3 7-7"/>
-              </svg>
-            </span>
+            <span class="privacy-check"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l3 3 7-7"/></svg></span>
             <div>
-              <h3>History stays on your disk</h3>
-              <p>Past dictations live in <code style="font-family: 'JetBrains Mono', monospace; font-size: 12px;">~/.worknetic-flow/history.json</code>. Plain JSON, easy to inspect, easy to delete.</p>
+              <h3 data-i18n="privacy.p3.title">History stays on your disk</h3>
+              <p data-i18n="privacy.p3.body" data-i18n-html>Past dictations live in <code class="mono">~/.worknetic-flow/history.json</code>. Plain JSON, easy to inspect, easy to delete.</p>
             </div>
           </li>
           <li>
-            <span class="privacy-check">
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M3 8l3 3 7-7"/>
-              </svg>
-            </span>
+            <span class="privacy-check"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l3 3 7-7"/></svg></span>
             <div>
-              <h3>No telemetry</h3>
-              <p>No analytics, no crash reporting that phones home, no auto-update check. Flow knows nothing about how often you use it.</p>
+              <h3 data-i18n="privacy.p4.title">No telemetry</h3>
+              <p data-i18n="privacy.p4.body">No analytics, no crash reporting that phones home, no auto-update check. Flow knows nothing about how often you use it.</p>
             </div>
           </li>
           <li>
-            <span class="privacy-check">
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M3 8l3 3 7-7"/>
-              </svg>
-            </span>
+            <span class="privacy-check"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l3 3 7-7"/></svg></span>
             <div>
-              <h3>MIT — audit the source</h3>
-              <p>Every line is public on <a href="https://github.com/alpeppo/flow">github.com/alpeppo/flow</a>. The install script is <a href="https://github.com/alpeppo/flow/blob/main/docs/install.sh">130 lines of plain bash</a> — read it before running it.</p>
+              <h3 data-i18n="privacy.p5.title">MIT — audit the source</h3>
+              <p data-i18n="privacy.p5.body" data-i18n-html>Every line is public on <a href="https://github.com/alpeppo/flow">github.com/alpeppo/flow</a>. The install script is <a href="https://github.com/alpeppo/flow/blob/main/docs/install.sh">130 lines of plain bash</a> — read it before running it.</p>
             </div>
           </li>
           <li>
-            <span class="privacy-check">
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M3 8l3 3 7-7"/>
-              </svg>
-            </span>
+            <span class="privacy-check"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l3 3 7-7"/></svg></span>
             <div>
-              <h3>Community-driven</h3>
-              <p>Flow is built by volunteers, for the community. No company, no investors, no monetization plan. Issues and pull requests welcome.</p>
+              <h3 data-i18n="privacy.p6.title">Community-driven</h3>
+              <p data-i18n="privacy.p6.body">Flow is built by volunteers, for the community. No company, no investors, no monetization plan. Issues and pull requests welcome.</p>
             </div>
           </li>
         </ul>
@@ -1039,28 +953,20 @@
     <div class="container container--narrow">
       <div class="donate-card">
         <div>
-          <div class="eyebrow">Community-driven</div>
-          <h2>Flow is free. Always.</h2>
-          <p>
-            We're not trying to make money with this. Flow exists because we wanted a private, local-first dictation tool — and once we built it, it felt wrong to lock it behind a paywall.
-          </p>
-          <p>
-            <strong>If Flow saves you time and you'd like to give something back, sponsoring on GitHub helps cover server costs (the install page, future binaries) and lets us reinvest in features that benefit everyone.</strong> Every cent flows back into the project — never into someone's pocket.
-          </p>
-          <p>
-            As a thank-you, supporters get <strong>new releases two weeks before they go public</strong>. Same code, same MIT license — just earlier access.
-          </p>
+          <div class="eyebrow" data-i18n="donate.eyebrow">Community-driven</div>
+          <h2 data-i18n="donate.title">Flow is free. Always.</h2>
+          <p data-i18n="donate.p1">We're not trying to make money with this. Flow exists because we wanted a private, local-first dictation tool — and once we built it, it felt wrong to lock it behind a paywall.</p>
+          <p data-i18n="donate.p2" data-i18n-html><strong>If Flow saves you time and you'd like to give something back, sponsoring on GitHub helps cover server costs (the install page, future binaries) and lets us reinvest in features that benefit everyone.</strong> Every cent flows back into the project — never into someone's pocket.</p>
+          <p data-i18n="donate.p3" data-i18n-html>As a thank-you, supporters get <strong>new releases two weeks before they go public</strong>. Same code, same MIT license — just earlier access.</p>
         </div>
         <div class="donate-cta">
           <a href="https://github.com/sponsors/alpeppo" class="btn primary">
             <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
               <path d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
             </svg>
-            Sponsor on GitHub
+            <span data-i18n="donate.cta">Sponsor on GitHub</span>
           </a>
-          <div class="donate-fine">
-            Cancel anytime. All amounts go straight into hosting, releases, and future development.
-          </div>
+          <div class="donate-fine" data-i18n="donate.fine">Cancel anytime. All amounts go straight into hosting, releases, and future development.</div>
         </div>
       </div>
     </div>
@@ -1070,71 +976,67 @@
   <section id="install">
     <div class="container container--narrow">
       <div class="section-head">
-        <div class="eyebrow">Install</div>
-        <h2>One Terminal command.</h2>
-        <p class="lead">No installer wizard, no Apple-Developer detour. Paste, press Enter, done.</p>
+        <div class="eyebrow" data-i18n="install.eyebrow">Install</div>
+        <h2 data-i18n="install.title">One Terminal command.</h2>
+        <p class="lead" data-i18n="install.lead">No installer wizard, no Apple-Developer detour. Paste, press Enter, done.</p>
       </div>
 
       <div class="install-intro">
-        <h3>Why not just a DMG?</h3>
-        <p>
-          Apple's Gatekeeper blocks unsigned apps. Notarization costs USD 99/year for a developer account, which we'd rather not pay for an open-source project. The Terminal command sidesteps this cleanly: <code style="font-family: 'JetBrains Mono', monospace; font-size: 12px;">curl</code> downloads don't get the Gatekeeper quarantine flag, and the script explicitly strips it from the installed app. You can <a href="https://github.com/alpeppo/flow/blob/main/docs/install.sh">read the script first</a> — 130 lines, no root, no kernel extensions.
-        </p>
+        <h3 data-i18n="install.intro.title">Why not just a DMG?</h3>
+        <p data-i18n="install.intro.body" data-i18n-html>Apple's Gatekeeper blocks unsigned apps. Notarization costs USD 99/year for a developer account, which we'd rather not pay for an open-source project. The Terminal command sidesteps this cleanly: <code class="mono">curl</code> downloads don't get the Gatekeeper quarantine flag, and the script explicitly strips it from the installed app. You can <a href="https://github.com/alpeppo/flow/blob/main/docs/install.sh">read the script first</a> — 130 lines, no root, no kernel extensions.</p>
       </div>
 
       <!-- Step 1 -->
       <div class="install-step">
-        <h3><span class="step-num">1</span>Run the command</h3>
+        <h3><span class="step-num">1</span><span data-i18n="install.s1.title">Run the command</span></h3>
         <div class="install-step-body">
-          <p>Open <strong>Terminal.app</strong> (<kbd>Cmd</kbd>+<kbd>Space</kbd>, type "Terminal", hit Enter). Paste this line, press <kbd>Enter</kbd>:</p>
+          <p data-i18n="install.s1.body" data-i18n-html>Open <strong>Terminal.app</strong> (<kbd>Cmd</kbd>+<kbd>Space</kbd>, type "Terminal", hit Enter). Paste this line, press <kbd>Enter</kbd>:</p>
           <div class="terminal">
-            <button class="copy-btn" onclick="copyInstall(this)" type="button">Copy</button>
+            <button class="copy-btn" type="button" onclick="copyInstall(this)" data-i18n="install.copy">Copy</button>
             <code class="terminal-code">
 <span class="prompt">$ </span><span class="cmd" id="install-cmd">curl -fsSL https://alpeppo.github.io/flow/install.sh | bash</span>
             </code>
           </div>
-          <p style="font-size: 12px; color: var(--fg-tertiary); margin-top: 14px;">
-            The script will show every step live: system check, download, mount, install, permissions hint. About 60 seconds.
-          </p>
+          <p class="small" data-i18n="install.s1.note">The script will show every step live: system check, download, mount, install, permissions hint. About 60 seconds.</p>
         </div>
       </div>
 
       <!-- Step 2 -->
       <div class="install-step">
-        <h3><span class="step-num">2</span>Grant permissions</h3>
+        <h3><span class="step-num">2</span><span data-i18n="install.s2.title">Grant permissions</span></h3>
         <div class="install-step-body">
-          <p>Flow launches automatically. macOS will ask for two permissions:</p>
+          <p data-i18n="install.s2.body">Flow launches automatically. macOS will ask for two permissions:</p>
           <ul class="compact">
-            <li><strong>Microphone</strong> — system dialog on first recording. <em>Allow.</em></li>
-            <li><strong>Accessibility</strong> — System Settings → Privacy &amp; Security → Accessibility. Toggle <kbd>Flow</kbd> on. <em>Required so Flow can detect the global hotkey and paste into focused apps.</em></li>
+            <li data-i18n="install.s2.li1" data-i18n-html><strong>Microphone</strong> — system dialog on first recording. <em>Allow.</em></li>
+            <li data-i18n="install.s2.li2" data-i18n-html><strong>Accessibility</strong> — System Settings → Privacy &amp; Security → Accessibility. Toggle <kbd>Flow</kbd> on. <em>Required so Flow can detect the global hotkey and paste into focused apps.</em></li>
           </ul>
         </div>
       </div>
 
-      <!-- Step 3 (optional) -->
+      <!-- Step 3 -->
       <div class="install-step">
-        <h3><span class="step-num optional">3</span>Add your Groq key <em style="color: var(--fg-tertiary); font-weight: 400; font-size: 14px;">(optional)</em></h3>
+        <h3><span class="step-num optional">3</span><span data-i18n="install.s3.title" data-i18n-html>Add your Groq key <em style="color: var(--fg-tertiary); font-weight: 400; font-size: 14px;">(optional)</em></span></h3>
         <div class="install-step-body">
-          <p>Without a key, you get <strong>Verbatim mode</strong> — the raw Whisper transcript. That works for most cases.</p>
-          <p>With a free <a href="https://console.groq.com/keys" style="color: var(--fg-primary);">Groq API key</a>, you unlock:</p>
+          <p data-i18n="install.s3.body1" data-i18n-html>Without a key, you get <strong>Verbatim mode</strong> — the raw Whisper transcript. That works for most cases.</p>
+          <p data-i18n="install.s3.body2" data-i18n-html>With a free <a href="https://console.groq.com/keys" style="color: var(--fg-primary);">Groq API key</a>, you unlock:</p>
           <ul class="compact">
-            <li><strong>Formal</strong> (<kbd>Ctrl</kbd>+<kbd>fn</kbd>) — Llama rewrites your speech as polished prose.</li>
-            <li><strong>Anti-Wut</strong> (<kbd>Shift</kbd>+<kbd>fn</kbd>) — de-escalates emotionally-charged dictations before paste.</li>
+            <li data-i18n="install.s3.li1" data-i18n-html><strong>Formal</strong> (<kbd>Ctrl</kbd>+<kbd>fn</kbd>) — Llama rewrites your speech as polished prose.</li>
+            <li data-i18n="install.s3.li2" data-i18n-html><strong>Anti-Wut</strong> (<kbd>Shift</kbd>+<kbd>fn</kbd>) — de-escalates emotionally-charged dictations before paste.</li>
           </ul>
-          <p>Paste the key under <kbd>Einstellungen</kbd> → <kbd>Speichern</kbd>.</p>
+          <p data-i18n="install.s3.body3" data-i18n-html>Paste the key under <kbd>Einstellungen</kbd> → <kbd>Speichern</kbd>.</p>
         </div>
       </div>
 
       <!-- Step 4 -->
       <div class="install-step">
-        <h3><span class="step-num">4</span>Try it</h3>
+        <h3><span class="step-num">4</span><span data-i18n="install.s4.title">Try it</span></h3>
         <div class="install-step-body">
           <ul class="compact">
-            <li><strong>Start recording:</strong> double-tap <kbd>fn</kbd>. The pill appears at the bottom of your screen.</li>
-            <li><strong>Stop &amp; paste:</strong> double-tap <kbd>fn</kbd> again. Your transcript lands in the focused app.</li>
-            <li><strong>Cancel:</strong> <kbd>ESC</kbd> or click the <kbd>✕</kbd> on the pill. No transcription, no paste.</li>
+            <li data-i18n="install.s4.li1" data-i18n-html><strong>Start recording:</strong> double-tap <kbd>fn</kbd>. The pill appears at the bottom of your screen.</li>
+            <li data-i18n="install.s4.li2" data-i18n-html><strong>Stop &amp; paste:</strong> double-tap <kbd>fn</kbd> again. Your transcript lands in the focused app.</li>
+            <li data-i18n="install.s4.li3" data-i18n-html><strong>Cancel:</strong> <kbd>ESC</kbd> or click the <kbd>✕</kbd> on the pill. No transcription, no paste.</li>
           </ul>
-          <p style="margin-top: 16px;">Open the main window (history, dictionary, commands, settings) from the menubar icon or by clicking Flow in your Dock.</p>
+          <p style="margin-top: 16px;" data-i18n="install.s4.note">Open the main window (history, dictionary, commands, settings) from the menubar icon or by clicking Flow in your Dock.</p>
         </div>
       </div>
     </div>
@@ -1144,33 +1046,33 @@
   <section>
     <div class="container container--narrow">
       <div class="section-head">
-        <div class="eyebrow">FAQ</div>
-        <h2>Frequently asked.</h2>
+        <div class="eyebrow" data-i18n="faq.eyebrow">FAQ</div>
+        <h2 data-i18n="faq.title">Frequently asked.</h2>
       </div>
       <div class="faq">
         <details>
-          <summary>Is any audio sent to a server?</summary>
-          <p>No, never. Whisper runs on-device via MLX. Even when you use Formal or Anti-Wut cleanup, only the transcribed <em>text</em> is sent to Groq — the audio buffer never leaves your Mac.</p>
+          <summary data-i18n="faq.q1.q">Is any audio sent to a server?</summary>
+          <p data-i18n="faq.q1.a" data-i18n-html>No, never. Whisper runs on-device via MLX. Even when you use Formal or Anti-Wut cleanup, only the transcribed <em>text</em> is sent to Groq — the audio buffer never leaves your Mac.</p>
         </details>
         <details>
-          <summary>Why would I need a Groq API key?</summary>
-          <p>Only if you want Formal or Anti-Wut cleanup. Verbatim mode (the default) works completely offline without any key. Groq has a generous free tier that's more than enough for personal use.</p>
+          <summary data-i18n="faq.q2.q">Why would I need a Groq API key?</summary>
+          <p data-i18n="faq.q2.a">Only if you want Formal or Anti-Wut cleanup. Verbatim mode (the default) works completely offline without any key. Groq has a generous free tier that's more than enough for personal use.</p>
         </details>
         <details>
-          <summary>What are the system requirements?</summary>
-          <p>macOS 13 (Ventura) or newer, on Apple Silicon (M1, M2, M3, M4). Intel Macs aren't supported because MLX-Whisper needs the Metal backend that ships with Apple Silicon.</p>
+          <summary data-i18n="faq.q3.q">What are the system requirements?</summary>
+          <p data-i18n="faq.q3.a">macOS 13 (Ventura) or newer, on Apple Silicon (M1, M2, M3, M4). Intel Macs aren't supported because MLX-Whisper needs the Metal backend that ships with Apple Silicon.</p>
         </details>
         <details>
-          <summary>Why isn't Flow signed and notarized?</summary>
-          <p>Apple charges USD 99 per year for a developer account. Flow is a community project with zero revenue — we'd rather not pay that out of pocket. The Terminal installer is a clean workaround: <code style="font-family: 'JetBrains Mono', monospace; font-size: 12px;">curl</code> downloads aren't quarantined by Gatekeeper, so the install just works.</p>
+          <summary data-i18n="faq.q4.q">Why isn't Flow signed and notarized?</summary>
+          <p data-i18n="faq.q4.a" data-i18n-html>Apple charges USD 99 per year for a developer account. Flow is a community project with zero revenue — we'd rather not pay that out of pocket. The Terminal installer is a clean workaround: <code class="mono">curl</code> downloads aren't quarantined by Gatekeeper, so the install just works.</p>
         </details>
         <details>
-          <summary>How do I uninstall Flow?</summary>
-          <p>Drag <code style="font-family: 'JetBrains Mono', monospace; font-size: 12px;">/Applications/Flow.app</code> to the Trash. For a clean removal, also delete the config &amp; history at <code style="font-family: 'JetBrains Mono', monospace; font-size: 12px;">~/.worknetic-flow/</code>.</p>
+          <summary data-i18n="faq.q5.q">How do I uninstall Flow?</summary>
+          <p data-i18n="faq.q5.a" data-i18n-html>Drag <code class="mono">/Applications/Flow.app</code> to the Trash. For a clean removal, also delete the config &amp; history at <code class="mono">~/.worknetic-flow/</code>.</p>
         </details>
         <details>
-          <summary>How do I report a bug or request a feature?</summary>
-          <p>Open an <a href="https://github.com/alpeppo/flow/issues/new">issue on GitHub</a>. PRs welcome — for bigger changes, open an issue first so we can align on the approach.</p>
+          <summary data-i18n="faq.q6.q">How do I report a bug or request a feature?</summary>
+          <p data-i18n="faq.q6.a" data-i18n-html>Open an <a href="https://github.com/alpeppo/flow/issues/new">issue on GitHub</a>. PRs welcome — for bigger changes, open an issue first so we can align on the approach.</p>
         </details>
       </div>
     </div>
@@ -1191,25 +1093,340 @@
           <rect x="216" y="93.6" width="18" height="52.7"  rx="9" fill="currentColor"/>
         </svg>
       </div>
-      <span>Flow · MIT · Community-driven</span>
+      <span data-i18n="footer.tagline">Flow · MIT · Community-driven</span>
       <span class="footer-spacer"></span>
-      <a href="https://github.com/alpeppo/flow">GitHub</a>
-      <a href="https://github.com/sponsors/alpeppo">Sponsor</a>
-      <a href="https://github.com/alpeppo/flow/issues">Report issue</a>
+      <a href="https://github.com/alpeppo/flow" data-i18n="footer.github">GitHub</a>
+      <a href="https://github.com/sponsors/alpeppo" data-i18n="footer.sponsor">Sponsor</a>
+      <a href="https://github.com/alpeppo/flow/issues" data-i18n="footer.issue">Report issue</a>
     </div>
   </footer>
 
   <script>
+    // ---------- i18n dictionary ----------
+    const I18N = {
+      en: {
+        "nav.features": "Features",
+        "nav.privacy": "Privacy",
+        "nav.install": "Install",
+        "nav.github": "GitHub →",
+
+        "hero.tag": "Community-driven · MIT · v0.3.4",
+        "hero.title": "<span>Stop typing.</span><br><span>Start talking.</span>",
+        "hero.lead": "Local-first dictation for macOS. Tap <kbd>fn</kbd> twice, speak, and your words land in whatever app is focused. <strong>Whisper runs on your Mac</strong> — audio never leaves your device.",
+        "hero.cta.primary": "Install in one minute",
+        "hero.cta.secondary": "View on GitHub",
+        "hero.pill.caption": "The recording pill, live and on top of every app.",
+
+        "features.eyebrow": "What it does",
+        "features.title": "Three things, done well.",
+        "features.lead": "No bloat, no cloud detours. Flow does one job — turning speech into text inside any app — and tries to do it without surprises.",
+        "features.f1.title": "On-device transcription",
+        "features.f1.body": "MLX-Whisper Large v3 Turbo runs locally on your Apple Silicon Mac. No upload, no streaming to a server — your voice never leaves the device.",
+        "features.f2.title": "Three cleanup modes",
+        "features.f2.body": "<strong>Verbatim</strong> for the raw transcript, <strong>Formal</strong> for polished prose, <strong>Anti-Wut</strong> to de-escalate heated messages. Switch with a modifier key mid-tap.",
+        "features.f3.title": "Works in any app",
+        "features.f3.body": "Flow types the result wherever your cursor is — email, Slack, IDE, browser, terminal. No integrations, no plugins. It just pastes.",
+
+        "personas.eyebrow": "Who it's for",
+        "personas.title": "Built for people who think out loud.",
+        "personas.p1.title": "Developers in flow",
+        "personas.p1.body": "Brainstorm out loud, commit code with your fingers. Dictate comments, PR descriptions, Slack replies — without leaving your editor.",
+        "personas.p2.title": "Writers + journalists",
+        "personas.p2.body": "Interview transcripts, first drafts, voice notes. Verbatim mode captures exactly what was said; Formal cleans up scratch dictation into prose.",
+        "personas.p3.title": "Multilingual professionals",
+        "personas.p3.body": "Switch between German, English, French, Spanish, Italian, and Dutch. Whisper auto-detects, or you fix it in the settings.",
+        "personas.p4.title": "Privacy-conscious",
+        "personas.p4.body": "Local audio, MIT-licensed source you can audit line by line, no telemetry, no account, no subscription. Disable Groq cleanup and you're 100% offline.",
+
+        "compare.eyebrow": "Why Flow",
+        "compare.title": "Honest about the trade-offs.",
+        "compare.lead": "Flow isn't trying to win every category. It's optimized for one thing: dictation that respects your privacy and your wallet.",
+        "compare.col.apple": "macOS Dictation",
+        "compare.row.cost": "Cost",
+        "compare.flow.cost": "Free (MIT)",
+        "compare.apple.cost": "Free",
+        "compare.row.audio": "Audio location",
+        "compare.flow.audio": "Local (MLX-Whisper)",
+        "compare.wispr.audio": "Cloud",
+        "compare.apple.audio": "Local (on-device)",
+        "compare.row.cleanup": "Cleanup modes (LLM rewrite)",
+        "compare.flow.cleanup": "3 modes, optional",
+        "compare.wispr.cleanup": "Yes, default",
+        "compare.apple.cleanup": "None",
+        "compare.row.oss": "Open source",
+        "compare.wispr.oss": "Closed",
+        "compare.apple.oss": "Closed",
+        "compare.row.hotkey": "Customizable hotkey",
+        "compare.wispr.hotkey": "Limited",
+        "compare.apple.hotkey": "Limited",
+        "compare.row.everywhere": "Works in any app",
+        "compare.flow.everywhere": "Yes (paste)",
+        "compare.wispr.everywhere": "Yes",
+        "compare.apple.everywhere": "Yes",
+        "compare.row.langs": "Multilingual",
+        "compare.flow.langs": "6 languages, switchable",
+        "compare.wispr.langs": "Many",
+        "compare.apple.langs": "Many",
+
+        "privacy.eyebrow": "Privacy & security",
+        "privacy.title": "Privacy by default.",
+        "privacy.lead": "Flow is built so that even the developer can't see your dictations. Here's exactly what happens — and what doesn't.",
+        "privacy.p1.title": "Audio never leaves your Mac",
+        "privacy.p1.body": "MLX-Whisper runs entirely on Apple Silicon. The recorded audio buffer is held in memory, transcribed, then discarded. No upload, no streaming, no cache.",
+        "privacy.p2.title": "Cleanup is opt-in",
+        "privacy.p2.body": "Verbatim mode never contacts Groq. Formal/Anti-Wut send only the transcribed text — not the audio — and only if you've entered an API key.",
+        "privacy.p3.title": "History stays on your disk",
+        "privacy.p3.body": "Past dictations live in <code class=\"mono\">~/.worknetic-flow/history.json</code>. Plain JSON, easy to inspect, easy to delete.",
+        "privacy.p4.title": "No telemetry",
+        "privacy.p4.body": "No analytics, no crash reporting that phones home, no auto-update check. Flow knows nothing about how often you use it.",
+        "privacy.p5.title": "MIT — audit the source",
+        "privacy.p5.body": "Every line is public on <a href=\"https://github.com/alpeppo/flow\">github.com/alpeppo/flow</a>. The install script is <a href=\"https://github.com/alpeppo/flow/blob/main/docs/install.sh\">130 lines of plain bash</a> — read it before running it.",
+        "privacy.p6.title": "Community-driven",
+        "privacy.p6.body": "Flow is built by volunteers, for the community. No company, no investors, no monetization plan. Issues and pull requests welcome.",
+
+        "donate.eyebrow": "Community-driven",
+        "donate.title": "Flow is free. Always.",
+        "donate.p1": "We're not trying to make money with this. Flow exists because we wanted a private, local-first dictation tool — and once we built it, it felt wrong to lock it behind a paywall.",
+        "donate.p2": "<strong>If Flow saves you time and you'd like to give something back, sponsoring on GitHub helps cover server costs (the install page, future binaries) and lets us reinvest in features that benefit everyone.</strong> Every cent flows back into the project — never into someone's pocket.",
+        "donate.p3": "As a thank-you, supporters get <strong>new releases two weeks before they go public</strong>. Same code, same MIT license — just earlier access.",
+        "donate.cta": "Sponsor on GitHub",
+        "donate.fine": "Cancel anytime. All amounts go straight into hosting, releases, and future development.",
+
+        "install.eyebrow": "Install",
+        "install.title": "One Terminal command.",
+        "install.lead": "No installer wizard, no Apple-Developer detour. Paste, press Enter, done.",
+        "install.intro.title": "Why not just a DMG?",
+        "install.intro.body": "Apple's Gatekeeper blocks unsigned apps. Notarization costs USD 99/year for a developer account, which we'd rather not pay for an open-source project. The Terminal command sidesteps this cleanly: <code class=\"mono\">curl</code> downloads don't get the Gatekeeper quarantine flag, and the script explicitly strips it from the installed app. You can <a href=\"https://github.com/alpeppo/flow/blob/main/docs/install.sh\">read the script first</a> — 130 lines, no root, no kernel extensions.",
+        "install.copy": "Copy",
+        "install.s1.title": "Run the command",
+        "install.s1.body": "Open <strong>Terminal.app</strong> (<kbd>Cmd</kbd>+<kbd>Space</kbd>, type \"Terminal\", hit Enter). Paste this line, press <kbd>Enter</kbd>:",
+        "install.s1.note": "The script will show every step live: system check, download, mount, install, permissions hint. About 60 seconds.",
+        "install.s2.title": "Grant permissions",
+        "install.s2.body": "Flow launches automatically. macOS will ask for two permissions:",
+        "install.s2.li1": "<strong>Microphone</strong> — system dialog on first recording. <em>Allow.</em>",
+        "install.s2.li2": "<strong>Accessibility</strong> — System Settings → Privacy &amp; Security → Accessibility. Toggle <kbd>Flow</kbd> on. <em>Required so Flow can detect the global hotkey and paste into focused apps.</em>",
+        "install.s3.title": "Add your Groq key <em style=\"color: var(--fg-tertiary); font-weight: 400; font-size: 14px;\">(optional)</em>",
+        "install.s3.body1": "Without a key, you get <strong>Verbatim mode</strong> — the raw Whisper transcript. That works for most cases.",
+        "install.s3.body2": "With a free <a href=\"https://console.groq.com/keys\" style=\"color: var(--fg-primary);\">Groq API key</a>, you unlock:",
+        "install.s3.li1": "<strong>Formal</strong> (<kbd>Ctrl</kbd>+<kbd>fn</kbd>) — Llama rewrites your speech as polished prose.",
+        "install.s3.li2": "<strong>Anti-Wut</strong> (<kbd>Shift</kbd>+<kbd>fn</kbd>) — de-escalates emotionally-charged dictations before paste.",
+        "install.s3.body3": "Paste the key under <kbd>Settings</kbd> → <kbd>Save</kbd>.",
+        "install.s4.title": "Try it",
+        "install.s4.li1": "<strong>Start recording:</strong> double-tap <kbd>fn</kbd>. The pill appears at the bottom of your screen.",
+        "install.s4.li2": "<strong>Stop &amp; paste:</strong> double-tap <kbd>fn</kbd> again. Your transcript lands in the focused app.",
+        "install.s4.li3": "<strong>Cancel:</strong> <kbd>ESC</kbd> or click the <kbd>✕</kbd> on the pill. No transcription, no paste.",
+        "install.s4.note": "Open the main window (history, dictionary, commands, settings) from the menubar icon or by clicking Flow in your Dock.",
+
+        "faq.eyebrow": "FAQ",
+        "faq.title": "Frequently asked.",
+        "faq.q1.q": "Is any audio sent to a server?",
+        "faq.q1.a": "No, never. Whisper runs on-device via MLX. Even when you use Formal or Anti-Wut cleanup, only the transcribed <em>text</em> is sent to Groq — the audio buffer never leaves your Mac.",
+        "faq.q2.q": "Why would I need a Groq API key?",
+        "faq.q2.a": "Only if you want Formal or Anti-Wut cleanup. Verbatim mode (the default) works completely offline without any key. Groq has a generous free tier that's more than enough for personal use.",
+        "faq.q3.q": "What are the system requirements?",
+        "faq.q3.a": "macOS 13 (Ventura) or newer, on Apple Silicon (M1, M2, M3, M4). Intel Macs aren't supported because MLX-Whisper needs the Metal backend that ships with Apple Silicon.",
+        "faq.q4.q": "Why isn't Flow signed and notarized?",
+        "faq.q4.a": "Apple charges USD 99 per year for a developer account. Flow is a community project with zero revenue — we'd rather not pay that out of pocket. The Terminal installer is a clean workaround: <code class=\"mono\">curl</code> downloads aren't quarantined by Gatekeeper, so the install just works.",
+        "faq.q5.q": "How do I uninstall Flow?",
+        "faq.q5.a": "Drag <code class=\"mono\">/Applications/Flow.app</code> to the Trash. For a clean removal, also delete the config &amp; history at <code class=\"mono\">~/.worknetic-flow/</code>.",
+        "faq.q6.q": "How do I report a bug or request a feature?",
+        "faq.q6.a": "Open an <a href=\"https://github.com/alpeppo/flow/issues/new\">issue on GitHub</a>. PRs welcome — for bigger changes, open an issue first so we can align on the approach.",
+
+        "footer.tagline": "Flow · MIT · Community-driven",
+        "footer.github": "GitHub",
+        "footer.sponsor": "Sponsor",
+        "footer.issue": "Report issue",
+      },
+      de: {
+        "nav.features": "Features",
+        "nav.privacy": "Datenschutz",
+        "nav.install": "Installation",
+        "nav.github": "GitHub →",
+
+        "hero.tag": "Community-getrieben · MIT · v0.3.4",
+        "hero.title": "<span>Hör auf zu tippen.</span><br><span>Fang an zu sprechen.</span>",
+        "hero.lead": "Lokales Diktat für macOS. Doppel-Tap auf <kbd>fn</kbd>, sprich, und dein Text landet in der App, in der du gerade bist. <strong>Whisper läuft auf deinem Mac</strong> — Audio verlässt dein Gerät nie.",
+        "hero.cta.primary": "In einer Minute installieren",
+        "hero.cta.secondary": "Auf GitHub ansehen",
+        "hero.pill.caption": "Die Aufnahme-Pille, live über jeder App.",
+
+        "features.eyebrow": "Was es macht",
+        "features.title": "Drei Dinge, sauber umgesetzt.",
+        "features.lead": "Kein Ballast, keine Cloud-Umwege. Flow macht eine Sache — Sprache in Text in jeder App — und versucht, das ohne Überraschungen zu tun.",
+        "features.f1.title": "Transkription auf dem Gerät",
+        "features.f1.body": "MLX-Whisper Large v3 Turbo läuft lokal auf deinem Apple-Silicon-Mac. Kein Upload, kein Streaming zu einem Server — deine Stimme verlässt das Gerät nie.",
+        "features.f2.title": "Drei Cleanup-Modi",
+        "features.f2.body": "<strong>Verbatim</strong> für das rohe Transkript, <strong>Formal</strong> für polierten Fließtext, <strong>Anti-Wut</strong> zum Entschärfen hitziger Nachrichten. Modifier-Taste hält gedrückt während du diktierst.",
+        "features.f3.title": "Funktioniert in jeder App",
+        "features.f3.body": "Flow tippt das Ergebnis dorthin, wo dein Cursor steht — E-Mail, Slack, IDE, Browser, Terminal. Keine Integrationen, keine Plugins. Es fügt einfach ein.",
+
+        "personas.eyebrow": "Für wen",
+        "personas.title": "Gebaut für Leute, die laut denken.",
+        "personas.p1.title": "Entwickler im Flow",
+        "personas.p1.body": "Laut brainstormen, mit den Fingern committen. Diktiere Kommentare, PR-Beschreibungen, Slack-Antworten — ohne den Editor zu verlassen.",
+        "personas.p2.title": "Autoren + Journalisten",
+        "personas.p2.body": "Interview-Transkripte, erste Entwürfe, Sprachnotizen. Verbatim erfasst exakt was gesagt wurde; Formal macht aus Notizen polierte Prosa.",
+        "personas.p3.title": "Mehrsprachig arbeitende",
+        "personas.p3.body": "Wechsle zwischen Deutsch, Englisch, Französisch, Spanisch, Italienisch und Niederländisch. Whisper erkennt automatisch, oder du stellst es in den Einstellungen ein.",
+        "personas.p4.title": "Privacy-bewusst",
+        "personas.p4.body": "Lokale Audio-Verarbeitung, MIT-lizenzierter Source zum Selbst-Audit, keine Telemetrie, kein Account, kein Abo. Groq-Cleanup deaktivieren und du bist 100 % offline.",
+
+        "compare.eyebrow": "Warum Flow",
+        "compare.title": "Ehrlich über die Trade-offs.",
+        "compare.lead": "Flow versucht nicht, jede Kategorie zu gewinnen. Es ist optimiert für eine Sache: Diktat, das deine Privatsphäre und deinen Geldbeutel respektiert.",
+        "compare.col.apple": "macOS-Diktat",
+        "compare.row.cost": "Kosten",
+        "compare.flow.cost": "Kostenlos (MIT)",
+        "compare.apple.cost": "Kostenlos",
+        "compare.row.audio": "Audio-Verarbeitung",
+        "compare.flow.audio": "Lokal (MLX-Whisper)",
+        "compare.wispr.audio": "Cloud",
+        "compare.apple.audio": "Lokal (auf dem Gerät)",
+        "compare.row.cleanup": "Cleanup-Modi (LLM-Rewrite)",
+        "compare.flow.cleanup": "3 Modi, optional",
+        "compare.wispr.cleanup": "Ja, Default",
+        "compare.apple.cleanup": "Keine",
+        "compare.row.oss": "Open Source",
+        "compare.wispr.oss": "Closed",
+        "compare.apple.oss": "Closed",
+        "compare.row.hotkey": "Hotkey anpassbar",
+        "compare.wispr.hotkey": "Begrenzt",
+        "compare.apple.hotkey": "Begrenzt",
+        "compare.row.everywhere": "In jeder App",
+        "compare.flow.everywhere": "Ja (Paste)",
+        "compare.wispr.everywhere": "Ja",
+        "compare.apple.everywhere": "Ja",
+        "compare.row.langs": "Mehrsprachig",
+        "compare.flow.langs": "6 Sprachen, umschaltbar",
+        "compare.wispr.langs": "Viele",
+        "compare.apple.langs": "Viele",
+
+        "privacy.eyebrow": "Datenschutz & Sicherheit",
+        "privacy.title": "Privacy by default.",
+        "privacy.lead": "Flow ist so gebaut, dass selbst der Entwickler deine Diktate nicht sehen kann. Hier ist exakt, was passiert — und was nicht.",
+        "privacy.p1.title": "Audio verlässt deinen Mac nie",
+        "privacy.p1.body": "MLX-Whisper läuft komplett auf Apple Silicon. Der Audio-Buffer bleibt im RAM, wird transkribiert, dann verworfen. Kein Upload, kein Streaming, kein Cache.",
+        "privacy.p2.title": "Cleanup ist opt-in",
+        "privacy.p2.body": "Verbatim-Modus kontaktiert Groq nie. Formal/Anti-Wut senden nur den transkribierten Text — nicht das Audio — und nur wenn du einen API-Key eingetragen hast.",
+        "privacy.p3.title": "History bleibt auf deiner Platte",
+        "privacy.p3.body": "Frühere Diktate liegen in <code class=\"mono\">~/.worknetic-flow/history.json</code>. Plain JSON, leicht zu inspizieren, leicht zu löschen.",
+        "privacy.p4.title": "Keine Telemetrie",
+        "privacy.p4.body": "Keine Analytics, kein Crash-Reporting das nach Hause telefoniert, kein Auto-Update-Check. Flow weiß nichts darüber, wie oft du es nutzt.",
+        "privacy.p5.title": "MIT — Source selbst prüfen",
+        "privacy.p5.body": "Jede Zeile ist öffentlich auf <a href=\"https://github.com/alpeppo/flow\">github.com/alpeppo/flow</a>. Das Install-Script sind <a href=\"https://github.com/alpeppo/flow/blob/main/docs/install.sh\">130 Zeilen reines Bash</a> — lies es, bevor du es ausführst.",
+        "privacy.p6.title": "Community-getrieben",
+        "privacy.p6.body": "Flow wird von Freiwilligen gebaut, für die Community. Keine Firma, keine Investoren, kein Monetarisierungs-Plan. Issues und Pull-Requests willkommen.",
+
+        "donate.eyebrow": "Community-getrieben",
+        "donate.title": "Flow ist kostenlos. Für immer.",
+        "donate.p1": "Wir wollen mit diesem Projekt keinen Cent verdienen. Flow existiert, weil wir ein privates, lokales Diktat-Tool wollten — und als wir es gebaut hatten, fühlte es sich falsch an, es hinter einer Paywall zu verstecken.",
+        "donate.p2": "<strong>Wenn Flow dir Zeit spart und du etwas zurückgeben möchtest, deckt eine Spende auf GitHub die Server-Kosten (Install-Seite, künftige Binaries) und ermöglicht es uns, in Features zu reinvestieren, von denen alle profitieren.</strong> Jeder Cent fließt zurück ins Projekt — nie in jemandes Tasche.",
+        "donate.p3": "Als Dankeschön bekommen Unterstützer <strong>neue Releases zwei Wochen vor dem öffentlichen Launch</strong>. Gleicher Code, gleiche MIT-Lizenz — nur früher.",
+        "donate.cta": "Auf GitHub spenden",
+        "donate.fine": "Jederzeit kündbar. Alle Beträge gehen direkt in Hosting, Releases und zukünftige Entwicklung.",
+
+        "install.eyebrow": "Installation",
+        "install.title": "Ein Terminal-Befehl.",
+        "install.lead": "Kein Installer-Wizard, kein Apple-Developer-Umweg. Einfügen, Enter, fertig.",
+        "install.intro.title": "Warum nicht einfach ein DMG?",
+        "install.intro.body": "Apples Gatekeeper blockt unsignierte Apps. Notarization kostet USD 99/Jahr für einen Developer-Account, den wir für ein Open-Source-Projekt nicht bezahlen wollen. Der Terminal-Befehl umgeht das sauber: <code class=\"mono\">curl</code>-Downloads bekommen keinen Gatekeeper-Quarantine-Flag, und das Script entfernt ihn explizit von der installierten App. Du kannst <a href=\"https://github.com/alpeppo/flow/blob/main/docs/install.sh\">das Script vorher lesen</a> — 130 Zeilen, kein Root, keine Kernel-Extensions.",
+        "install.copy": "Kopieren",
+        "install.s1.title": "Befehl ausführen",
+        "install.s1.body": "Öffne <strong>Terminal.app</strong> (<kbd>Cmd</kbd>+<kbd>Space</kbd>, „Terminal\" tippen, Enter). Diese Zeile einfügen, <kbd>Enter</kbd> drücken:",
+        "install.s1.note": "Das Script zeigt jeden Schritt live: System-Check, Download, Mount, Install, Permission-Hinweis. Etwa 60 Sekunden.",
+        "install.s2.title": "Berechtigungen geben",
+        "install.s2.body": "Flow startet automatisch. macOS fragt nach zwei Permissions:",
+        "install.s2.li1": "<strong>Mikrofon</strong> — System-Dialog beim ersten Recording. <em>Erlauben.</em>",
+        "install.s2.li2": "<strong>Bedienungshilfen</strong> — Systemeinstellungen → Datenschutz &amp; Sicherheit → Bedienungshilfen. Toggle <kbd>Flow</kbd> einschalten. <em>Nötig, damit Flow den globalen Hotkey hört und in andere Apps einfügen kann.</em>",
+        "install.s3.title": "Groq-Key eintragen <em style=\"color: var(--fg-tertiary); font-weight: 400; font-size: 14px;\">(optional)</em>",
+        "install.s3.body1": "Ohne Key bekommst du <strong>Verbatim-Modus</strong> — das rohe Whisper-Transkript. Reicht für die meisten Fälle.",
+        "install.s3.body2": "Mit einem kostenlosen <a href=\"https://console.groq.com/keys\" style=\"color: var(--fg-primary);\">Groq-API-Key</a> bekommst du zusätzlich:",
+        "install.s3.li1": "<strong>Formal</strong> (<kbd>Ctrl</kbd>+<kbd>fn</kbd>) — Llama schreibt deine Sprache als polierte Prosa um.",
+        "install.s3.li2": "<strong>Anti-Wut</strong> (<kbd>Shift</kbd>+<kbd>fn</kbd>) — entschärft emotional aufgeladene Diktate vor dem Einfügen.",
+        "install.s3.body3": "Key einfügen unter <kbd>Einstellungen</kbd> → <kbd>Speichern</kbd>.",
+        "install.s4.title": "Ausprobieren",
+        "install.s4.li1": "<strong>Aufnahme starten:</strong> Doppel-Tap <kbd>fn</kbd>. Die Pille erscheint unten am Bildschirm.",
+        "install.s4.li2": "<strong>Stoppen &amp; einfügen:</strong> Doppel-Tap <kbd>fn</kbd> erneut. Dein Transkript landet in der aktiven App.",
+        "install.s4.li3": "<strong>Abbrechen:</strong> <kbd>ESC</kbd> oder Klick auf <kbd>✕</kbd> der Pille. Keine Transkription, kein Paste.",
+        "install.s4.note": "Das Hauptfenster (Verlauf, Wörterbuch, Befehle, Einstellungen) öffnest du über das Menubar-Icon oder per Klick auf Flow im Dock.",
+
+        "faq.eyebrow": "FAQ",
+        "faq.title": "Häufig gefragt.",
+        "faq.q1.q": "Wird irgendein Audio an einen Server geschickt?",
+        "faq.q1.a": "Nein, nie. Whisper läuft auf dem Gerät via MLX. Selbst bei Formal- oder Anti-Wut-Cleanup wird nur der transkribierte <em>Text</em> an Groq geschickt — der Audio-Buffer verlässt deinen Mac nie.",
+        "faq.q2.q": "Warum brauche ich einen Groq-API-Key?",
+        "faq.q2.a": "Nur wenn du Formal- oder Anti-Wut-Cleanup willst. Verbatim-Modus (Default) funktioniert komplett offline ohne Key. Groq hat einen großzügigen Free-Tier, der für private Nutzung mehr als ausreicht.",
+        "faq.q3.q": "Welche Systemvoraussetzungen?",
+        "faq.q3.a": "macOS 13 (Ventura) oder neuer, auf Apple Silicon (M1, M2, M3, M4). Intel-Macs werden nicht unterstützt, weil MLX-Whisper das Metal-Backend braucht, das nur Apple Silicon hat.",
+        "faq.q4.q": "Warum ist Flow nicht signiert und notarisiert?",
+        "faq.q4.a": "Apple verlangt USD 99/Jahr für einen Developer-Account. Flow ist ein Community-Projekt mit null Umsatz — das wollen wir nicht aus eigener Tasche zahlen. Der Terminal-Installer ist ein sauberer Workaround: <code class=\"mono\">curl</code>-Downloads bekommen keinen Quarantäne-Flag, deshalb klappt die Installation einfach.",
+        "faq.q5.q": "Wie deinstalliere ich Flow?",
+        "faq.q5.a": "<code class=\"mono\">/Applications/Flow.app</code> in den Papierkorb. Für eine saubere Entfernung zusätzlich Config &amp; History unter <code class=\"mono\">~/.worknetic-flow/</code> löschen.",
+        "faq.q6.q": "Wie melde ich einen Bug oder schlage ein Feature vor?",
+        "faq.q6.a": "Öffne ein <a href=\"https://github.com/alpeppo/flow/issues/new\">Issue auf GitHub</a>. PRs willkommen — für größere Änderungen erst ein Issue eröffnen, damit wir uns auf den Ansatz einigen.",
+
+        "footer.tagline": "Flow · MIT · Community-getrieben",
+        "footer.github": "GitHub",
+        "footer.sponsor": "Spenden",
+        "footer.issue": "Bug melden",
+      }
+    };
+
+    // ---------- Apply language ----------
+    // Note: we set innerHTML below, but ONLY with values from the static
+    // I18N dictionary above. No user input ever reaches this path —
+    // values are author-controlled HTML snippets (kbd, strong, code, a).
+    function applyLang(lang) {
+      const dict = I18N[lang] || I18N.en;
+      document.documentElement.lang = lang;
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        const val = dict[key];
+        if (val == null) return;
+        if (el.hasAttribute('data-i18n-html')) {
+          el.innerHTML = val;
+        } else {
+          el.textContent = val;
+        }
+      });
+      // Toggle-Buttons
+      document.querySelectorAll('.lang-toggle button').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === lang);
+      });
+      // Persist
+      try { localStorage.setItem('flow.lang', lang); } catch(_) {}
+    }
+
+    function detectLang() {
+      try {
+        const saved = localStorage.getItem('flow.lang');
+        if (saved && I18N[saved]) return saved;
+      } catch(_) {}
+      const nav = (navigator.language || 'en').toLowerCase();
+      return nav.startsWith('de') ? 'de' : 'en';
+    }
+
+    document.querySelectorAll('.lang-toggle button').forEach(btn => {
+      btn.addEventListener('click', () => applyLang(btn.dataset.lang));
+    });
+
+    applyLang(detectLang());
+
+    // ---------- Copy install command ----------
     function copyInstall(btn) {
       const text = document.getElementById('install-cmd').textContent;
+      const lang = document.documentElement.lang === 'de' ? 'de' : 'en';
+      const label = (s) => I18N[lang][s] || s;
       navigator.clipboard.writeText(text).then(() => {
-        btn.textContent = '✓ Copied';
+        btn.textContent = lang === 'de' ? '✓ Kopiert' : '✓ Copied';
         btn.classList.add('copied');
         setTimeout(() => {
-          btn.textContent = 'Copy';
+          btn.textContent = label('install.copy');
           btn.classList.remove('copied');
         }, 1800);
-      }).catch(() => { btn.textContent = 'Error'; });
+      }).catch(() => {
+        btn.textContent = lang === 'de' ? 'Fehler' : 'Error';
+      });
     }
   </script>
 </body>
