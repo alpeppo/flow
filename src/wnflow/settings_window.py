@@ -16,6 +16,8 @@ from collections.abc import Callable
 import objc  # type: ignore[import-not-found]
 from AppKit import (  # type: ignore[import-not-found]
     NSApplication,
+    NSApplicationActivationPolicyAccessory,
+    NSApplicationActivationPolicyRegular,
     NSBackingStoreBuffered,
     NSBezelBorder,
     NSButton,
@@ -224,9 +226,17 @@ class _SettingsController(NSObject):
         }
         self._on_save_dict(values)
         self._window.orderOut_(None)
+        # Zurück zu Accessory (Menubar-only ohne Dock-Icon)
+        NSApplication.sharedApplication().setActivationPolicy_(
+            NSApplicationActivationPolicyAccessory
+        )
 
     def onCancel_(self, sender):
         self._window.orderOut_(None)
+        # Zurück zu Accessory (Menubar-only ohne Dock-Icon)
+        NSApplication.sharedApplication().setActivationPolicy_(
+            NSApplicationActivationPolicyAccessory
+        )
 
     def onTest_(self, sender):
         key = str(self._key_field.stringValue())
@@ -286,5 +296,12 @@ class SettingsWindow:
                 1 if initial_values.get("login_item", False) else 0
             )
 
+        # KRITISCH: rumps.App läuft als LSUIElement (kein Dock-Icon, kein
+        # App-Switcher). Solche Apps können keinen Keyboard-Focus auf Sub-
+        # Windows weiterleiten — Textfields wären "read-only".
+        # Lösung: temporär zur Regular-App promoten beim Settings-Open.
+        # Beim Close (onSave_ / onCancel_) zurück zu Accessory.
+        app = NSApplication.sharedApplication()
+        app.setActivationPolicy_(NSApplicationActivationPolicyRegular)
         self._controller._window.makeKeyAndOrderFront_(None)
-        NSApplication.sharedApplication().activateIgnoringOtherApps_(True)
+        app.activateIgnoringOtherApps_(True)
