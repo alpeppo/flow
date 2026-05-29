@@ -26,13 +26,17 @@ from AppKit import (  # type: ignore[import-not-found]
     NSBezierPath,
     NSColor,
     NSImage,
+    NSPanel,
     NSRect,
     NSScreen,
-    NSStatusWindowLevel,
+    NSScreenSaverWindowLevel,
     NSView,
-    NSWindow,
     NSWindowCollectionBehaviorCanJoinAllSpaces,
+    NSWindowCollectionBehaviorFullScreenAuxiliary,
+    NSWindowCollectionBehaviorIgnoresCycle,
+    NSWindowCollectionBehaviorStationary,
     NSWindowStyleMaskBorderless,
+    NSWindowStyleMaskNonactivatingPanel,
 )
 from Foundation import NSObject  # type: ignore[import-not-found]
 
@@ -186,18 +190,30 @@ class PillWindow:
         y = PILL_BOTTOM_MARGIN
         window_frame = NSRect((x, y), (PILL_WIDTH, PILL_HEIGHT))
 
-        self._window = NSWindow.alloc().initWithContentRect_styleMask_backing_defer_(
+        # NSPanel statt NSWindow: NonactivatingPanel = stiehlt keinen Focus
+        # und wird vom WindowServer als Overlay behandelt — sichtbar ueber
+        # Fullscreen-Apps mit eigenem Space.
+        style = NSWindowStyleMaskBorderless | NSWindowStyleMaskNonactivatingPanel
+        self._window = NSPanel.alloc().initWithContentRect_styleMask_backing_defer_(
             window_frame,
-            NSWindowStyleMaskBorderless,
+            style,
             NSBackingStoreBuffered,
             False,
         )
-        self._window.setLevel_(NSStatusWindowLevel)
+        # NSScreenSaverWindowLevel (1000) — ueber Fullscreen-Apps.
+        self._window.setLevel_(NSScreenSaverWindowLevel)
         self._window.setBackgroundColor_(NSColor.clearColor())
         self._window.setOpaque_(False)
         self._window.setIgnoresMouseEvents_(True)
+        self._window.setFloatingPanel_(True)
+        self._window.setHidesOnDeactivate_(False)
+        # CollectionBehavior fuer Fullscreen-Spaces: CanJoinAllSpaces +
+        # FullScreenAuxiliary + Stationary + IgnoresCycle.
         self._window.setCollectionBehavior_(
             NSWindowCollectionBehaviorCanJoinAllSpaces
+            | NSWindowCollectionBehaviorFullScreenAuxiliary
+            | NSWindowCollectionBehaviorStationary
+            | NSWindowCollectionBehaviorIgnoresCycle
         )
 
         self._view = PillView.alloc().initWithFrame_(
