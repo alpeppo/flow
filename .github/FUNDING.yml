@@ -1,0 +1,4 @@
+# Activates the "Sponsor" button on the repo page.
+# Once GitHub Sponsors is set up for the @alpeppo account, contributions
+# flow back into project costs (hosting, releases, future development).
+github: [alpeppo]
