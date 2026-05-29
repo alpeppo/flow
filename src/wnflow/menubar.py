@@ -43,6 +43,7 @@ class MenubarController:
         on_quit: Callable[[], None],
         on_mode_change: Callable[[str], None],
         on_open_settings: Callable[[], None],
+        on_open_main: Callable[[], None] | None = None,
         initial_mode: str = "verbatim",
         logo_path: Path | None = None,
     ) -> None:
@@ -90,7 +91,13 @@ class MenubarController:
         for mode in MODES:
             mode_submenu.add(self._mode_items[mode])
 
-        self._app.menu = [
+        menu_items: list = []
+        if on_open_main is not None:
+            menu_items.append(
+                rumps.MenuItem("Hauptfenster…", callback=lambda _: on_open_main())
+            )
+            menu_items.append(None)
+        menu_items += [
             mode_submenu,
             None,
             rumps.MenuItem("Settings…", callback=lambda _: on_open_settings()),
@@ -98,6 +105,7 @@ class MenubarController:
             None,
             rumps.MenuItem("Quit", callback=lambda _: on_quit()),
         ]
+        self._app.menu = menu_items
 
     def _make_mode_callback(self, mode: str) -> Callable:
         def cb(_):

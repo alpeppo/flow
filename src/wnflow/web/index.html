@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flow</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-page: #e7e1d5;
+      --bg-card: #faf5ec;
+      --bg-card-inner: #efe6d5;
+      --bg-glyph: #1b1714;
+      --glyph: #e7e1d5;       /* beige wave on dark squircle */
+      --fg-primary: #1b1714;
+      --fg-secondary: #6b5f4f;
+      --fg-tertiary: #8a7d6a;
+      --hover: rgba(27, 23, 20, 0.05);
+      --selected: #ffffff;
+      --shadow-card: 0 1px 3px rgba(27, 23, 20, 0.04), 0 20px 60px rgba(27, 23, 20, 0.08);
+      --shadow-key: 0 1px 0 rgba(27, 23, 20, 0.12);
+      --radius-card: 22px;
+      --radius-pill: 12px;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0; height: 100%;
+      background: transparent;        /* Window-BG erledigt das */
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--fg-primary);
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden;
+    }
+    .app {
+      display: flex;
+      height: 100vh;
+      gap: 0;
+    }
+    .card {
+      flex: 1;
+      display: flex;
+      background: var(--bg-card);
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    /* macOS Traffic-Light Ampel oben links in der Sidebar -------------- */
+    .traffic {
+      display: flex;
+      gap: 8px;
+      padding: 12px 12px 18px 12px;
+      -webkit-app-region: no-drag;     /* Klicks gehen durch, kein Drag */
+    }
+    .traffic button {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      border: 0;
+      padding: 0;
+      cursor: default;
+      position: relative;
+      transition: filter 0.1s ease;
+    }
+    .traffic button:focus { outline: none; }
+    .traffic .tl-close    { background: #ff5f57; }
+    .traffic .tl-minimize { background: #febc2e; }
+    .traffic .tl-zoom     { background: #28c840; }
+    .traffic button::before {
+      content: ""; opacity: 0;
+      position: absolute; inset: 0;
+      background-image: var(--glyph);
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: 7px 7px;
+    }
+    .traffic:hover button::before { opacity: 0.55; }
+    .traffic .tl-close::before {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath stroke='%23000' stroke-width='1.4' stroke-linecap='round' d='M2 2l4 4M6 2l-4 4'/%3E%3C/svg%3E");
+    }
+    .traffic .tl-minimize::before {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath stroke='%23000' stroke-width='1.4' stroke-linecap='round' d='M1.5 4h5'/%3E%3C/svg%3E");
+    }
+    .traffic .tl-zoom::before {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath fill='%23000' d='M1.5 4.7v1.8h1.8zM6.5 3.3V1.5H4.7z'/%3E%3C/svg%3E");
+    }
+
+    /* Sidebar -------------------------------------------------------------- */
+    .sidebar {
+      width: 220px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 0 18px 22px 18px;
+      border-right: 1px solid rgba(27,23,20,0.06);
+      -webkit-app-region: drag;       /* Sidebar-Top draggable */
+    }
+    /* Alles unter der Ampel/Brand nicht-draggable, damit Klicks ankommen. */
+    .nav, .hotkey-card, .traffic { -webkit-app-region: no-drag; }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 28px;
+      padding-left: 4px;
+    }
+    .brand-glyph {
+      width: 30px; height: 30px;
+      border-radius: 9px;
+      background: var(--bg-glyph);
+      display: grid; place-items: center;
+      color: var(--glyph);
+    }
+    .brand-glyph svg { width: 18px; height: 18px; }
+    .brand-name {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: 17px;
+      letter-spacing: -0.3px;
+      color: var(--fg-primary);
+    }
+    .nav {
+      display: flex; flex-direction: column; gap: 2px;
+      margin-bottom: auto;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px;
+      border-radius: var(--radius-pill);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--fg-secondary);
+      cursor: default;
+      -webkit-user-select: none;
+      user-select: none;
+      transition: background 0.12s ease;
+    }
+    .nav-item:hover { background: var(--hover); }
+    .nav-item.active {
+      background: var(--selected);
+      color: var(--fg-primary);
+      box-shadow: 0 1px 2px rgba(27,23,20,0.04);
+    }
+    .nav-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      border: 1.5px solid currentColor;
+    }
+    .nav-item.active .nav-dot {
+      background: var(--fg-primary);
+      border-color: var(--fg-primary);
+    }
+
+    .hotkey-card {
+      background: var(--bg-card-inner);
+      border-radius: 14px;
+      padding: 12px 14px;
+      margin-top: 18px;
+    }
+    .hotkey-label {
+      font-size: 11px;
+      color: var(--fg-secondary);
+      margin-bottom: 8px;
+    }
+    .hotkey-keys {
+      display: flex; gap: 6px;
+    }
+    .kbd {
+      background: #fff;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      box-shadow: var(--shadow-key);
+      min-width: 22px;
+      text-align: center;
+    }
+
+    /* Main content -------------------------------------------------------- */
+    .main {
+      flex: 1;
+      min-width: 0;
+      display: flex; flex-direction: column;
+      padding: 38px 32px 28px 28px;     /* +12px oben fuer Window-Top-Air */
+      overflow: hidden;
+      -webkit-app-region: drag;          /* Top des Main-Bereichs auch draggable */
+    }
+    .main-header, .scroll { -webkit-app-region: no-drag; }
+    .main-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 22px;
+    }
+    .tab-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: -0.4px;
+      margin: 0 0 4px 0;
+    }
+    .tab-sub {
+      font-size: 13px;
+      color: var(--fg-secondary);
+    }
+    .kpis {
+      display: flex;
+      gap: 32px;
+      text-align: right;
+    }
+    .kpi-value {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: 28px;
+      letter-spacing: -0.5px;
+      line-height: 1;
+    }
+    .kpi-label {
+      font-size: 11px;
+      color: var(--fg-secondary);
+      margin-top: 4px;
+    }
+
+    .scroll {
+      overflow-y: auto;
+      flex: 1;
+      padding-right: 6px;
+      margin-right: -6px;
+    }
+    .scroll::-webkit-scrollbar { width: 6px; }
+    .scroll::-webkit-scrollbar-thumb {
+      background: rgba(27,23,20,0.15);
+      border-radius: 3px;
+    }
+
+    .history-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(27,23,20,0.04);
+    }
+    .history-item:last-child { border-bottom: none; }
+    .history-icon {
+      width: 22px; height: 22px;
+      color: var(--fg-secondary);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .history-body {
+      flex: 1; min-width: 0;
+    }
+    .history-text {
+      font-size: 14px;
+      line-height: 1.4;
+      color: var(--fg-primary);
+      word-wrap: break-word;
+    }
+    .history-meta {
+      margin-top: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--fg-tertiary);
+      letter-spacing: 0.2px;
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--fg-secondary);
+      gap: 12px;
+      text-align: center;
+    }
+    .empty-state-icon { opacity: 0.4; }
+    .empty-state-text { font-size: 14px; }
+    .empty-state-sub {
+      font-size: 12px;
+      color: var(--fg-tertiary);
+      max-width: 260px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="card">
+      <aside class="sidebar">
+        <div class="traffic" id="traffic">
+          <button class="tl-close" aria-label="Schließen" data-w="close"></button>
+          <button class="tl-minimize" aria-label="Minimieren" data-w="minimize"></button>
+          <button class="tl-zoom" aria-label="Maximieren" data-w="zoom"></button>
+        </div>
+        <div class="brand">
+          <div class="brand-glyph">
+            <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+              <rect x="6"   y="99.5"  width="18" height="41"  rx="9" fill="currentColor"/>
+              <rect x="36"  y="75.1"  width="18" height="89.7" rx="9" fill="currentColor"/>
+              <rect x="66"  y="46.8"  width="18" height="146.3" rx="9" fill="currentColor"/>
+              <rect x="96"  y="26.4"  width="18" height="187.2" rx="9" fill="currentColor"/>
+              <rect x="126" y="61.5"  width="18" height="117"   rx="9" fill="currentColor"/>
+              <rect x="156" y="34.2"  width="18" height="171.6" rx="9" fill="currentColor"/>
+              <rect x="186" y="71.2"  width="18" height="97.5"  rx="9" fill="currentColor"/>
+              <rect x="216" y="93.6"  width="18" height="52.7"  rx="9" fill="currentColor"/>
+            </svg>
+          </div>
+          <div class="brand-name">Flow</div>
+        </div>
+
+        <nav class="nav" id="nav">
+          <div class="nav-item active" data-tab="history"><span class="nav-dot"></span>Verlauf</div>
+          <div class="nav-item" data-tab="dictionary"><span class="nav-dot"></span>Wörterbuch</div>
+          <div class="nav-item" data-tab="commands"><span class="nav-dot"></span>Befehle</div>
+          <div class="nav-item" data-tab="settings"><span class="nav-dot"></span>Einstellungen</div>
+        </nav>
+
+        <div class="hotkey-card">
+          <div class="hotkey-label">Diktat starten</div>
+          <div class="hotkey-keys">
+            <span class="kbd">fn</span>
+            <span class="kbd">fn</span>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main" id="main">
+        <header class="main-header" id="main-header">
+          <div>
+            <h1 class="tab-title" id="tab-title">Verlauf</h1>
+            <div class="tab-sub" id="tab-sub">Diese Woche</div>
+          </div>
+          <div class="kpis" id="kpis">
+            <div>
+              <div class="kpi-value" id="kpi-words">—</div>
+              <div class="kpi-label">Wörter</div>
+            </div>
+            <div>
+              <div class="kpi-value" id="kpi-speed">—</div>
+              <div class="kpi-label">schneller</div>
+            </div>
+          </div>
+        </header>
+
+        <div class="scroll" id="content">
+          <div class="empty-state">
+            <svg class="empty-state-icon" width="32" height="32" viewBox="0 0 240 240">
+              <rect x="6" y="99.5" width="18" height="41" rx="9" fill="currentColor"/>
+              <rect x="36" y="75.1" width="18" height="89.7" rx="9" fill="currentColor"/>
+              <rect x="66" y="46.8" width="18" height="146.3" rx="9" fill="currentColor"/>
+              <rect x="96" y="26.4" width="18" height="187.2" rx="9" fill="currentColor"/>
+              <rect x="126" y="61.5" width="18" height="117" rx="9" fill="currentColor"/>
+              <rect x="156" y="34.2" width="18" height="171.6" rx="9" fill="currentColor"/>
+              <rect x="186" y="71.2" width="18" height="97.5" rx="9" fill="currentColor"/>
+              <rect x="216" y="93.6" width="18" height="52.7" rx="9" fill="currentColor"/>
+            </svg>
+            <div class="empty-state-text">Noch keine Diktate.</div>
+            <div class="empty-state-sub">Doppel-Tap auf fn startet die Aufnahme.</div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const WAVE_SVG = `
+      <svg width="22" height="22" viewBox="0 0 240 240">
+        <rect x="6" y="99.5" width="18" height="41" rx="9" fill="currentColor"/>
+        <rect x="36" y="75.1" width="18" height="89.7" rx="9" fill="currentColor"/>
+        <rect x="66" y="46.8" width="18" height="146.3" rx="9" fill="currentColor"/>
+        <rect x="96" y="26.4" width="18" height="187.2" rx="9" fill="currentColor"/>
+        <rect x="126" y="61.5" width="18" height="117" rx="9" fill="currentColor"/>
+        <rect x="156" y="34.2" width="18" height="171.6" rx="9" fill="currentColor"/>
+        <rect x="186" y="71.2" width="18" height="97.5" rx="9" fill="currentColor"/>
+        <rect x="216" y="93.6" width="18" height="52.7" rx="9" fill="currentColor"/>
+      </svg>`;
+
+    const TABS = {
+      history:    { title: 'Verlauf',       sub: 'Diese Woche' },
+      dictionary: { title: 'Wörterbuch',    sub: 'Eigene Begriffe und Korrekturen' },
+      commands:   { title: 'Befehle',       sub: 'Custom-Modi und Sprach-Triggers' },
+      settings:   { title: 'Einstellungen', sub: 'API-Key, Sprache und Hotkeys' },
+    };
+
+    let currentTab = 'history';
+
+    function fmtMeta(ts, words) {
+      const d = new Date(ts * 1000);
+      const now = new Date();
+      const isToday = d.toDateString() === now.toDateString();
+      const yest = new Date(now); yest.setDate(yest.getDate() - 1);
+      const isYest = d.toDateString() === yest.toDateString();
+      let time;
+      if (isToday) {
+        time = d.toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'});
+      } else if (isYest) {
+        time = 'Gestern';
+      } else {
+        time = d.toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit'});
+      }
+      return `${time}  ·  ${words} ${words === 1 ? 'Wort' : 'Wörter'}`;
+    }
+
+    // SVG-Wave per DOM, nicht via innerHTML — kein User-Input drin, aber konsistent
+    function makeWaveSvg(size) {
+      const NS = 'http://www.w3.org/2000/svg';
+      const svg = document.createElementNS(NS, 'svg');
+      svg.setAttribute('width', size); svg.setAttribute('height', size);
+      svg.setAttribute('viewBox', '0 0 240 240');
+      const bars = [
+        [6, 99.5, 41], [36, 75.1, 89.7], [66, 46.8, 146.3], [96, 26.4, 187.2],
+        [126, 61.5, 117], [156, 34.2, 171.6], [186, 71.2, 97.5], [216, 93.6, 52.7],
+      ];
+      for (const [x, y, h] of bars) {
+        const r = document.createElementNS(NS, 'rect');
+        r.setAttribute('x', x); r.setAttribute('y', y);
+        r.setAttribute('width', 18); r.setAttribute('height', h);
+        r.setAttribute('rx', 9); r.setAttribute('fill', 'currentColor');
+        svg.appendChild(r);
+      }
+      return svg;
+    }
+
+    function clear(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+    function makeEmptyState(text, sub) {
+      const wrap = document.createElement('div');
+      wrap.className = 'empty-state';
+      const svg = makeWaveSvg(36);
+      svg.classList.add('empty-state-icon');
+      wrap.appendChild(svg);
+      const t = document.createElement('div');
+      t.className = 'empty-state-text';
+      t.textContent = text;
+      wrap.appendChild(t);
+      if (sub) {
+        const s = document.createElement('div');
+        s.className = 'empty-state-sub';
+        s.textContent = sub;
+        wrap.appendChild(s);
+      }
+      return wrap;
+    }
+
+    function renderHistory(items, kpis) {
+      const c = document.getElementById('content');
+      clear(c);
+      if (!items || items.length === 0) {
+        c.appendChild(makeEmptyState('Noch keine Diktate.', 'Doppel-Tap auf fn startet die Aufnahme.'));
+      } else {
+        for (const it of items) {
+          const row = document.createElement('div');
+          row.className = 'history-item';
+
+          const iconWrap = document.createElement('div');
+          iconWrap.className = 'history-icon';
+          iconWrap.appendChild(makeWaveSvg(22));
+          row.appendChild(iconWrap);
+
+          const body = document.createElement('div');
+          body.className = 'history-body';
+          const text = document.createElement('div');
+          text.className = 'history-text';
+          text.textContent = String(it.text || '');  // textContent = XSS-sicher
+          body.appendChild(text);
+          const meta = document.createElement('div');
+          meta.className = 'history-meta';
+          meta.textContent = fmtMeta(it.ts, it.words);
+          body.appendChild(meta);
+          row.appendChild(body);
+
+          c.appendChild(row);
+        }
+      }
+      document.getElementById('kpi-words').textContent = (kpis && kpis.words_week != null)
+        ? kpis.words_week.toLocaleString('de-DE') : '—';
+      document.getElementById('kpi-speed').textContent = (kpis && kpis.speed_factor != null)
+        ? kpis.speed_factor.toLocaleString('de-DE', {maximumFractionDigits: 1}) + '×' : '—';
+    }
+
+    function renderComingSoon(label) {
+      document.getElementById('content').innerHTML = `
+        <div class="empty-state">
+          <svg width="32" height="32" viewBox="0 0 240 240" class="empty-state-icon">
+            <rect x="96" y="26.4" width="18" height="187.2" rx="9" fill="currentColor"/>
+          </svg>
+          <div class="empty-state-text">${label} folgt in einem nächsten Release.</div>
+          <div class="empty-state-sub">Hier wirst du bald deine Begriffe, Befehle und Korrekturen pflegen.</div>
+        </div>`;
+      document.getElementById('kpi-words').textContent = '—';
+      document.getElementById('kpi-speed').textContent = '—';
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+      }[c]));
+    }
+
+    function showTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.nav-item').forEach(el => {
+        el.classList.toggle('active', el.dataset.tab === tab);
+      });
+      document.getElementById('tab-title').textContent = TABS[tab].title;
+      document.getElementById('tab-sub').textContent = TABS[tab].sub;
+      if (tab === 'history') {
+        loadHistory();
+      } else if (tab === 'settings') {
+        renderComingSoon('Die Einstellungen');
+        callPython('openSettings');
+      } else {
+        renderComingSoon('Dieser Bereich');
+      }
+    }
+
+    function callPython(action, payload) {
+      try {
+        window.webkit.messageHandlers.flow.postMessage({
+          action, payload: payload || null,
+        });
+      } catch (e) {
+        console.warn('Bridge not ready:', e);
+      }
+    }
+
+    function loadHistory() {
+      callPython('loadHistory');
+    }
+
+    // Wird von Python aufgerufen
+    window.applyHistory = function(data) {
+      renderHistory(data.items || [], data.kpis || {});
+    };
+
+    document.getElementById('nav').addEventListener('click', e => {
+      const item = e.target.closest('.nav-item');
+      if (item) showTab(item.dataset.tab);
+    });
+
+    document.getElementById('traffic').addEventListener('click', e => {
+      const btn = e.target.closest('button[data-w]');
+      if (!btn) return;
+      const map = { close: 'windowClose', minimize: 'windowMinimize', zoom: 'windowZoom' };
+      const action = map[btn.dataset.w];
+      if (action) callPython(action);
+    });
+
+    // Auto-Refresh History alle 5s, solange History-Tab aktiv ist.
+    setInterval(() => { if (currentTab === 'history') loadHistory(); }, 5000);
+
+    document.addEventListener('DOMContentLoaded', loadHistory);
+    if (document.readyState !== 'loading') loadHistory();
+  </script>
+</body>
+</html>

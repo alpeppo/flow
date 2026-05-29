@@ -41,11 +41,13 @@ from Foundation import (  # type: ignore[import-not-found]
 # keyCode 53 = Escape
 KEYCODE_ESCAPE = 53
 
+from wnflow import history_store
 from wnflow.audio_ducker import AudioDucker
 from wnflow.cleanup.groq_client import GroqClient
 from wnflow.config import load, save
 from wnflow.hotkey import HotkeyListener
 from wnflow.login_item import is_login_enabled, set_login_enabled
+from wnflow.main_window import MainWindow
 from wnflow.menubar import MenubarController
 from wnflow.mic import MicCapture, compute_rms
 from wnflow.notify import notify, play_done_sound, play_error_sound, play_start_sound
@@ -141,6 +143,7 @@ class WnflowApp(NSObject):
         self._pending_pipeline: Future[PipelineResult] | None = None
         self._pending_paste: Future[bool] | None = None
         self._last_pipeline_result: PipelineResult | None = None
+        self._last_recording_duration_s: float = 0.0  # fuer History-Speed-KPI
         self._done_timer: rumps.Timer | None = None  # rev2 C1-Fix: strong-ref gegen GC
 
         # v0.3.0 S-e Fix: eigener Executor für API-Key-Test
@@ -165,8 +168,14 @@ class WnflowApp(NSObject):
             # Hier setzen, damit X-Klick → _request_cancel triggert.
             self._pill.set_cancel_callback(self._request_cancel)
 
+        # Hauptfenster (Verlauf + Tabs). Lazy: NSWindow erst beim ersten Open.
+        self._main_window = MainWindow(on_open_settings=self._open_settings)
+
         # ESC-Hotkey-Monitor (global): laeuft permanent, prueft state.
         self._esc_monitor = None
+        # Activation-Observer fuer Dock-Click-Reopen
+        self._activation_obs = None
+        self._suppress_next_activation = True  # erstes activate beim Boot ignorieren
 
         # AudioDucker (mutet Hintergrund waehrend Recording, wenn aktiviert)
         self._audio_ducker = AudioDucker(
@@ -193,7 +202,8 @@ class WnflowApp(NSObject):
             on_open_config=self._open_config,
             on_quit=self._quit,
             on_mode_change=self._on_default_mode_change,
-            on_open_settings=self._open_settings,  # NEU
+            on_open_settings=self._open_settings,
+            on_open_main=self._open_main_window,
             initial_mode=self._default_mode,
             logo_path=logo_path,
         )
@@ -243,6 +253,29 @@ class WnflowApp(NSObject):
         path = Path.home() / ".worknetic-flow" / "config.toml"
         subprocess.run(["open", str(path)], check=False)
 
+    def _open_main_window(self) -> None:
+        assert_main_thread("WnflowApp._open_main_window")
+        if self._main_window is None:
+            return
+        self._main_window.show()
+
+    def _on_app_did_become_active(self) -> None:
+        """Reopen-Handler: bei Dock-Click oeffnen wir das Hauptfenster, wenn
+        keines mehr sichtbar ist. Das erste Activate beim Boot wird ignoriert."""
+        if self._suppress_next_activation:
+            self._suppress_next_activation = False
+            return
+        try:
+            # Prufen ob irgendein Fenster sichtbar ist (Pill zaehlt nicht — Panel).
+            from AppKit import NSApplication  # type: ignore[import-not-found]
+            visible = [w for w in NSApplication.sharedApplication().windows() if w.isVisible()]
+            # Pill-NSPanel filtern: hat keinen Titel und ist FloatingPanel
+            visible = [w for w in visible if w.title() and w.title() != ""]
+            if not visible:
+                self._open_main_window()
+        except Exception:
+            log.exception("Reopen handler failed")
+
     def _quit(self) -> None:
         assert_main_thread("WnflowApp._quit")
         log.info("Quitting...")
@@ -252,6 +285,13 @@ class WnflowApp(NSObject):
             except Exception:
                 log.exception("ESC monitor remove failed")
             self._esc_monitor = None
+        if self._activation_obs is not None:
+            try:
+                from Foundation import NSNotificationCenter  # type: ignore[import-not-found]
+                NSNotificationCenter.defaultCenter().removeObserver_(self._activation_obs)
+            except Exception:
+                log.exception("Activation observer remove failed")
+            self._activation_obs = None
         self._hotkey.stop()
         self._boot_executor.shutdown(wait=False)
         self._pipeline_executor.shutdown(wait=False)
@@ -303,6 +343,17 @@ class WnflowApp(NSObject):
             log.info("ESC monitor active (cancel recording)")
         except Exception:
             log.exception("ESC monitor failed (non-fatal — X-Button still works)")
+
+        # Dock-Click-Trigger: wenn der User die App via Dock aktiviert und
+        # kein Fenster sichtbar ist, oeffnen wir das Hauptfenster.
+        try:
+            from Foundation import NSNotificationCenter  # type: ignore[import-not-found]
+            self._activation_obs = NSNotificationCenter.defaultCenter().addObserverForName_object_queue_usingBlock_(
+                "NSApplicationDidBecomeActiveNotification", None, None,
+                lambda _note: self._on_app_did_become_active(),
+            )
+        except Exception:
+            log.exception("App-Activation observer failed (non-fatal)")
 
         log.info("Submitting model warmup...")
         self._pending_boot = self._boot_executor.submit(self._run_boot_warmup)
@@ -484,6 +535,9 @@ class WnflowApp(NSObject):
         if self._pill is not None:
             self._pill.update_state(PillState.LOADING)
 
+        # Recording-Dauer fuer History/KPI merken
+        self._last_recording_duration_s = float(duration_s)
+
         # Pipeline mit current_mode
         self._pending_pipeline = self._pipeline_executor.submit(
             self._pipeline.process, audio, self._current_mode
@@ -513,6 +567,19 @@ class WnflowApp(NSObject):
             return
 
         self._last_pipeline_result = result
+        # History persistieren (best-effort, ohne Blocking)
+        try:
+            words = len(result.text.split())
+            history_store.append(
+                text=result.text,
+                words=words,
+                mode=result.mode,
+                duration_s=self._last_recording_duration_s,
+            )
+            if self._main_window is not None:
+                self._main_window.refresh_history()
+        except Exception:
+            log.exception("history_store.append failed (non-fatal)")
         self._pending_paste = self._paste_executor.submit(self._output.paste, result.text)
 
     def _handle_paste_done(self, future: Future[bool]) -> None:

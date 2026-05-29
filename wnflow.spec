@@ -23,13 +23,18 @@ a = Analysis(
         ('brand/wnflow_icon_22.png', 'brand'),
         ('brand/wnflow_icon_16.png', 'brand'),
         ('brand/wnflow_icon_64.png', 'brand'),
+        # Hauptfenster-HTML
+        ('src/wnflow/web/index.html', 'wnflow/web'),
     ],
     hiddenimports=[
         # Sichergehen, dass alle wnflow-Submodule da sind
         'wnflow.app',
+        'wnflow.audio_ducker',
         'wnflow.config',
+        'wnflow.history_store',
         'wnflow.hotkey',
         'wnflow.login_item',
+        'wnflow.main_window',
         'wnflow.menubar',
         'wnflow.mic',
         'wnflow.notify',
@@ -42,6 +47,8 @@ a = Analysis(
         'wnflow.threading_guard',
         'wnflow.stt',
         'wnflow.cleanup',
+        # PyObjC-Frameworks
+        'WebKit',
     ],
     hookspath=['dev/hooks'],
     hooksconfig={},
