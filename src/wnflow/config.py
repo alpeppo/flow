@@ -36,7 +36,7 @@ double_tap_window_ms = 350
 
 [recording]
 min_duration_s = 0.5
-max_duration_s = 60.0
+max_duration_s = 0.0  # 0 = unbegrenzt (kein Auto-Stop)
 sample_rate = 16000
 
 [cleanup]
@@ -68,6 +68,9 @@ enabled = true
 mode_indicator = true
 waveform_bar_count = 5
 fade_out_ms = 200
+
+[audio]
+mute_background = false  # pausiert Medien + mutet Volume waehrend Recording
 """
 
 
@@ -87,7 +90,7 @@ class HotkeyConfig:
 @dataclass
 class RecordingConfig:
     min_duration_s: float = 0.5
-    max_duration_s: float = 60.0
+    max_duration_s: float = 0.0  # 0 = unbegrenzt
     sample_rate: int = 16000
 
 
@@ -133,6 +136,11 @@ class PillConfig:
 
 
 @dataclass
+class AudioConfig:
+    mute_background: bool = False
+
+
+@dataclass
 class Config:
     stt: STTConfig = field(default_factory=STTConfig)
     hotkey: HotkeyConfig = field(default_factory=HotkeyConfig)
@@ -143,6 +151,7 @@ class Config:
     logging: LoggingConfig = field(default_factory=LoggingConfig)
     modes: ModesConfig = field(default_factory=ModesConfig)  # NEU
     pill: PillConfig = field(default_factory=PillConfig)  # NEU
+    audio: AudioConfig = field(default_factory=AudioConfig)  # NEU v0.3.0
 
 
 def load(config_path: Path | None = None) -> Config:
@@ -178,6 +187,8 @@ def load(config_path: Path | None = None) -> Config:
         cfg.modes = ModesConfig(**data["modes"])
     if "pill" in data:
         cfg.pill = PillConfig(**data["pill"])
+    if "audio" in data:
+        cfg.audio = AudioConfig(**data["audio"])
 
     # API-Key-Priorität: ENV > TOML > leer
     env_key = os.environ.get("GROQ_API_KEY", "")
@@ -246,5 +257,8 @@ def _serialize(config: Config) -> dict:
             "mode_indicator": config.pill.mode_indicator,
             "waveform_bar_count": config.pill.waveform_bar_count,
             "fade_out_ms": config.pill.fade_out_ms,
+        },
+        "audio": {
+            "mute_background": config.audio.mute_background,
         },
     }

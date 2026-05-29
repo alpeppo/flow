@@ -85,6 +85,7 @@ class _SettingsController(NSObject):
         self._lang_popup = None
         self._hw_view = None
         self._login_item_btn = None
+        self._mute_bg_btn = None
         self._test_label = None
         self._test_button = None
         return self
@@ -92,13 +93,13 @@ class _SettingsController(NSObject):
     def buildWindow_(self, initial_values):
         style = NSWindowStyleMaskTitled | NSWindowStyleMaskClosable
         self._window = NSWindow.alloc().initWithContentRect_styleMask_backing_defer_(
-            NSMakeRect(0, 0, 480, 380), style, NSBackingStoreBuffered, False
+            NSMakeRect(0, 0, 480, 420), style, NSBackingStoreBuffered, False
         )
-        self._window.setTitle_("worknetic-flow Settings")
+        self._window.setTitle_("Flow Settings")
         self._window.center()
         content = self._window.contentView()
 
-        y = 340
+        y = 380
 
         # API-Key Label
         api_label = self._make_label("Groq API-Key", 20, y, 200)
@@ -186,6 +187,20 @@ class _SettingsController(NSObject):
             1 if initial_values.get("login_item", False) else 0
         )
         content.addSubview_(self._login_item_btn)
+        y -= 28
+
+        # Mute-Background Toggle (v0.3.0)
+        self._mute_bg_btn = NSButton.alloc().initWithFrame_(
+            NSMakeRect(20, y, 420, 24)
+        )
+        self._mute_bg_btn.setButtonType_(3)  # NSButtonTypeSwitch
+        self._mute_bg_btn.setTitle_(
+            "Hintergrund stummschalten waehrend Aufnahme"
+        )
+        self._mute_bg_btn.setState_(
+            1 if initial_values.get("mute_background", False) else 0
+        )
+        content.addSubview_(self._mute_bg_btn)
 
         # Save + Cancel Buttons (rechts unten)
         save_btn = NSButton.alloc().initWithFrame_(NSMakeRect(380, 12, 80, 32))
@@ -223,6 +238,7 @@ class _SettingsController(NSObject):
             ),
             "hotwords": parse_hotwords(str(self._hw_view.string())),
             "login_item": bool(self._login_item_btn.state()),
+            "mute_background": bool(self._mute_bg_btn.state()),
         }
         self._on_save_dict(values)
         self._window.orderOut_(None)
@@ -294,6 +310,9 @@ class SettingsWindow:
             self._controller._hw_view.setString_(hw_text)
             self._controller._login_item_btn.setState_(
                 1 if initial_values.get("login_item", False) else 0
+            )
+            self._controller._mute_bg_btn.setState_(
+                1 if initial_values.get("mute_background", False) else 0
             )
 
         # KRITISCH: rumps.App läuft als LSUIElement (kein Dock-Icon, kein

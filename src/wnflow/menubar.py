@@ -55,8 +55,20 @@ class MenubarController:
         if logo_path is not None and logo_path.exists():
             try:
                 self._app.icon = str(logo_path)
-                self._app.template = True  # macOS dark/light adaptiv
+                # template=False: farbiges Icon (Squircle beige + Soundwave),
+                # kein automatisches dark/light-Invertieren.
+                self._app.template = False
                 self._has_logo = True
+                # Retina-Fix: rumps laedt das PNG als NSImage mit Pixel-Groesse.
+                # Bei 22px-PNG auf Retina-Display interpretiert macOS das als
+                # 22pt-Bild und skaliert auf 44px hoch → unscharf. Wir setzen
+                # _icon_nsimage explizit auf 22pt Display-Groesse (NSImage hat
+                # die volle Aufloesung, wird sauber runterskaliert).
+                from AppKit import NSMakeSize  # type: ignore[import-not-found]
+
+                if self._app._icon_nsimage is not None:
+                    self._app._icon_nsimage.setSize_(NSMakeSize(22, 22))
+                    self._app._icon_nsimage.setTemplate_(False)
             except Exception:
                 self._app.title = STATE_ICONS[State.BOOT]
         else:

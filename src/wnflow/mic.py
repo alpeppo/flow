@@ -88,7 +88,8 @@ class MicCapture:
             blocksize=int(self._sample_rate * 0.1),
         )
         self._stream.start()
-        if self._auto_stop_queue is not None:
+        # Auto-Stop-Timer nur wenn max_duration_s > 0 (0 = unbegrenzt).
+        if self._auto_stop_queue is not None and self._max_duration_s > 0:
             self._auto_stop_timer = threading.Timer(
                 self._max_duration_s, self._on_auto_stop
             )
@@ -120,4 +121,29 @@ class MicCapture:
         return duration_s < self._min_duration_s
 
     def is_too_long(self, duration_s: float) -> bool:
+        if self._max_duration_s <= 0:
+            return False
         return duration_s >= self._max_duration_s
+
+    def get_start_time(self) -> float | None:
+        return self._start_time
+
+    def discard(self) -> None:
+        """Bricht laufende Aufnahme ab und verwirft das Audio.
+
+        Wie stop(), aber ohne Rueckgabe — fuer den Cancel-Pfad
+        (ESC-Taste oder X-Klick).
+        """
+        if self._auto_stop_timer is not None:
+            self._auto_stop_timer.cancel()
+            self._auto_stop_timer = None
+        if self._stream is not None:
+            try:
+                self._stream.stop()
+                self._stream.close()
+            except Exception:
+                log.exception("MicCapture.discard: stream close failed")
+            self._stream = None
+        self._start_time = None
+        with self._lock:
+            self._chunks.clear()

@@ -57,7 +57,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name='worknetic-flow',
+    name='Flow',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -76,22 +76,22 @@ coll = COLLECT(
     strip=False,
     upx=False,
     upx_exclude=[],
-    name='worknetic-flow',
+    name='Flow',
 )
 
 app = BUNDLE(
     coll,
-    name='worknetic-flow.app',
+    name='Flow.app',
     icon='brand/wnflow.icns',
     bundle_identifier='de.worknetic.flow',
     version='0.3.0',
     info_plist={
-        'CFBundleName': 'worknetic-flow',
-        'CFBundleDisplayName': 'worknetic-flow',
+        'CFBundleName': 'Flow',
+        'CFBundleDisplayName': 'Flow.',
         'CFBundleShortVersionString': '0.3.0',
         'CFBundleVersion': '0.3.0',
         'CFBundleIdentifier': 'de.worknetic.flow',
-        'CFBundleExecutable': 'worknetic-flow',
+        'CFBundleExecutable': 'Flow',
         'CFBundleIconFile': 'wnflow.icns',
         'NSHighResolutionCapable': True,
         # Normale App: Dock-Icon + Menubar-Icon. Tim will sie wie eine

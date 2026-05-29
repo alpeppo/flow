@@ -43,12 +43,16 @@ render() {
     esac
 }
 
-# Menubar-Icons (Template-faehig, currentColor)
+# Menubar-Icons mit Retina-Versionen (@2x). macOS sucht automatisch
+# nach <name>@2x.<ext> wenn das Hauptbild geladen wird und der Screen Retina ist.
 echo ""
 echo "Menubar-PNGs..."
 render "$MENUBAR_SVG" 16 "$BRAND_DIR/wnflow_icon_16.png"
+render "$MENUBAR_SVG" 32 "$BRAND_DIR/wnflow_icon_16@2x.png"
 render "$MENUBAR_SVG" 22 "$BRAND_DIR/wnflow_icon_22.png"
+render "$MENUBAR_SVG" 44 "$BRAND_DIR/wnflow_icon_22@2x.png"
 render "$MENUBAR_SVG" 64 "$BRAND_DIR/wnflow_icon_64.png"
+render "$MENUBAR_SVG" 128 "$BRAND_DIR/wnflow_icon_64@2x.png"
 
 # App-Icon-PNGs (mit Squircle-Hintergrund)
 echo ""

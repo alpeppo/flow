@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-  <!-- WhisperXFlow Soundwave-Marke: 8 abgerundete Balken, WAVE [42,92,150,192,120,176,100,54] -->
-  <rect x="2.90"  y="9.95"  width="1.40" height="4.10"  rx="0.70" fill="currentColor"/>
-  <rect x="5.30"  y="7.52"  width="1.40" height="8.97"  rx="0.70" fill="currentColor"/>
-  <rect x="7.70"  y="4.69"  width="1.40" height="14.62" rx="0.70" fill="currentColor"/>
-  <rect x="10.10" y="2.64"  width="1.40" height="18.72" rx="0.70" fill="currentColor"/>
-  <rect x="12.50" y="6.15"  width="1.40" height="11.70" rx="0.70" fill="currentColor"/>
-  <rect x="14.90" y="3.42"  width="1.40" height="17.16" rx="0.70" fill="currentColor"/>
-  <rect x="17.30" y="7.13"  width="1.40" height="9.75"  rx="0.70" fill="currentColor"/>
-  <rect x="19.70" y="9.37"  width="1.40" height="5.26"  rx="0.70" fill="currentColor"/>
+  <!-- Flow Menubar-Icon: Squircle mit Soundwave-Marke (Vollfarbe, kein Template) -->
+  <rect x="0" y="0" width="24" height="24" rx="5.40" ry="5.40" fill="#EFE6D5"/>
+  <!-- WAVE-Rhythmus [42,92,150,192,120,176,100,54], 8 abgerundete Balken -->
+  <rect x="4.93"  y="10.73" width="1.12" height="2.54"  rx="0.56" fill="#1B1714"/>
+  <rect x="6.79"  y="9.22"  width="1.12" height="5.56"  rx="0.56" fill="#1B1714"/>
+  <rect x="8.65"  y="7.47"  width="1.12" height="9.07"  rx="0.56" fill="#1B1714"/>
+  <rect x="10.51" y="6.20"  width="1.12" height="11.61" rx="0.56" fill="#1B1714"/>
+  <rect x="12.37" y="8.37"  width="1.12" height="7.25"  rx="0.56" fill="#1B1714"/>
+  <rect x="14.23" y="6.68"  width="1.12" height="10.64" rx="0.56" fill="#1B1714"/>
+  <rect x="16.09" y="8.98"  width="1.12" height="6.04"  rx="0.56" fill="#1B1714"/>
+  <rect x="17.95" y="10.37" width="1.12" height="3.26"  rx="0.56" fill="#1B1714"/>
 </svg>

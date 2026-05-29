@@ -15,6 +15,8 @@ Threading bleibt: alle State-Transitions + UI auf Main, Workers in Queues.
 import logging
 import queue
 import subprocess
+import threading
+import time
 from collections import deque
 from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass
@@ -24,6 +26,10 @@ from typing import Union
 import objc  # type: ignore[import-not-found]
 import pyperclip
 import rumps
+from AppKit import (  # type: ignore[import-not-found]
+    NSEvent,
+    NSEventMaskKeyDown,
+)
 from dotenv import load_dotenv
 from Foundation import (  # type: ignore[import-not-found]
     NSObject,
@@ -32,6 +38,10 @@ from Foundation import (  # type: ignore[import-not-found]
     NSTimer,
 )
 
+# keyCode 53 = Escape
+KEYCODE_ESCAPE = 53
+
+from wnflow.audio_ducker import AudioDucker
 from wnflow.cleanup.groq_client import GroqClient
 from wnflow.config import load, save
 from wnflow.hotkey import HotkeyListener
@@ -150,10 +160,34 @@ class WnflowApp(NSObject):
 
         # Pill (lazy NSWindow-Creation)
         self._pill = PillWindow() if self._config.pill.enabled else None
+        if self._pill is not None:
+            # Cancel-Callback wird beim ersten show() in den View injiziert.
+            # Hier setzen, damit X-Klick → _request_cancel triggert.
+            self._pill.set_cancel_callback(self._request_cancel)
+
+        # ESC-Hotkey-Monitor (global): laeuft permanent, prueft state.
+        self._esc_monitor = None
+
+        # AudioDucker (mutet Hintergrund waehrend Recording, wenn aktiviert)
+        self._audio_ducker = AudioDucker(
+            enabled=self._config.audio.mute_background
+        )
 
         # rumps App
         self._rumps_app = rumps.App("wnflow", quit_button=None)
-        logo_path = Path(__file__).parent.parent.parent / "brand" / "wnflow_icon_22.png"
+        # Retina-Fix: wir laden das 64px-PNG (3x Retina) und lassen MenubarController
+        # das NSImage auf 22pt Display-Groesse skalieren. Das gibt scharfe Darstellung
+        # auf Retina-Macs (Down-Sampling 64→44 = scharf, Up-Sampling 22→44 = blurry).
+        # Im Bundle liegt 'brand/' direkt unter sys._MEIPASS (Resources/),
+        # im Dev-Run unter repo/brand/. Beide Pfade probieren.
+        import sys as _sys
+        _candidates = []
+        meipass = getattr(_sys, "_MEIPASS", None)
+        if meipass:
+            _candidates.append(Path(meipass) / "brand" / "wnflow_icon_64.png")
+        _candidates.append(Path(__file__).parent.parent.parent / "brand" / "wnflow_icon_64.png")
+        logo_path = next((p for p in _candidates if p.exists()), None)
+        log.info("Menubar logo: %s", logo_path)
         self._menubar = MenubarController(
             self._rumps_app,
             on_open_config=self._open_config,
@@ -161,7 +195,7 @@ class WnflowApp(NSObject):
             on_mode_change=self._on_default_mode_change,
             on_open_settings=self._open_settings,  # NEU
             initial_mode=self._default_mode,
-            logo_path=logo_path if logo_path.exists() else None,
+            logo_path=logo_path,
         )
 
         self._state.subscribe(self._on_state_change)
@@ -186,6 +220,18 @@ class WnflowApp(NSObject):
         assert_main_thread("WnflowApp._on_state_change")
         log.info("State: %s → %s", old.name, new.name)
         self._menubar.update_state(new)
+        # AudioDucker NIE synchron — der Main-Thread darf nicht 2s auf
+        # osascript warten. Im Hintergrund-Thread feuern und vergessen.
+        if new == State.RECORDING and old != State.RECORDING:
+            threading.Thread(
+                target=self._audio_ducker.mute, daemon=True,
+                name="audio-mute",
+            ).start()
+        elif old == State.RECORDING and new != State.RECORDING:
+            threading.Thread(
+                target=self._audio_ducker.restore, daemon=True,
+                name="audio-restore",
+            ).start()
 
     def _on_default_mode_change(self, mode: str) -> None:
         assert_main_thread("WnflowApp._on_default_mode_change")
@@ -200,6 +246,12 @@ class WnflowApp(NSObject):
     def _quit(self) -> None:
         assert_main_thread("WnflowApp._quit")
         log.info("Quitting...")
+        if self._esc_monitor is not None:
+            try:
+                NSEvent.removeMonitor_(self._esc_monitor)
+            except Exception:
+                log.exception("ESC monitor remove failed")
+            self._esc_monitor = None
         self._hotkey.stop()
         self._boot_executor.shutdown(wait=False)
         self._pipeline_executor.shutdown(wait=False)
@@ -243,6 +295,15 @@ class WnflowApp(NSObject):
             self._state.try_transition(State.DEGRADED)
             return
 
+        # ESC-Hotkey global: cancelt nur waehrend RECORDING; sonst no-op.
+        try:
+            self._esc_monitor = NSEvent.addGlobalMonitorForEventsMatchingMask_handler_(
+                NSEventMaskKeyDown, self._on_global_keydown
+            )
+            log.info("ESC monitor active (cancel recording)")
+        except Exception:
+            log.exception("ESC monitor failed (non-fatal — X-Button still works)")
+
         log.info("Submitting model warmup...")
         self._pending_boot = self._boot_executor.submit(self._run_boot_warmup)
 
@@ -267,6 +328,14 @@ class WnflowApp(NSObject):
         self._state.try_transition(State.IDLE)
         log.info("worknetic-flow ready. Hotkey: %s, Default Mode: %s",
                  self._config.hotkey.key, self._default_mode)
+
+        # Pre-Warm Pill: NSPanel erstellen ohne sie zu zeigen, damit der
+        # erste fn-Tap nicht auf lazy-init wartet (~200ms).
+        if self._pill is not None:
+            try:
+                self._pill.update_mode(self._default_mode)  # triggert _ensure_window
+            except Exception:
+                log.exception("Pill pre-warm failed (non-fatal)")
 
         # v0.3.0 C-j Fix: First-Run-Auto-Open Settings-Window wenn kein API-Key
         if not self._config.cleanup.api_key:
@@ -316,13 +385,13 @@ class WnflowApp(NSObject):
             self._pending_paste = None
             self._handle_paste_done(future)
 
-        # 6. Pill-Level-Update (während Recording)
-        if (
-            self._pill is not None
-            and self._state.current == State.RECORDING
-            and self._level_ring
-        ):
-            self._pill.update_level(self._level_ring[-1])
+        # 6. Pill-Level + Timer-Update (waehrend Recording)
+        if self._pill is not None and self._state.current == State.RECORDING:
+            if self._level_ring:
+                self._pill.update_level(self._level_ring[-1])
+            start = self._mic.get_start_time()
+            if start is not None:
+                self._pill.set_elapsed(time.perf_counter() - start)
 
     def _handle_hotkey_event(self, event: tuple) -> None:
         assert_main_thread("WnflowApp._handle_hotkey_event")
@@ -359,6 +428,31 @@ class WnflowApp(NSObject):
             return
         notify("worknetic-flow", "Max-Aufnahmelänge erreicht — wird verarbeitet")
         self._consume_recording()
+
+    def _on_global_keydown(self, event) -> None:
+        """Globaler KeyDown-Monitor. Reagiert nur auf ESC waehrend RECORDING."""
+        try:
+            if event.keyCode() != KEYCODE_ESCAPE:
+                return
+            if self._state.current != State.RECORDING:
+                return
+            # Cancel-Pfad muss auf Main laufen — wir sind in einem
+            # NSEvent-Callback, also bereits auf Main.
+            self._request_cancel()
+        except Exception:
+            log.exception("ESC monitor handler raised")
+
+    def _request_cancel(self) -> None:
+        """Bricht die laufende Aufnahme ab. Audio wird verworfen, kein STT."""
+        assert_main_thread("WnflowApp._request_cancel")
+        if self._state.current != State.RECORDING:
+            log.debug("Cancel ignored, state=%s", self._state.current.name)
+            return
+        log.info("Cancel requested — discarding recording")
+        self._mic.discard()
+        if self._pill is not None:
+            self._pill.hide()
+        self._state.try_transition(State.IDLE)
 
     def _consume_recording(self) -> None:
         assert_main_thread("WnflowApp._consume_recording")
@@ -470,19 +564,24 @@ class WnflowApp(NSObject):
             "language": self._config.stt.language,
             "hotwords": self._config.cleanup.hotwords,
             "login_item": is_login_enabled(),
+            "mute_background": self._config.audio.mute_background,
         }
         self._settings_window.show(initial_values)
 
     def _on_settings_save(self, values: dict) -> None:
         """Callback wenn Settings-Window 'Speichern' geklickt wird."""
         assert_main_thread("WnflowApp._on_settings_save")
-        log.info("Settings save: language=%s, hotwords=%d, login_item=%s",
-                 values["language"], len(values["hotwords"]), values["login_item"])
+        log.info(
+            "Settings save: language=%s, hotwords=%d, login_item=%s, mute_bg=%s",
+            values["language"], len(values["hotwords"]),
+            values["login_item"], values.get("mute_background", False),
+        )
 
         # Config-State updaten
         self._config.cleanup.api_key = values["api_key"]
         self._config.stt.language = values["language"]
         self._config.cleanup.hotwords = values["hotwords"]
+        self._config.audio.mute_background = values.get("mute_background", False)
 
         # TOML schreiben
         try:
@@ -512,7 +611,10 @@ class WnflowApp(NSObject):
             log.warning("Login-Item-Setzen fehlgeschlagen: %s", err)
             # nicht als Notification — User hat ggf. Dev-Mode
 
-        notify("worknetic-flow", "Einstellungen gespeichert")
+        # AudioDucker Live-Reload (Toggle wirkt ab naechstem Recording)
+        self._audio_ducker.set_enabled(self._config.audio.mute_background)
+
+        notify("Flow", "Einstellungen gespeichert")
 
     def _on_test_api_key(self, key: str, result_callback) -> None:
         """Worker-Thread: testet API-Key via minimalem Groq-Request.
