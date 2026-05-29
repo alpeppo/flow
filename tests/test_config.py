@@ -15,7 +15,7 @@ def test_load_returns_defaults_when_file_missing(tmp_path: Path) -> None:
     assert cfg.stt.language == "de"
     assert cfg.hotkey.key == "fn"
     assert cfg.hotkey.double_tap_window_ms == 350
-    assert cfg.recording.max_duration_s == 60.0
+    assert cfg.recording.max_duration_s == 0.0  # 0 = unbegrenzt (v0.3.0)
 
 
 def test_load_creates_default_file_if_missing(tmp_path: Path) -> None:

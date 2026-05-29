@@ -1,9 +1,9 @@
-"""Tests für settings_window.py — pure validation logic.
+"""Tests fuer settings_data.py — pure validation logic.
 
-NSWindow + AppKit-Form-Elements werden manuell validiert (kein Unit-Test).
+Die UI lebt seit v0.3.2 im Hauptfenster (HTML/JS via main_window).
 """
 
-from wnflow.settings_window import (
+from wnflow.settings_data import (
     LANGUAGE_OPTIONS,
     language_code_to_index,
     language_index_to_code,

@@ -334,7 +334,7 @@
       font-size: 12px;
       line-height: 1.5;
     }
-    .select { appearance: none; -webkit-appearance: none; cursor: pointer;
+    .select { -webkit-appearance: none; appearance: none; cursor: pointer;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%236b5f4f' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 12px center;
@@ -686,6 +686,99 @@
         },
       }));
 
+      // Section-Heading: Modus
+      wrap.appendChild(makeSectionHeading('Modus & Hotkey'));
+
+      // Default-Modus
+      wrap.appendChild(makeField({
+        label: 'Standard-Modus',
+        hint: 'Wird genutzt, wenn beim Diktieren keine Modifier-Taste (Cmd/Ctrl/Shift) gedrueckt wird.',
+        build: () => {
+          const sel = document.createElement('select');
+          sel.className = 'select';
+          sel.id = 'st-default-mode';
+          const opts = (v.mode_options || [['verbatim','Verbatim']]);
+          for (const [code, label] of opts) {
+            const o = document.createElement('option');
+            o.value = code; o.textContent = label;
+            if (code === v.default_mode) o.selected = true;
+            sel.appendChild(o);
+          }
+          return sel;
+        },
+      }));
+
+      // Hotkey-Taste
+      wrap.appendChild(makeField({
+        label: 'Aktivierungs-Taste',
+        hint: 'Welche Taste startet die Aufnahme. fn ist Default — manche Tastaturen haben kein fn, dann right_cmd/right_shift.',
+        build: () => {
+          const sel = document.createElement('select');
+          sel.className = 'select';
+          sel.id = 'st-hotkey-key';
+          const opts = (v.hotkey_key_options || [['fn','fn (Funktions-Taste)']]);
+          for (const [code, label] of opts) {
+            const o = document.createElement('option');
+            o.value = code; o.textContent = label;
+            if (code === v.hotkey_key) o.selected = true;
+            sel.appendChild(o);
+          }
+          return sel;
+        },
+      }));
+
+      // Hotkey-Activation-Mode
+      wrap.appendChild(makeField({
+        label: 'Aktivierungs-Verhalten',
+        hint: 'PTT = halten waehrend du sprichst. Toggle = doppel-tap startet, doppel-tap stoppt. Both = beide gleichzeitig.',
+        build: () => {
+          const sel = document.createElement('select');
+          sel.className = 'select';
+          sel.id = 'st-hotkey-mode';
+          for (const [code, label] of [
+            ['both','Both (halten oder doppel-tap)'],
+            ['ptt','PTT (push-to-talk, halten)'],
+            ['toggle','Toggle (doppel-tap zum An/Aus)'],
+          ]) {
+            const o = document.createElement('option');
+            o.value = code; o.textContent = label;
+            if (code === v.hotkey_mode) o.selected = true;
+            sel.appendChild(o);
+          }
+          return sel;
+        },
+      }));
+
+      // Double-Tap-Window Slider
+      wrap.appendChild(makeField({
+        label: 'Doppel-Tap-Fenster',
+        hint: 'Wie schnell die zwei Taps aufeinanderfolgen muessen. Kuerzer = schneller Toggle, aber mehr Fehl-Trigger.',
+        build: () => {
+          const row = document.createElement('div');
+          row.className = 'field-row';
+          const slider = document.createElement('input');
+          slider.type = 'range';
+          slider.min = '150'; slider.max = '600'; slider.step = '10';
+          slider.value = String(v.double_tap_window_ms || 350);
+          slider.id = 'st-double-tap';
+          slider.style.flex = '1';
+          const lbl = document.createElement('div');
+          lbl.style.minWidth = '60px';
+          lbl.style.fontFamily = "'JetBrains Mono', monospace";
+          lbl.style.fontSize = '12px';
+          lbl.style.color = 'var(--fg-secondary)';
+          lbl.style.textAlign = 'right';
+          lbl.textContent = slider.value + ' ms';
+          slider.addEventListener('input', () => { lbl.textContent = slider.value + ' ms'; });
+          row.appendChild(slider);
+          row.appendChild(lbl);
+          return row;
+        },
+      }));
+
+      // Section-Heading: System
+      wrap.appendChild(makeSectionHeading('System'));
+
       // Hotwords
       wrap.appendChild(makeField({
         label: 'Hotwords',
@@ -734,6 +827,21 @@
       wrap.appendChild(bar);
 
       c.appendChild(wrap);
+    }
+
+    function makeSectionHeading(text) {
+      const h = document.createElement('div');
+      h.textContent = text;
+      h.style.fontFamily = "'Outfit', sans-serif";
+      h.style.fontSize = '13px';
+      h.style.fontWeight = '600';
+      h.style.color = 'var(--fg-secondary)';
+      h.style.letterSpacing = '0.3px';
+      h.style.textTransform = 'uppercase';
+      h.style.marginTop = '8px';
+      h.style.paddingTop = '14px';
+      h.style.borderTop = '1px solid rgba(27,23,20,0.06)';
+      return h;
     }
 
     function makeField({ label, hint, build }) {
@@ -796,8 +904,13 @@
       const hotwords = hotwordsText.split('\n').map(s => s.trim()).filter(s => s.length > 0);
       const login_item = document.getElementById('st-login-item').dataset.on === '1';
       const mute_background = document.getElementById('st-mute-bg').dataset.on === '1';
+      const default_mode = document.getElementById('st-default-mode').value;
+      const hotkey_key = document.getElementById('st-hotkey-key').value;
+      const hotkey_mode = document.getElementById('st-hotkey-mode').value;
+      const double_tap_window_ms = parseInt(document.getElementById('st-double-tap').value, 10) || 350;
       callPython('saveSettings', {
         api_key: apiKey, language, hotwords, login_item, mute_background,
+        default_mode, hotkey_key, hotkey_mode, double_tap_window_ms,
       });
     }
 

@@ -174,9 +174,10 @@ class WnflowApp(NSObject):
 
         # ESC-Hotkey-Monitor (global): laeuft permanent, prueft state.
         self._esc_monitor = None
-        # Activation-Observer fuer Dock-Click-Reopen
+        # Activation-Observer fuer Dock-Click-Reopen.
+        # Wir wollen das Hauptfenster bei JEDER Aktivierung oeffnen, wenn
+        # kein anderes Fenster sichtbar ist — auch beim allerersten Launch.
         self._activation_obs = None
-        self._suppress_next_activation = True  # erstes activate beim Boot ignorieren
 
         # AudioDucker (mutet Hintergrund waehrend Recording, wenn aktiviert)
         self._audio_ducker = AudioDucker(
@@ -261,16 +262,19 @@ class WnflowApp(NSObject):
         self._main_window.show()
 
     def _on_app_did_become_active(self) -> None:
-        """Reopen-Handler: bei Dock-Click oeffnen wir das Hauptfenster, wenn
-        keines mehr sichtbar ist. Das erste Activate beim Boot wird ignoriert."""
-        if self._suppress_next_activation:
-            self._suppress_next_activation = False
+        """Reopen-Handler: bei Dock-Click, Finder-Doppelklick oder
+        Cmd-Tab-Aktivierung oeffnen wir das Hauptfenster, sofern aktuell
+        kein anderes sichtbar ist. Der Boot-Done-Handler triggert den
+        Initial-Open einmal direkt nach Model-Warmup — der hier kuemmert
+        sich um spaetere Re-Activations."""
+        # Boot kann noch laufen — dann gar nichts oeffnen, das macht
+        # _handle_boot_done explizit.
+        if self._state.current.name == "BOOT":
             return
         try:
-            # Prufen ob irgendein Fenster sichtbar ist (Pill zaehlt nicht — Panel).
             from AppKit import NSApplication  # type: ignore[import-not-found]
             visible = [w for w in NSApplication.sharedApplication().windows() if w.isVisible()]
-            # Pill-NSPanel filtern: hat keinen Titel und ist FloatingPanel
+            # Pill-NSPanel filtern: hat keinen Titel
             visible = [w for w in visible if w.title() and w.title() != ""]
             if not visible:
                 self._open_main_window()
@@ -326,6 +330,14 @@ class WnflowApp(NSObject):
                 "Berechtigungen fehlen. Systemeinstellungen → Datenschutz → Bedienungshilfen + Eingabeüberwachung",
             )
             self._state.try_transition(State.DEGRADED)
+            # Trotz DEGRADED: Hauptfenster anzeigen, damit der User die App
+            # sieht (sonst wirkt sie tot) und ueber Settings-Tab nachvollziehen
+            # kann was fehlt.
+            if self._main_window is not None:
+                try:
+                    self._main_window.show()
+                except Exception:
+                    log.exception("MainWindow degraded-open failed")
             return
 
         try:
@@ -334,6 +346,11 @@ class WnflowApp(NSObject):
             log.exception("Hotkey listener failed")
             notify("worknetic-flow", f"Hotkey-Listener failed: {exc}")
             self._state.try_transition(State.DEGRADED)
+            if self._main_window is not None:
+                try:
+                    self._main_window.show()
+                except Exception:
+                    log.exception("MainWindow degraded-open failed")
             return
 
         # ESC-Hotkey global: cancelt nur waehrend RECORDING; sonst no-op.
@@ -389,10 +406,16 @@ class WnflowApp(NSObject):
             except Exception:
                 log.exception("Pill pre-warm failed (non-fatal)")
 
-        # v0.3.0 C-j Fix: First-Run-Auto-Open Settings-Window wenn kein API-Key
-        if not self._config.cleanup.api_key:
-            log.info("First run detected (no API key) — opening settings window")
-            self._open_settings()
+        # Hauptfenster immer beim Launch oeffnen. Bei First-Run (kein API-Key)
+        # direkt auf den Settings-Tab springen, sonst auf den Verlauf-Tab.
+        if self._main_window is not None:
+            try:
+                self._main_window.show()
+                if not self._config.cleanup.api_key:
+                    log.info("First run detected (no API key) — jumping to Settings tab")
+                    self._main_window.activate_tab("settings")
+            except Exception:
+                log.exception("MainWindow boot-open failed (non-fatal)")
 
     # Event-Pump (NSTimer in CommonModes — B2-Fix)
 
@@ -637,6 +660,13 @@ class WnflowApp(NSObject):
     def _collect_settings_values(self) -> dict:
         """Liefert das initial-values-Dict fuer das Settings-Form im HTML."""
         from wnflow.settings_data import LANGUAGE_OPTIONS
+        from wnflow.menubar import MODE_LABELS, MODES
+        mode_options = [[m, MODE_LABELS.get(m, m)] for m in MODES]
+        hotkey_key_options = [
+            ["fn", "fn (Funktions-Taste)"],
+            ["right_cmd", "Rechte Cmd-Taste"],
+            ["right_shift", "Rechte Shift-Taste"],
+        ]
         return {
             "api_key": self._config.cleanup.api_key or "",
             "language": self._config.stt.language,
@@ -644,15 +674,25 @@ class WnflowApp(NSObject):
             "login_item": is_login_enabled(),
             "mute_background": self._config.audio.mute_background,
             "language_options": list(LANGUAGE_OPTIONS),
+            # Modi + Hotkey
+            "default_mode": self._config.modes.default,
+            "mode_options": mode_options,
+            "hotkey_key": self._config.hotkey.key,
+            "hotkey_mode": self._config.hotkey.mode,
+            "hotkey_key_options": hotkey_key_options,
+            "double_tap_window_ms": int(self._config.hotkey.double_tap_window_ms),
         }
 
     def _on_settings_save(self, values: dict) -> None:
-        """Callback wenn Settings-Window 'Speichern' geklickt wird."""
+        """Callback wenn der Settings-Tab 'Speichern' triggert."""
         assert_main_thread("WnflowApp._on_settings_save")
         log.info(
-            "Settings save: language=%s, hotwords=%d, login_item=%s, mute_bg=%s",
-            values["language"], len(values["hotwords"]),
-            values["login_item"], values.get("mute_background", False),
+            "Settings save: language=%s, hotwords=%d, login_item=%s, mute_bg=%s, "
+            "default_mode=%s, hotkey=%s/%s, dtw=%d",
+            values.get("language"), len(values.get("hotwords") or []),
+            values.get("login_item"), values.get("mute_background", False),
+            values.get("default_mode"), values.get("hotkey_key"),
+            values.get("hotkey_mode"), values.get("double_tap_window_ms", 0),
         )
 
         # Config-State updaten
@@ -660,6 +700,27 @@ class WnflowApp(NSObject):
         self._config.stt.language = values["language"]
         self._config.cleanup.hotwords = values["hotwords"]
         self._config.audio.mute_background = values.get("mute_background", False)
+
+        # Modi + Hotkey
+        new_default_mode = values.get("default_mode")
+        if new_default_mode:
+            self._config.modes.default = new_default_mode
+
+        old_hotkey = (
+            self._config.hotkey.key,
+            self._config.hotkey.mode,
+            self._config.hotkey.double_tap_window_ms,
+        )
+        new_hotkey_key = values.get("hotkey_key") or self._config.hotkey.key
+        new_hotkey_mode = values.get("hotkey_mode") or self._config.hotkey.mode
+        new_dtw = int(values.get("double_tap_window_ms") or self._config.hotkey.double_tap_window_ms)
+        # Validierung: nur erlaubte Werte uebernehmen
+        from wnflow.hotkey import MODIFIER_FLAGS
+        if new_hotkey_key in MODIFIER_FLAGS:
+            self._config.hotkey.key = new_hotkey_key
+        if new_hotkey_mode in ("ptt", "toggle", "both"):
+            self._config.hotkey.mode = new_hotkey_mode
+        self._config.hotkey.double_tap_window_ms = max(150, min(600, new_dtw))
 
         # TOML schreiben
         try:
@@ -687,10 +748,34 @@ class WnflowApp(NSObject):
         err = set_login_enabled(values["login_item"])
         if err is not None:
             log.warning("Login-Item-Setzen fehlgeschlagen: %s", err)
-            # nicht als Notification — User hat ggf. Dev-Mode
 
         # AudioDucker Live-Reload (Toggle wirkt ab naechstem Recording)
         self._audio_ducker.set_enabled(self._config.audio.mute_background)
+
+        # Default-Mode in Menubar widerspiegeln
+        if new_default_mode:
+            self._default_mode = new_default_mode
+            try:
+                self._menubar.set_mode_checkmark(new_default_mode)
+            except Exception:
+                log.exception("Menubar mode-checkmark sync failed")
+
+        # Hotkey-Listener neu binden, wenn sich was geaendert hat
+        new_hotkey = (
+            self._config.hotkey.key,
+            self._config.hotkey.mode,
+            self._config.hotkey.double_tap_window_ms,
+        )
+        if old_hotkey != new_hotkey:
+            try:
+                self._hotkey.stop()
+                self._hotkey = HotkeyListener(self._config.hotkey, self._event_queue)
+                self._hotkey.start()
+                log.info("HotkeyListener re-bound: key=%s, mode=%s, dtw=%d",
+                         *new_hotkey)
+            except Exception:
+                log.exception("Hotkey re-bind failed — please restart Flow")
+                notify("Flow", "Hotkey-Aenderung wirkt nach Neustart")
 
         notify("Flow", "Einstellungen gespeichert")
 
