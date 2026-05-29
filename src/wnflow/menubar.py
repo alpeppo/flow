@@ -42,6 +42,7 @@ class MenubarController:
         on_open_config: Callable[[], None],
         on_quit: Callable[[], None],
         on_mode_change: Callable[[str], None],
+        on_open_settings: Callable[[], None],
         initial_mode: str = "verbatim",
         logo_path: Path | None = None,
     ) -> None:
@@ -80,6 +81,7 @@ class MenubarController:
         self._app.menu = [
             mode_submenu,
             None,
+            rumps.MenuItem("Settings…", callback=lambda _: on_open_settings()),
             rumps.MenuItem("Open Config", callback=lambda _: on_open_config()),
             None,
             rumps.MenuItem("Quit", callback=lambda _: on_quit()),

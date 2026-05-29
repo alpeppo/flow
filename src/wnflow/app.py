@@ -33,8 +33,9 @@ from Foundation import (  # type: ignore[import-not-found]
 )
 
 from wnflow.cleanup.groq_client import GroqClient
-from wnflow.config import load
+from wnflow.config import load, save
 from wnflow.hotkey import HotkeyListener
+from wnflow.login_item import is_login_enabled, set_login_enabled
 from wnflow.menubar import MenubarController
 from wnflow.mic import MicCapture, compute_rms
 from wnflow.notify import notify, play_done_sound, play_error_sound, play_start_sound
@@ -42,6 +43,7 @@ from wnflow.output import OutputInjector
 from wnflow.permissions import ensure_permissions
 from wnflow.pill import PillState, PillWindow
 from wnflow.pipeline import Pipeline, PipelineResult
+from wnflow.settings_window import SettingsWindow
 from wnflow.state import State, StateMachine
 from wnflow.stt.engine import STTEngine
 from wnflow.threading_guard import assert_main_thread
@@ -131,6 +133,19 @@ class WnflowApp(NSObject):
         self._last_pipeline_result: PipelineResult | None = None
         self._done_timer: rumps.Timer | None = None  # rev2 C1-Fix: strong-ref gegen GC
 
+        # v0.3.0 S-e Fix: eigener Executor für API-Key-Test
+        # (kein Reuse von paste_executor — sonst race-condition zwischen
+        # Test-Click und Paste-Operation)
+        self._test_executor = ThreadPoolExecutor(
+            max_workers=1, thread_name_prefix="api-test"
+        )
+
+        # v0.3.0: Settings-Window (lazy)
+        self._settings_window = SettingsWindow(
+            on_save=self._on_settings_save,
+            on_test_api_key=self._on_test_api_key,
+        )
+
         self._hotkey = HotkeyListener(self._config.hotkey, self._event_queue)
 
         # Pill (lazy NSWindow-Creation)
@@ -144,6 +159,7 @@ class WnflowApp(NSObject):
             on_open_config=self._open_config,
             on_quit=self._quit,
             on_mode_change=self._on_default_mode_change,
+            on_open_settings=self._open_settings,  # NEU
             initial_mode=self._default_mode,
             logo_path=logo_path if logo_path.exists() else None,
         )
@@ -188,6 +204,7 @@ class WnflowApp(NSObject):
         self._boot_executor.shutdown(wait=False)
         self._pipeline_executor.shutdown(wait=False)
         self._paste_executor.shutdown(wait=False)
+        self._test_executor.shutdown(wait=False)  # v0.3.0
         rumps.quit_application()
 
     # Boot
@@ -196,6 +213,15 @@ class WnflowApp(NSObject):
         """rumps.Timer-Callback. Startet Boot-Worker."""
         assert_main_thread("WnflowApp.kickOffBoot_")
         _timer.stop()  # rumps.Timer has stop(), not invalidate() (NSTimer-API)
+
+        # v0.3.0 Migration-Check: warne wenn alte v0.2.0 launchd-plist da ist
+        legacy_plist = Path.home() / "Library/LaunchAgents/de.worknetic.flow.plist"
+        if legacy_plist.exists():
+            notify(
+                "worknetic-flow",
+                "v0.2.0 launchd-Agent gefunden. Bitte 'launchctl unload && rm' "
+                "und neu starten — sonst laufen 2 Instanzen parallel.",
+            )
 
         if not self._config.cleanup.api_key:
             notify("worknetic-flow", "GROQ_API_KEY fehlt — Cleanup deaktiviert")
@@ -241,6 +267,11 @@ class WnflowApp(NSObject):
         self._state.try_transition(State.IDLE)
         log.info("worknetic-flow ready. Hotkey: %s, Default Mode: %s",
                  self._config.hotkey.key, self._default_mode)
+
+        # v0.3.0 C-j Fix: First-Run-Auto-Open Settings-Window wenn kein API-Key
+        if not self._config.cleanup.api_key:
+            log.info("First run detected (no API key) — opening settings window")
+            self._open_settings()
 
     # Event-Pump (NSTimer in CommonModes — B2-Fix)
 
@@ -431,6 +462,96 @@ class WnflowApp(NSObject):
         self._done_timer = None  # rev2 C1-Fix: ref freigeben
         if self._pill is not None:
             self._pill.hide()
+
+    def _open_settings(self) -> None:
+        assert_main_thread("WnflowApp._open_settings")
+        initial_values = {
+            "api_key": self._config.cleanup.api_key,
+            "language": self._config.stt.language,
+            "hotwords": self._config.cleanup.hotwords,
+            "login_item": is_login_enabled(),
+        }
+        self._settings_window.show(initial_values)
+
+    def _on_settings_save(self, values: dict) -> None:
+        """Callback wenn Settings-Window 'Speichern' geklickt wird."""
+        assert_main_thread("WnflowApp._on_settings_save")
+        log.info("Settings save: language=%s, hotwords=%d, login_item=%s",
+                 values["language"], len(values["hotwords"]), values["login_item"])
+
+        # Config-State updaten
+        self._config.cleanup.api_key = values["api_key"]
+        self._config.stt.language = values["language"]
+        self._config.cleanup.hotwords = values["hotwords"]
+
+        # TOML schreiben
+        try:
+            save(self._config)
+        except Exception as exc:
+            log.exception("Config save failed")
+            notify("worknetic-flow", f"Settings-Speichern fehlgeschlagen: {exc}")
+            return
+
+        # Cleanup wieder aktivieren falls jetzt API-Key da
+        if self._config.cleanup.api_key:
+            self._config.cleanup.enabled = True
+
+        # Groq-Client mit neuem Key neu instanziieren
+        self._groq = GroqClient(
+            api_key=self._config.cleanup.api_key,
+            model=self._config.cleanup.model,
+            timeout_s=self._config.cleanup.timeout_s,
+            retry=self._config.cleanup.retry,
+        )
+        # Pipeline mit neuem Groq-Client neu binden (S-d Fix: Setter)
+        self._pipeline.set_groq_client(self._groq)
+
+        # Login-Item synchronisieren
+        err = set_login_enabled(values["login_item"])
+        if err is not None:
+            log.warning("Login-Item-Setzen fehlgeschlagen: %s", err)
+            # nicht als Notification — User hat ggf. Dev-Mode
+
+        notify("worknetic-flow", "Einstellungen gespeichert")
+
+    def _on_test_api_key(self, key: str, result_callback) -> None:
+        """Worker-Thread: testet API-Key via minimalem Groq-Request.
+
+        S-h Fix: Direkt httpx.post mit max_tokens=5, nicht GroqClient.clean
+        (sonst voller 70B-Roundtrip mit ~1-3s Latenz statt <500ms).
+        S-e Fix: Nutzt eigenen _test_executor, nicht paste_executor.
+        """
+        def worker():
+            try:
+                import httpx
+                response = httpx.post(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    headers={"Authorization": f"Bearer {key}"},
+                    json={
+                        "model": self._config.cleanup.model,
+                        "messages": [
+                            {"role": "system", "content": "Antworte mit OK."},
+                            {"role": "user", "content": "Test"},
+                        ],
+                        "max_tokens": 5,
+                        "temperature": 0.0,
+                    },
+                    timeout=5.0,
+                )
+                if response.status_code == 200:
+                    result_callback(True, "Valide")
+                elif response.status_code == 401:
+                    result_callback(False, "Key ungültig")
+                else:
+                    result_callback(False, f"HTTP {response.status_code}")
+            except httpx.TimeoutException:
+                result_callback(False, "Timeout")
+            except httpx.RequestError as exc:
+                result_callback(False, f"Verbindungsfehler: {str(exc)[:60]}")
+            except Exception as exc:
+                result_callback(False, f"Fehler: {str(exc)[:80]}")
+
+        self._test_executor.submit(worker)
 
     def run(self) -> None:
         # Boot-Timer als Instance-Var (rev2 defensive: GC-safe)
