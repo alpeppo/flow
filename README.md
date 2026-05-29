@@ -16,18 +16,25 @@ No cloud uploads of audio. No subscription. MIT-licensed.
 
 ---
 
-## Install (5 minutes)
+## Install (2 minutes)
+
+Flow isn't notarized with Apple yet (that requires a paid 99 USD/year developer account, which I'd rather not pay for an open-source side project). So macOS will refuse to launch the `.app` directly. **The DMG ships with a one-click installer that handles this for you.**
 
 1. **Download the latest DMG** from the [Releases page](https://github.com/alpeppo/flow/releases/latest).
-2. **Open the DMG**, drag **Flow.app** into your **Applications** folder.
-3. **Launch Flow.app**. macOS will ask for two permissions on first run:
+2. **Open the DMG**. You'll see three items: `Flow.app`, `Install Flow.command`, and an `Applications` shortcut.
+3. **Double-click `Install Flow.command`**. A Terminal window opens, copies Flow to `/Applications`, removes the Gatekeeper quarantine flag, and prints next steps. Press Enter to close.
+4. **Grant two permissions** when Flow launches:
    - **Microphone** (system dialog) → allow.
-   - **Accessibility** → System Settings → Privacy & Security → Accessibility → toggle **Flow** on. This is what lets Flow listen for the `fn` hotkey globally and paste text into any focused app.
-4. **Drop in your Groq API key** (optional, but recommended):
-   - In Flow's main window → **Einstellungen** tab → paste the key → **Speichern**.
+   - **Accessibility** → System Settings → Privacy & Security → Accessibility → toggle **Flow** on. This lets Flow listen for the `fn` hotkey globally and paste text into any focused app.
+5. **(Optional) Drop in your Groq API key**:
+   - In Flow → **Einstellungen** tab → paste the key → **Speichern**.
    - Without a key, you only get raw Whisper output (verbatim mode). With a key, formal/anti-wut cleanup gets enabled.
 
 That's it. **Double-tap `fn`** anywhere and start dictating.
+
+### Why the installer script?
+
+Apple's Gatekeeper blocks any app that isn't signed with a paid Apple Developer ID. The standard "drag to Applications" install would result in a "Flow is damaged and can't be opened" or "Apple could not verify Flow is free of malware" dialog. The installer simply runs `xattr -cr /Applications/Flow.app`, which clears the quarantine flag macOS sets on downloaded files. That's it — no magic, no privileges escalated, no kernel extensions. You can [inspect the script before running it](https://github.com/alpeppo/flow/blob/main/scripts/Install%20Flow.command); it's 80 lines of plain bash.
 
 ---
 
@@ -77,15 +84,17 @@ Open System Settings → Privacy & Security → **Accessibility** → make sure 
 **Some keyboards don't have an fn key.**
 Switch to right-Cmd or right-Shift in **Einstellungen → Aktivierungs-Taste**.
 
-**App says "Flow is damaged and can't be opened" on first launch.**
-The DMG isn't notarized yet. Open Terminal and run:
+**App says "Flow is damaged and can't be opened" or "Apple could not verify it is free of malware".**
+You probably launched `Flow.app` directly from the DMG instead of running `Install Flow.command` first. Just run the installer — it clears the Gatekeeper quarantine flag automatically. If you've already copied the app manually, open Terminal and run:
+
 ```bash
 xattr -cr /Applications/Flow.app
 ```
-This clears macOS's Gatekeeper quarantine flag. Notarization is on the roadmap.
+
+Notarization with Apple is not planned — it requires a 99 USD/year developer account that I'm not paying for an open-source side project.
 
 **"GROQ_API_KEY fehlt" notification.**
-You haven't entered a Groq key. Either grab one at https://console.groq.com/keys (free tier is plenty for personal use) or just stay in Verbatim mode — it works without any key.
+You haven't entered a Groq key. Either grab one at [console.groq.com/keys](https://console.groq.com/keys) (the free tier is plenty for personal use) or just stay in Verbatim mode — it works without any key.
 
 **Pill doesn't show up.**
 Click the menubar icon → "Hauptfenster…" → check the **Verlauf** tab. If you see "Noch keine Diktate" but you just dictated, Whisper probably picked up silence — check your microphone input level.
