@@ -238,16 +238,39 @@ App ist registriert, aber Notifications werden ohne Identity nicht zugestellt.
 **Datum:** 2026-05-29
 **Mode:** Dev-Mode (uv run, kein Bundle nötig — POC 0+1 haben Bundle validiert)
 
-### Resultat (Tim testet)
+### Resultat
 
-- [ ] Window erscheint mittig (480x360)
-- [ ] NSSecureTextField zeigt Bullets statt Klartext
-- [ ] NSPopUpButton-Dropdown öffnet sich mit 6 Sprachen
-- [ ] NSTextView multiline-editierbar
-- [ ] Save-Button-Klick → Terminal-Output mit Werten
-- [ ] Cmd+Q / Close-Button beendet sauber
+- [x] Window erscheint mittig (480x360)
+- [x] NSSecureTextField zeigt Bullets statt Klartext
+- [x] NSPopUpButton-Dropdown öffnet sich mit 6 Sprachen
+- [x] NSTextView multiline-editierbar (nach Fix)
+- [x] Save-Button-Klick → Terminal-Output mit Werten
+- [x] Cmd+Q / Close-Button beendet sauber
+
+### Wichtige Fixes während POC 2
+
+**Fix 1: NSTextView Editing-Settings**
+Ohne explizites `setEditable_(True)`, `setSelectable_(True)`, `setRichText_(False)`,
+`setAllowsUndo_(True)` nahm die TextView keine Tastatureingaben an.
+
+**Fix 2: Activation Policy (KRITISCH für Dev-Mode)**
+Ohne `app.setActivationPolicy_(NSApplicationActivationPolicyRegular)`:
+- Kein Dock-Icon
+- App läuft als Background-Process
+- Window kann nicht Key-Window werden → Tastatureingabe blockiert
+
+Dieser Fix gilt nur für Dev-Mode (uv run). In der produktiven `.app`:
+LSUIElement=True in Info.plist macht Menubar-only ohne Dock-Icon, aber
+Windows funktionieren trotzdem (siehe v0.2.0 Pill-Window).
+
+### Implications für Settings-Window-Implementierung in Phase 2
+
+- `setEditable_(True)` + Verwandte ist Pflicht für alle NSTextView-Instanzen
+- Activation-Policy ist im Bundle vom Info.plist verwaltet — kein Code-Fix nötig
+- Settings-Window in produktiver App ist Sub-Window der laufenden rumps.App,
+  daher Activation kommt vom Parent
 
 ### Entscheidung
 
-- [ ] PASS — Settings-Window-Stack validiert, PROCEED zu Phase 1
+- [x] PASS — Settings-Window-Stack validiert, PROCEED zu Phase 1
 - [ ] FAIL — Settings-Window-Approach überdenken

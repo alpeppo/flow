@@ -15,6 +15,7 @@ Quit: Cmd+Q oder Window-Close-Button.
 import objc  # type: ignore[import-not-found]
 from AppKit import (  # type: ignore[import-not-found]
     NSApplication,
+    NSApplicationActivationPolicyRegular,
     NSBackingStoreBuffered,
     NSBezelBorder,
     NSButton,
@@ -90,9 +91,15 @@ class POC2Controller(NSObject):
 
         scroll = NSScrollView.alloc().initWithFrame_(NSMakeRect(20, 80, 440, 80))
         scroll.setBorderType_(NSBezelBorder)
+        scroll.setHasVerticalScroller_(True)
         self._hw_view = NSTextView.alloc().initWithFrame_(
             NSMakeRect(0, 0, 440, 80)
         )
+        # Tastatureingabe + Editing aktivieren (Pflicht für interaktive TextView)
+        self._hw_view.setEditable_(True)
+        self._hw_view.setSelectable_(True)
+        self._hw_view.setRichText_(False)
+        self._hw_view.setAllowsUndo_(True)
         self._hw_view.setFont_(NSFont.userFixedPitchFontOfSize_(12))
         self._hw_view.setString_("Worknetic\nRidersystem\n")
         scroll.setDocumentView_(self._hw_view)
@@ -127,7 +134,10 @@ class POC2Controller(NSObject):
 
 
 def main():
-    NSApplication.sharedApplication()
+    app = NSApplication.sharedApplication()
+    # CRITICAL: Activation Policy Regular damit App ein Dock-Icon bekommt
+    # UND Tastatureingabe entgegennimmt (sonst Background-Process)
+    app.setActivationPolicy_(NSApplicationActivationPolicyRegular)
     controller = POC2Controller.alloc().init()
     controller.setup()
     AppHelper.runEventLoop()
