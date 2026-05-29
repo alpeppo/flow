@@ -230,3 +230,24 @@ App ist registriert, aber Notifications werden ohne Identity nicht zugestellt.
 
 - [x] PASS — PROCEED zu POC 2 (rumps-Core-Funktionalität in Bundle bestätigt)
 - [ ] FAIL — rumps + PyInstaller incompatible
+
+---
+
+## v0.3.0 POC 2: NSWindow + Form-Elemente
+
+**Datum:** 2026-05-29
+**Mode:** Dev-Mode (uv run, kein Bundle nötig — POC 0+1 haben Bundle validiert)
+
+### Resultat (Tim testet)
+
+- [ ] Window erscheint mittig (480x360)
+- [ ] NSSecureTextField zeigt Bullets statt Klartext
+- [ ] NSPopUpButton-Dropdown öffnet sich mit 6 Sprachen
+- [ ] NSTextView multiline-editierbar
+- [ ] Save-Button-Klick → Terminal-Output mit Werten
+- [ ] Cmd+Q / Close-Button beendet sauber
+
+### Entscheidung
+
+- [ ] PASS — Settings-Window-Stack validiert, PROCEED zu Phase 1
+- [ ] FAIL — Settings-Window-Approach überdenken
