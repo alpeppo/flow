@@ -103,11 +103,18 @@ class _BridgeHandler(NSObject):
 class MainWindow:
     """Wrapper um NSWindow + WKWebView mit Lazy-Creation."""
 
-    def __init__(self, on_open_settings=None) -> None:
+    def __init__(
+        self,
+        on_load_settings=None,
+        on_save_settings=None,
+        on_test_api_key=None,
+    ) -> None:
         self._window: NSWindow | None = None
         self._webview: WKWebView | None = None
         self._bridge: _BridgeHandler | None = None
-        self._on_open_settings = on_open_settings
+        self._on_load_settings = on_load_settings
+        self._on_save_settings = on_save_settings
+        self._on_test_api_key = on_test_api_key
         self._loaded = False
 
     # ---------- Public API --------------------------------------------------
@@ -147,12 +154,25 @@ class MainWindow:
         log.debug("Bridge: %s", action)
         if action == "loadHistory":
             self._send_history()
-        elif action == "openSettings":
-            if self._on_open_settings is not None:
+        elif action == "loadSettings":
+            self._send_settings()
+        elif action == "saveSettings":
+            payload = self._body_to_dict(body).get("payload") or {}
+            if self._on_save_settings is not None:
                 try:
-                    self._on_open_settings()
+                    self._on_save_settings(payload)
+                    self.notify_settings_saved()
                 except Exception:
-                    log.exception("openSettings callback raised")
+                    log.exception("saveSettings callback raised")
+        elif action == "testApiKey":
+            payload = self._body_to_dict(body).get("payload") or {}
+            key = str(payload.get("key", ""))
+            if self._on_test_api_key is not None:
+                try:
+                    self._on_test_api_key(key, self._deliver_test_result)
+                except Exception:
+                    log.exception("testApiKey callback raised")
+                    self._deliver_test_result(False, "Interner Fehler")
         elif action == "windowClose":
             self.hide()
         elif action == "windowMinimize":
@@ -170,15 +190,66 @@ class MainWindow:
         else:
             log.warning("Unknown bridge action: %s", action)
 
+    @staticmethod
+    def _body_to_dict(body) -> dict:
+        """WKScriptMessage.body kommt als NSDictionary; dict() schickt's."""
+        try:
+            return dict(body) if body is not None else {}
+        except Exception:
+            return {}
+
     def _send_history(self) -> None:
         if self._webview is None:
             return
         data = history_store.payload(limit=80)
         js_payload = json.dumps(data, ensure_ascii=False)
-        # window.applyHistory(...) ruft die JS-Funktion
         self._webview.evaluateJavaScript_completionHandler_(
             f"window.applyHistory({js_payload})", None
         )
+
+    def _send_settings(self) -> None:
+        if self._webview is None or self._on_load_settings is None:
+            return
+        try:
+            values = self._on_load_settings()
+        except Exception:
+            log.exception("loadSettings provider raised")
+            values = {}
+        js_payload = json.dumps(values, ensure_ascii=False)
+        self._webview.evaluateJavaScript_completionHandler_(
+            f"window.applySettings({js_payload})", None
+        )
+
+    def _deliver_test_result(self, ok: bool, message: str) -> None:
+        """Wird vom Test-Worker aufgerufen (anderer Thread). Wir hoppen
+        zurueck auf Main fuer den JS-Call."""
+        def _push():
+            if self._webview is None:
+                return
+            payload = json.dumps({"ok": bool(ok), "message": str(message or "")},
+                                  ensure_ascii=False)
+            js = f"window.applyApiKeyTestResult({json.dumps(bool(ok))}, {json.dumps(str(message or ''))})"
+            self._webview.evaluateJavaScript_completionHandler_(js, None)
+        NSOperationQueue.mainQueue().addOperationWithBlock_(_push)
+
+    def notify_settings_saved(self) -> None:
+        if self._webview is None:
+            return
+        self._webview.evaluateJavaScript_completionHandler_(
+            "window.applySettingsSaved && window.applySettingsSaved()", None
+        )
+
+    def activate_tab(self, tab: str) -> None:
+        """Wechselt den Tab im offenen Fenster (vor allem fuer Menubar
+        'Settings…' → tab=settings)."""
+        if self._webview is None:
+            return
+        try:
+            self._webview.evaluateJavaScript_completionHandler_(
+                f"window.activateTab && window.activateTab({json.dumps(tab)})", None
+            )
+        except Exception:
+            log.exception("activate_tab failed")
 
     # ---------- Setup -------------------------------------------------------
 

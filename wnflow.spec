@@ -42,7 +42,7 @@ a = Analysis(
         'wnflow.permissions',
         'wnflow.pill',
         'wnflow.pipeline',
-        'wnflow.settings_window',
+        'wnflow.settings_data',
         'wnflow.state',
         'wnflow.threading_guard',
         'wnflow.stt',

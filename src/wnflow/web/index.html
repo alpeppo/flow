@@ -282,6 +282,131 @@
       color: var(--fg-tertiary);
       max-width: 260px;
     }
+
+    /* Settings-Form ------------------------------------------------------ */
+    .settings {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      max-width: 520px;
+    }
+    .field-group { display: flex; flex-direction: column; gap: 6px; }
+    .field-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--fg-secondary);
+      letter-spacing: 0.1px;
+    }
+    .field-hint {
+      font-size: 11px;
+      color: var(--fg-tertiary);
+      margin-top: -2px;
+    }
+    .field-row { display: flex; gap: 8px; align-items: center; }
+    .input,
+    .select,
+    .textarea {
+      width: 100%;
+      background: var(--bg-card-inner);
+      border: 1px solid rgba(27,23,20,0.08);
+      border-radius: 10px;
+      padding: 9px 12px;
+      font-family: inherit;
+      font-size: 13px;
+      color: var(--fg-primary);
+      outline: none;
+      transition: border-color 0.12s, background 0.12s;
+    }
+    .input:focus,
+    .select:focus,
+    .textarea:focus {
+      border-color: rgba(27,23,20,0.22);
+      background: #fff;
+    }
+    .input.mono {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+    }
+    .textarea {
+      resize: vertical;
+      min-height: 84px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .select { appearance: none; -webkit-appearance: none; cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%236b5f4f' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 30px;
+    }
+    .btn {
+      background: var(--bg-glyph);
+      color: var(--bg-card);
+      border: 0;
+      border-radius: 10px;
+      padding: 9px 16px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: default;
+      transition: transform 0.06s, filter 0.12s;
+    }
+    .btn:hover { filter: brightness(1.15); }
+    .btn:active { transform: translateY(1px); }
+    .btn.secondary {
+      background: var(--bg-card-inner);
+      color: var(--fg-primary);
+    }
+    .btn.ghost {
+      background: transparent;
+      color: var(--fg-secondary);
+      padding: 9px 10px;
+    }
+    .btn.ghost:hover { background: var(--hover); }
+    .switch-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 12px;
+      background: var(--bg-card-inner);
+      border-radius: 10px;
+    }
+    .switch-row .switch-label { flex: 1; font-size: 13px; }
+    .switch-row .switch-sub { font-size: 11px; color: var(--fg-tertiary); margin-top: 2px; }
+    .switch {
+      position: relative;
+      width: 36px; height: 20px;
+      flex-shrink: 0;
+      background: rgba(27,23,20,0.18);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.18s;
+    }
+    .switch::after {
+      content: "";
+      position: absolute; top: 2px; left: 2px;
+      width: 16px; height: 16px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.18s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+    .switch.on { background: var(--bg-glyph); }
+    .switch.on::after { transform: translateX(16px); }
+
+    .save-bar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(27,23,20,0.06);
+    }
+    .test-status {
+      font-size: 12px;
+      min-height: 16px;
+      color: var(--fg-tertiary);
+    }
+    .test-status.ok { color: #1f7a3b; }
+    .test-status.fail { color: #b03a2a; }
   </style>
 </head>
 <body>
@@ -289,9 +414,9 @@
     <div class="card">
       <aside class="sidebar">
         <div class="traffic" id="traffic">
-          <button class="tl-close" aria-label="Schließen" data-w="close"></button>
-          <button class="tl-minimize" aria-label="Minimieren" data-w="minimize"></button>
-          <button class="tl-zoom" aria-label="Maximieren" data-w="zoom"></button>
+          <button type="button" class="tl-close" aria-label="Schließen" data-w="close"></button>
+          <button type="button" class="tl-minimize" aria-label="Minimieren" data-w="minimize"></button>
+          <button type="button" class="tl-zoom" aria-label="Maximieren" data-w="zoom"></button>
         </div>
         <div class="brand">
           <div class="brand-glyph">
@@ -377,13 +502,14 @@
       </svg>`;
 
     const TABS = {
-      history:    { title: 'Verlauf',       sub: 'Diese Woche' },
-      dictionary: { title: 'Wörterbuch',    sub: 'Eigene Begriffe und Korrekturen' },
-      commands:   { title: 'Befehle',       sub: 'Custom-Modi und Sprach-Triggers' },
-      settings:   { title: 'Einstellungen', sub: 'API-Key, Sprache und Hotkeys' },
+      history:    { title: 'Verlauf',       sub: 'Diese Woche',                       showKpis: true  },
+      dictionary: { title: 'Wörterbuch',    sub: 'Eigene Begriffe und Korrekturen',   showKpis: false },
+      commands:   { title: 'Befehle',       sub: 'Custom-Modi und Sprach-Triggers',   showKpis: false },
+      settings:   { title: 'Einstellungen', sub: 'API-Key, Sprache und Hotkeys',      showKpis: false },
     };
 
     let currentTab = 'history';
+    let settingsCache = null;  // initial-values cache, gefuellt durch applySettings
 
     function fmtMeta(ts, words) {
       const d = new Date(ts * 1000);
@@ -480,17 +606,225 @@
     }
 
     function renderComingSoon(label) {
-      document.getElementById('content').innerHTML = `
-        <div class="empty-state">
-          <svg width="32" height="32" viewBox="0 0 240 240" class="empty-state-icon">
-            <rect x="96" y="26.4" width="18" height="187.2" rx="9" fill="currentColor"/>
-          </svg>
-          <div class="empty-state-text">${label} folgt in einem nächsten Release.</div>
-          <div class="empty-state-sub">Hier wirst du bald deine Begriffe, Befehle und Korrekturen pflegen.</div>
-        </div>`;
-      document.getElementById('kpi-words').textContent = '—';
-      document.getElementById('kpi-speed').textContent = '—';
+      const c = document.getElementById('content');
+      clear(c);
+      c.appendChild(makeEmptyState(`${label} folgt in einem nächsten Release.`,
+        'Hier wirst du bald deine Begriffe, Befehle und Korrekturen pflegen.'));
     }
+
+    // ---------- Settings-Form ---------------------------------------------
+
+    function renderSettings(values) {
+      settingsCache = values || settingsCache || {};
+      const v = settingsCache;
+      const c = document.getElementById('content');
+      clear(c);
+
+      const wrap = document.createElement('div');
+      wrap.className = 'settings';
+
+      // API-Key + Test
+      wrap.appendChild(makeField({
+        label: 'Groq API-Key',
+        hint: 'Auf console.groq.com/keys erstellen. Wird zum Bereinigen der Diktate (Formal/Rage) verwendet.',
+        build: () => {
+          const row = document.createElement('div');
+          row.className = 'field-row';
+          const input = document.createElement('input');
+          input.type = 'password';
+          input.className = 'input mono';
+          input.id = 'st-api-key';
+          input.value = v.api_key || '';
+          input.placeholder = 'gsk_...';
+          row.appendChild(input);
+          const showBtn = document.createElement('button');
+          showBtn.type = 'button';
+          showBtn.className = 'btn ghost';
+          showBtn.textContent = 'Zeigen';
+          showBtn.addEventListener('click', () => {
+            const t = input.type === 'password' ? 'text' : 'password';
+            input.type = t;
+            showBtn.textContent = t === 'password' ? 'Zeigen' : 'Verbergen';
+          });
+          row.appendChild(showBtn);
+          const testBtn = document.createElement('button');
+          testBtn.type = 'button';
+          testBtn.className = 'btn secondary';
+          testBtn.textContent = 'Testen';
+          testBtn.addEventListener('click', () => {
+            const k = (input.value || '').trim();
+            if (!k) { setTestStatus('Bitte API-Key einfügen.', 'fail'); return; }
+            setTestStatus('Teste...', '');
+            callPython('testApiKey', { key: k });
+          });
+          row.appendChild(testBtn);
+          const status = document.createElement('div');
+          status.className = 'test-status';
+          status.id = 'st-test-status';
+          const container = document.createElement('div');
+          container.appendChild(row);
+          container.appendChild(status);
+          return container;
+        },
+      }));
+
+      // Language
+      wrap.appendChild(makeField({
+        label: 'Diktat-Sprache',
+        build: () => {
+          const sel = document.createElement('select');
+          sel.className = 'select';
+          sel.id = 'st-lang';
+          const opts = (v.language_options || [['de','Deutsch']]);
+          for (const [code, label] of opts) {
+            const o = document.createElement('option');
+            o.value = code; o.textContent = label;
+            if (code === v.language) o.selected = true;
+            sel.appendChild(o);
+          }
+          return sel;
+        },
+      }));
+
+      // Hotwords
+      wrap.appendChild(makeField({
+        label: 'Hotwords',
+        hint: 'Eine pro Zeile. Whisper bekommt die als Bias-Liste, damit deine Eigennamen korrekt erkannt werden.',
+        build: () => {
+          const ta = document.createElement('textarea');
+          ta.className = 'textarea';
+          ta.id = 'st-hotwords';
+          ta.value = (v.hotwords || []).join('\n');
+          ta.spellcheck = false;
+          return ta;
+        },
+      }));
+
+      // Login-Item Switch
+      wrap.appendChild(makeSwitchRow({
+        id: 'st-login-item',
+        title: 'Beim Login automatisch starten',
+        sub: 'Flow lädt sich beim Anmelden in die Menüleiste.',
+        on: !!v.login_item,
+      }));
+
+      // Mute-Background Switch
+      wrap.appendChild(makeSwitchRow({
+        id: 'st-mute-bg',
+        title: 'Hintergrund stummschalten während Aufnahme',
+        sub: 'Pausiert Apple Music & Co. solange du diktierst. Wird danach automatisch fortgesetzt.',
+        on: !!v.mute_background,
+      }));
+
+      // Save-Bar
+      const bar = document.createElement('div');
+      bar.className = 'save-bar';
+      const cancel = document.createElement('button');
+      cancel.type = 'button';
+      cancel.className = 'btn ghost';
+      cancel.textContent = 'Zurück';
+      cancel.addEventListener('click', () => showTab('history'));
+      bar.appendChild(cancel);
+      const save = document.createElement('button');
+      save.type = 'button';
+      save.className = 'btn';
+      save.textContent = 'Speichern';
+      save.addEventListener('click', collectAndSaveSettings);
+      bar.appendChild(save);
+      wrap.appendChild(bar);
+
+      c.appendChild(wrap);
+    }
+
+    function makeField({ label, hint, build }) {
+      const g = document.createElement('div');
+      g.className = 'field-group';
+      const l = document.createElement('div');
+      l.className = 'field-label';
+      l.textContent = label;
+      g.appendChild(l);
+      g.appendChild(build());
+      if (hint) {
+        const h = document.createElement('div');
+        h.className = 'field-hint';
+        h.textContent = hint;
+        g.appendChild(h);
+      }
+      return g;
+    }
+
+    function makeSwitchRow({ id, title, sub, on }) {
+      const row = document.createElement('div');
+      row.className = 'switch-row';
+      const labelWrap = document.createElement('div');
+      labelWrap.className = 'switch-label';
+      const t = document.createElement('div');
+      t.textContent = title;
+      labelWrap.appendChild(t);
+      if (sub) {
+        const s = document.createElement('div');
+        s.className = 'switch-sub';
+        s.textContent = sub;
+        labelWrap.appendChild(s);
+      }
+      row.appendChild(labelWrap);
+      const sw = document.createElement('div');
+      sw.className = 'switch' + (on ? ' on' : '');
+      sw.id = id;
+      sw.dataset.on = on ? '1' : '0';
+      sw.addEventListener('click', () => {
+        const nowOn = sw.dataset.on !== '1';
+        sw.dataset.on = nowOn ? '1' : '0';
+        sw.classList.toggle('on', nowOn);
+      });
+      row.appendChild(sw);
+      return row;
+    }
+
+    function setTestStatus(text, cls) {
+      const el = document.getElementById('st-test-status');
+      if (!el) return;
+      el.textContent = text;
+      el.classList.remove('ok', 'fail');
+      if (cls) el.classList.add(cls);
+    }
+
+    function collectAndSaveSettings() {
+      const apiKey = (document.getElementById('st-api-key').value || '').trim();
+      const language = document.getElementById('st-lang').value;
+      const hotwordsText = document.getElementById('st-hotwords').value || '';
+      const hotwords = hotwordsText.split('\n').map(s => s.trim()).filter(s => s.length > 0);
+      const login_item = document.getElementById('st-login-item').dataset.on === '1';
+      const mute_background = document.getElementById('st-mute-bg').dataset.on === '1';
+      callPython('saveSettings', {
+        api_key: apiKey, language, hotwords, login_item, mute_background,
+      });
+    }
+
+    // Bridge → JS: Test-Ergebnis und Save-Erfolg
+    window.applyApiKeyTestResult = function(ok, message) {
+      setTestStatus(ok ? '✓ Valide' : `✗ ${message || 'Fehler'}`, ok ? 'ok' : 'fail');
+    };
+    window.applySettingsSaved = function() {
+      setTestStatus('', '');
+      const bar = document.querySelector('.save-bar');
+      if (bar) {
+        const toast = document.createElement('div');
+        toast.textContent = 'Gespeichert ✓';
+        toast.style.color = '#1f7a3b';
+        toast.style.fontSize = '12px';
+        toast.style.alignSelf = 'center';
+        toast.style.marginRight = 'auto';
+        bar.prepend(toast);
+        setTimeout(() => toast.remove(), 1800);
+      }
+    };
+    window.applySettings = function(values) {
+      renderSettings(values);
+    };
+    window.activateTab = function(tab) {
+      if (TABS[tab]) showTab(tab);
+    };
 
     function escapeHtml(s) {
       return String(s).replace(/[&<>"']/g, c => ({
@@ -505,11 +839,20 @@
       });
       document.getElementById('tab-title').textContent = TABS[tab].title;
       document.getElementById('tab-sub').textContent = TABS[tab].sub;
+      document.getElementById('kpis').style.display = TABS[tab].showKpis ? 'flex' : 'none';
       if (tab === 'history') {
         loadHistory();
       } else if (tab === 'settings') {
-        renderComingSoon('Die Einstellungen');
-        callPython('openSettings');
+        callPython('loadSettings');
+        // Bis applySettings kommt: leichtes Placeholder
+        const c = document.getElementById('content');
+        clear(c);
+        const ph = document.createElement('div');
+        ph.className = 'empty-state-text';
+        ph.style.padding = '20px';
+        ph.style.color = 'var(--fg-tertiary)';
+        ph.textContent = 'Lade Einstellungen…';
+        c.appendChild(ph);
       } else {
         renderComingSoon('Dieser Bereich');
       }

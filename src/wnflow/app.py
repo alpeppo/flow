@@ -55,7 +55,6 @@ from wnflow.output import OutputInjector
 from wnflow.permissions import ensure_permissions
 from wnflow.pill import PillState, PillWindow
 from wnflow.pipeline import Pipeline, PipelineResult
-from wnflow.settings_window import SettingsWindow
 from wnflow.state import State, StateMachine
 from wnflow.stt.engine import STTEngine
 from wnflow.threading_guard import assert_main_thread
@@ -153,11 +152,9 @@ class WnflowApp(NSObject):
             max_workers=1, thread_name_prefix="api-test"
         )
 
-        # v0.3.0: Settings-Window (lazy)
-        self._settings_window = SettingsWindow(
-            on_save=self._on_settings_save,
-            on_test_api_key=self._on_test_api_key,
-        )
+        # v0.3.2: Settings sind jetzt vollstaendig im Hauptfenster integriert
+        # (HTML/JS-Form via main_window). settings_window.py wurde entfernt;
+        # pure Helpers liegen in settings_data.py.
 
         self._hotkey = HotkeyListener(self._config.hotkey, self._event_queue)
 
@@ -169,7 +166,11 @@ class WnflowApp(NSObject):
             self._pill.set_cancel_callback(self._request_cancel)
 
         # Hauptfenster (Verlauf + Tabs). Lazy: NSWindow erst beim ersten Open.
-        self._main_window = MainWindow(on_open_settings=self._open_settings)
+        self._main_window = MainWindow(
+            on_load_settings=self._collect_settings_values,
+            on_save_settings=self._on_settings_save,
+            on_test_api_key=self._on_test_api_key,
+        )
 
         # ESC-Hotkey-Monitor (global): laeuft permanent, prueft state.
         self._esc_monitor = None
@@ -625,15 +626,25 @@ class WnflowApp(NSObject):
             self._pill.hide()
 
     def _open_settings(self) -> None:
+        """Oeffnet das Hauptfenster und wechselt zum Settings-Tab.
+        (Frueher: separates SettingsWindow — jetzt in der UI integriert.)"""
         assert_main_thread("WnflowApp._open_settings")
-        initial_values = {
-            "api_key": self._config.cleanup.api_key,
+        if self._main_window is None:
+            return
+        self._main_window.show()
+        self._main_window.activate_tab("settings")
+
+    def _collect_settings_values(self) -> dict:
+        """Liefert das initial-values-Dict fuer das Settings-Form im HTML."""
+        from wnflow.settings_data import LANGUAGE_OPTIONS
+        return {
+            "api_key": self._config.cleanup.api_key or "",
             "language": self._config.stt.language,
-            "hotwords": self._config.cleanup.hotwords,
+            "hotwords": list(self._config.cleanup.hotwords or []),
             "login_item": is_login_enabled(),
             "mute_background": self._config.audio.mute_background,
+            "language_options": list(LANGUAGE_OPTIONS),
         }
-        self._settings_window.show(initial_values)
 
     def _on_settings_save(self, values: dict) -> None:
         """Callback wenn Settings-Window 'Speichern' geklickt wird."""
