@@ -12,8 +12,8 @@ dist/
 # Build-Artefakte (regenerierbar via scripts/build_logo.sh)
 brand/wnflow.iconset/
 
-# PyInstaller (generiert)
-*.spec
+# PyInstaller (POC-Specs ignorieren, finale wnflow.spec ist checked-in)
+poc_*.spec
 
 # POC-Audio-Fixtures (regenerierbar)
 poc/fixtures/
