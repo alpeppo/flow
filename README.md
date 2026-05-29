@@ -16,25 +16,33 @@ No cloud uploads of audio. No subscription. MIT-licensed.
 
 ---
 
-## Install (2 minutes)
+## Install (one Terminal command)
 
-Flow isn't notarized with Apple yet (that requires a paid 99 USD/year developer account, which I'd rather not pay for an open-source side project). So macOS will refuse to launch the `.app` directly. **The DMG ships with a one-click installer that handles this for you.**
+The easiest way — with a visual step-by-step guide — is on the install page:
 
-1. **Download the latest DMG** from the [Releases page](https://github.com/alpeppo/flow/releases/latest).
-2. **Open the DMG**. You'll see three items: `Flow.app`, `Install Flow.command`, and an `Applications` shortcut.
-3. **Double-click `Install Flow.command`**. A Terminal window opens, copies Flow to `/Applications`, removes the Gatekeeper quarantine flag, and prints next steps. Press Enter to close.
-4. **Grant two permissions** when Flow launches:
-   - **Microphone** (system dialog) → allow.
-   - **Accessibility** → System Settings → Privacy & Security → Accessibility → toggle **Flow** on. This lets Flow listen for the `fn` hotkey globally and paste text into any focused app.
-5. **(Optional) Drop in your Groq API key**:
-   - In Flow → **Einstellungen** tab → paste the key → **Speichern**.
-   - Without a key, you only get raw Whisper output (verbatim mode). With a key, formal/anti-wut cleanup gets enabled.
+**👉 [https://alpeppo.github.io/flow/](https://alpeppo.github.io/flow/)**
 
-That's it. **Double-tap `fn`** anywhere and start dictating.
+Or just paste this into Terminal:
 
-### Why the installer script?
+```bash
+curl -fsSL https://alpeppo.github.io/flow/install.sh | bash
+```
 
-Apple's Gatekeeper blocks any app that isn't signed with a paid Apple Developer ID. The standard "drag to Applications" install would result in a "Flow is damaged and can't be opened" or "Apple could not verify Flow is free of malware" dialog. The installer simply runs `xattr -cr /Applications/Flow.app`, which clears the quarantine flag macOS sets on downloaded files. That's it — no magic, no privileges escalated, no kernel extensions. You can [inspect the script before running it](https://github.com/alpeppo/flow/blob/main/scripts/Install%20Flow.command); it's 80 lines of plain bash.
+The script downloads the latest DMG, mounts it, copies Flow to `/Applications`, removes the Gatekeeper quarantine flag, and starts the app. About one minute.
+
+After Flow launches:
+
+1. **Grant Microphone** (system dialog) → allow.
+2. **Grant Accessibility** → System Settings → Privacy & Security → Accessibility → toggle **Flow** on. This lets Flow listen for the `fn` hotkey globally and paste text into any focused app.
+3. **(Optional) Drop in your Groq API key**: in Flow → **Einstellungen** tab → paste the key → **Speichern**. Without a key, you only get raw Whisper output (verbatim mode). With a key, formal/anti-wut cleanup gets enabled.
+
+Then **double-tap `fn`** anywhere and start dictating.
+
+### Why a Terminal command instead of just downloading the DMG?
+
+Apple's Gatekeeper blocks any app that isn't signed with a paid Apple Developer ID (99 USD/year, which I'd rather not pay for an open-source side project). Since macOS Sequoia, this also applies to `.command` files inside DMGs downloaded by a browser, which makes the standard "drag to Applications + run installer" flow unreliable.
+
+The Terminal command works because `curl` downloads don't get the Gatekeeper quarantine flag. The script then explicitly clears the flag from the copied app: `xattr -cr /Applications/Flow.app`. No magic, no root, no kernel extensions. You can [inspect the script before running it](https://github.com/alpeppo/flow/blob/main/docs/install.sh) — it's 130 lines of plain bash.
 
 ---
 
