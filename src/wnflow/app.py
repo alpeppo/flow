@@ -81,7 +81,11 @@ class WnflowApp(NSObject):
 
         # Domain
         self._state = StateMachine()
-        self._stt = STTEngine(self._config.stt, self._config.cleanup.hotwords)
+        self._stt = STTEngine(
+            model=self._config.stt.model,
+            language_getter=lambda: self._config.stt.language,
+            hotwords_getter=lambda: self._config.cleanup.hotwords,
+        )
         self._groq = GroqClient(
             api_key=self._config.cleanup.api_key,
             model=self._config.cleanup.model,

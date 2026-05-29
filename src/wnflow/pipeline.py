@@ -61,6 +61,10 @@ class Pipeline:
             logging_config.keep_transcripts if logging_config is not None else False
         )
 
+    def set_groq_client(self, client: GroqClient) -> None:
+        """Wechselt GroqClient zur Laufzeit (z.B. wenn User API-Key in Settings ändert)."""
+        self._groq = client
+
     def process(self, audio: np.ndarray, mode: str = "verbatim") -> PipelineResult:
         """STT → Cleanup → Result. Blockierend, im Worker-Thread aufrufen.
 
