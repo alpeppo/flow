@@ -283,6 +283,58 @@
       max-width: 260px;
     }
 
+    /* Warning-Banner (z.B. fn-Konflikt) --------------------------------- */
+    .banner-warning {
+      background: #fff4e1;
+      border: 1px solid rgba(254, 188, 46, 0.5);
+      border-radius: 14px;
+      padding: 16px 18px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      margin-bottom: 22px;
+    }
+    .banner-warning-icon {
+      width: 22px; height: 22px;
+      flex-shrink: 0;
+      color: #b06a00;
+      margin-top: 1px;
+    }
+    .banner-warning-body {
+      flex: 1; min-width: 0;
+    }
+    .banner-warning h4 {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      color: #6b3f00;
+      margin: 0 0 4px 0;
+    }
+    .banner-warning p {
+      margin: 0;
+      font-size: 13px;
+      color: #6b3f00;
+      line-height: 1.5;
+    }
+    .banner-warning-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .banner-warning .btn {
+      padding: 7px 14px;
+      font-size: 12px;
+    }
+    .banner-warning .btn.primary {
+      background: #b06a00;
+    }
+    .banner-warning .btn.primary:hover { filter: brightness(1.12); }
+    .banner-warning .btn.ghost {
+      border-color: rgba(176, 106, 0, 0.3);
+      color: #6b3f00;
+    }
+    .banner-warning .btn.ghost:hover { background: rgba(176, 106, 0, 0.08); }
+
     /* Settings-Form ------------------------------------------------------ */
     .settings {
       display: flex;
@@ -614,6 +666,80 @@
 
     // ---------- Settings-Form ---------------------------------------------
 
+    // Banner: macOS hat die fn-Taste fuer eine System-Funktion belegt
+    // (Emoji-Picker / Eingabequellen-Wechsel / Diktat). Solange das so ist,
+    // sieht Flow den fn-Doppel-Tap nicht zuverlaessig.
+    function makeFnConflictBanner(conflict) {
+      const wrap = document.createElement('div');
+      wrap.className = 'banner-warning';
+
+      const NS = 'http://www.w3.org/2000/svg';
+      const icon = document.createElementNS(NS, 'svg');
+      icon.setAttribute('viewBox', '0 0 24 24');
+      icon.setAttribute('class', 'banner-warning-icon');
+      icon.setAttribute('fill', 'none');
+      icon.setAttribute('stroke', 'currentColor');
+      icon.setAttribute('stroke-width', '2');
+      icon.setAttribute('stroke-linecap', 'round');
+      icon.setAttribute('stroke-linejoin', 'round');
+      const tri = document.createElementNS(NS, 'path');
+      tri.setAttribute('d', 'M10.3 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z');
+      const bang1 = document.createElementNS(NS, 'line');
+      bang1.setAttribute('x1', '12'); bang1.setAttribute('y1', '9');
+      bang1.setAttribute('x2', '12'); bang1.setAttribute('y2', '13');
+      const bang2 = document.createElementNS(NS, 'line');
+      bang2.setAttribute('x1', '12'); bang2.setAttribute('y1', '17');
+      bang2.setAttribute('x2', '12.01'); bang2.setAttribute('y2', '17');
+      icon.appendChild(tri); icon.appendChild(bang1); icon.appendChild(bang2);
+      wrap.appendChild(icon);
+
+      const usageMap = {
+        emoji: 'den Emoji-Picker',
+        input_source: 'den Wechsel der Eingabequelle',
+        dictation: 'das macOS-Diktat',
+      };
+      const usageLabel = usageMap[conflict.label] || 'eine System-Aktion';
+
+      const body = document.createElement('div');
+      body.className = 'banner-warning-body';
+      const h4 = document.createElement('h4');
+      h4.textContent = 'fn-Taste ist von macOS belegt';
+      body.appendChild(h4);
+      const p = document.createElement('p');
+      p.textContent =
+        `Dein Mac nutzt die fn-Taste aktuell für ${usageLabel}. ` +
+        `Solange diese Einstellung aktiv ist, kann Flow den fn-Doppel-Tap ` +
+        `nicht zuverlässig erkennen. Ändere entweder die System-Einstellung ` +
+        `oder wähle einen anderen Hotkey.`;
+      body.appendChild(p);
+
+      const actions = document.createElement('div');
+      actions.className = 'banner-warning-actions';
+      const openBtn = document.createElement('button');
+      openBtn.type = 'button';
+      openBtn.className = 'btn primary';
+      openBtn.textContent = 'Tastatur-Einstellungen öffnen';
+      openBtn.addEventListener('click', () => callPython('openKeyboardSettings'));
+      actions.appendChild(openBtn);
+      const switchBtn = document.createElement('button');
+      switchBtn.type = 'button';
+      switchBtn.className = 'btn ghost';
+      switchBtn.textContent = 'Anderen Hotkey wählen';
+      switchBtn.addEventListener('click', () => {
+        const sel = document.getElementById('st-hotkey-key');
+        if (sel) {
+          sel.value = 'right_cmd';
+          sel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          sel.focus();
+        }
+      });
+      actions.appendChild(switchBtn);
+      body.appendChild(actions);
+
+      wrap.appendChild(body);
+      return wrap;
+    }
+
     function renderSettings(values) {
       settingsCache = values || settingsCache || {};
       const v = settingsCache;
@@ -622,6 +748,11 @@
 
       const wrap = document.createElement('div');
       wrap.className = 'settings';
+
+      // fn-Konflikt-Banner (nur wenn Hotkey=fn UND System hat fn fuer was anderes belegt)
+      if (v.fn_conflict) {
+        wrap.appendChild(makeFnConflictBanner(v.fn_conflict));
+      }
 
       // API-Key + Test
       wrap.appendChild(makeField({
@@ -1005,6 +1136,18 @@
 
     // Auto-Refresh History alle 5s, solange History-Tab aktiv ist.
     setInterval(() => { if (currentTab === 'history') loadHistory(); }, 5000);
+
+    // Wenn das Fenster wieder den Fokus bekommt (z.B. nach Systemeinstellungen),
+    // den aktiven Tab refreshen — Settings-Tab faengt damit eine geaenderte
+    // fn-Belegung auf und das Konflikt-Banner verschwindet.
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState !== 'visible') return;
+      if (currentTab === 'settings') {
+        callPython('loadSettings');
+      } else if (currentTab === 'history') {
+        loadHistory();
+      }
+    });
 
     document.addEventListener('DOMContentLoaded', loadHistory);
     if (document.readyState !== 'loading') loadHistory();

@@ -1,5 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
-# PyInstaller-Spec fuer worknetic-flow v0.3.0
+# PyInstaller-Spec fuer worknetic-flow v0.3.5
 #
 # Build: pyinstaller wnflow.spec --noconfirm
 #
@@ -33,6 +33,7 @@ a = Analysis(
         'wnflow.config',
         'wnflow.history_store',
         'wnflow.hotkey',
+        'wnflow.fn_keymap',
         'wnflow.login_item',
         'wnflow.main_window',
         'wnflow.menubar',
@@ -91,12 +92,12 @@ app = BUNDLE(
     name='Flow.app',
     icon='brand/wnflow.icns',
     bundle_identifier='de.worknetic.flow',
-    version='0.3.0',
+    version='0.3.5',
     info_plist={
         'CFBundleName': 'Flow',
         'CFBundleDisplayName': 'Flow.',
-        'CFBundleShortVersionString': '0.3.0',
-        'CFBundleVersion': '0.3.0',
+        'CFBundleShortVersionString': '0.3.5',
+        'CFBundleVersion': '0.3.5',
         'CFBundleIdentifier': 'de.worknetic.flow',
         'CFBundleExecutable': 'Flow',
         'CFBundleIconFile': 'wnflow.icns',

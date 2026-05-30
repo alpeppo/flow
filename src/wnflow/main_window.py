@@ -108,6 +108,7 @@ class MainWindow:
         on_load_settings=None,
         on_save_settings=None,
         on_test_api_key=None,
+        on_open_keyboard_settings=None,
     ) -> None:
         self._window: NSWindow | None = None
         self._webview: WKWebView | None = None
@@ -115,6 +116,7 @@ class MainWindow:
         self._on_load_settings = on_load_settings
         self._on_save_settings = on_save_settings
         self._on_test_api_key = on_test_api_key
+        self._on_open_keyboard_settings = on_open_keyboard_settings
         self._loaded = False
 
     # ---------- Public API --------------------------------------------------
@@ -187,6 +189,12 @@ class MainWindow:
                     self._window.zoom_(None)
                 except Exception:
                     log.exception("zoom failed")
+        elif action == "openKeyboardSettings":
+            if self._on_open_keyboard_settings is not None:
+                try:
+                    self._on_open_keyboard_settings()
+                except Exception:
+                    log.exception("openKeyboardSettings callback raised")
         else:
             log.warning("Unknown bridge action: %s", action)
 

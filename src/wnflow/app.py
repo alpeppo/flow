@@ -170,6 +170,7 @@ class WnflowApp(NSObject):
             on_load_settings=self._collect_settings_values,
             on_save_settings=self._on_settings_save,
             on_test_api_key=self._on_test_api_key,
+            on_open_keyboard_settings=self._open_keyboard_settings,
         )
 
         # ESC-Hotkey-Monitor (global): laeuft permanent, prueft state.
@@ -260,6 +261,13 @@ class WnflowApp(NSObject):
         if self._main_window is None:
             return
         self._main_window.show()
+
+    def _open_keyboard_settings(self) -> None:
+        """Bridge-Action: oeffnet die macOS Tastatur-Einstellungen,
+        damit der User die fn-Taste-Belegung umstellen kann."""
+        assert_main_thread("WnflowApp._open_keyboard_settings")
+        from wnflow.fn_keymap import open_keyboard_settings
+        open_keyboard_settings()
 
     def _on_app_did_become_active(self) -> None:
         """Reopen-Handler: bei Dock-Click, Finder-Doppelklick oder
@@ -661,11 +669,16 @@ class WnflowApp(NSObject):
         """Liefert das initial-values-Dict fuer das Settings-Form im HTML."""
         from wnflow.settings_data import LANGUAGE_OPTIONS
         from wnflow.menubar import MODE_LABELS, MODES
+        from wnflow.fn_keymap import fn_conflict_for
         mode_options = [[m, MODE_LABELS.get(m, m)] for m in MODES]
+        # Reihenfolge: empfohlene Modifier zuerst, fn am Ende (kann durch
+        # macOS-Emoji-Funktion blockiert sein).
         hotkey_key_options = [
             ["fn", "fn (Funktions-Taste)"],
             ["right_cmd", "Rechte Cmd-Taste"],
             ["right_shift", "Rechte Shift-Taste"],
+            ["right_option", "Rechte Option-Taste"],
+            ["caps_lock", "Caps Lock"],
         ]
         return {
             "api_key": self._config.cleanup.api_key or "",
@@ -681,6 +694,8 @@ class WnflowApp(NSObject):
             "hotkey_mode": self._config.hotkey.mode,
             "hotkey_key_options": hotkey_key_options,
             "double_tap_window_ms": int(self._config.hotkey.double_tap_window_ms),
+            # macOS-fn-Konflikt-Hint (v0.3.5)
+            "fn_conflict": fn_conflict_for(self._config.hotkey.key),
         }
 
     def _on_settings_save(self, values: dict) -> None:

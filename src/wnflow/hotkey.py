@@ -19,8 +19,10 @@ import time
 from AppKit import (  # type: ignore[import-not-found]
     NSEvent,
     NSEventMaskFlagsChanged,
+    NSEventModifierFlagCapsLock,
     NSEventModifierFlagCommand,
     NSEventModifierFlagControl,
+    NSEventModifierFlagOption,
     NSEventModifierFlagShift,
 )
 
@@ -35,10 +37,14 @@ NSEventModifierFlagFunction = 1 << 23
 NSDeviceIndependentModifierFlagsMask = 0xFFFF0000
 
 # Mapping: config-key-name → NSEventModifierFlag
+# Aktuell nur Modifier-Keys: alle reagieren auf NSEventMaskFlagsChanged.
+# F-Keys (F13-F19) brauechten KeyDown-Events und sind noch nicht supported.
 MODIFIER_FLAGS: dict[str, int] = {
     "fn": NSEventModifierFlagFunction,
     "right_cmd": NSEventModifierFlagCommand,
     "right_shift": NSEventModifierFlagShift,
+    "right_option": NSEventModifierFlagOption,
+    "caps_lock": NSEventModifierFlagCapsLock,
 }
 
 
