@@ -561,7 +561,7 @@
     };
 
     let currentTab = 'history';
-    let settingsCache = null;  // initial-values cache, gefuellt durch applySettings
+    let settingsCache = null;  // initial-values cache, gefüllt durch applySettings
 
     function fmtMeta(ts, words) {
       const d = new Date(ts * 1000);
@@ -668,7 +668,7 @@
 
     // Banner: macOS hat die fn-Taste für eine System-Funktion belegt
     // (Emoji-Picker / Eingabequellen-Wechsel / Diktat). Solange das so ist,
-    // sieht Flow den fn-Doppel-Tap nicht zuverlaessig.
+    // sieht Flow den fn-Doppel-Tap nicht zuverlässig.
     function makeFnConflictBanner(conflict) {
       const wrap = document.createElement('div');
       wrap.className = 'banner-warning';
@@ -823,7 +823,7 @@
       // Default-Modus
       wrap.appendChild(makeField({
         label: 'Standard-Modus',
-        hint: 'Wird genutzt, wenn beim Diktieren keine Modifier-Taste (Cmd/Ctrl/Shift) gedrueckt wird.',
+        hint: 'Wird genutzt, wenn beim Diktieren keine Modifier-Taste (Cmd/Ctrl/Shift) gedrückt wird.',
         build: () => {
           const sel = document.createElement('select');
           sel.className = 'select';
@@ -861,7 +861,7 @@
       // Hotkey-Activation-Mode
       wrap.appendChild(makeField({
         label: 'Aktivierungs-Verhalten',
-        hint: 'PTT = halten waehrend du sprichst. Toggle = doppel-tap startet, doppel-tap stoppt. Both = beide gleichzeitig.',
+        hint: 'PTT = halten während du sprichst. Toggle = doppel-tap startet, doppel-tap stoppt. Both = beide gleichzeitig.',
         build: () => {
           const sel = document.createElement('select');
           sel.className = 'select';
@@ -883,7 +883,7 @@
       // Double-Tap-Window Slider
       wrap.appendChild(makeField({
         label: 'Doppel-Tap-Fenster',
-        hint: 'Wie schnell die zwei Taps aufeinanderfolgen müssen. Kuerzer = schneller Toggle, aber mehr Fehl-Trigger.',
+        hint: 'Wie schnell die zwei Taps aufeinanderfolgen müssen. Kürzer = schneller Toggle, aber mehr Fehl-Trigger.',
         build: () => {
           const row = document.createElement('div');
           row.className = 'field-row';

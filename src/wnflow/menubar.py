@@ -60,11 +60,11 @@ class MenubarController:
                 # kein automatisches dark/light-Invertieren.
                 self._app.template = False
                 self._has_logo = True
-                # Retina-Fix: rumps laedt das PNG als NSImage mit Pixel-Groesse.
+                # Retina-Fix: rumps lädt das PNG als NSImage mit Pixel-Größe.
                 # Bei 22px-PNG auf Retina-Display interpretiert macOS das als
                 # 22pt-Bild und skaliert auf 44px hoch → unscharf. Wir setzen
-                # _icon_nsimage explizit auf 22pt Display-Groesse (NSImage hat
-                # die volle Aufloesung, wird sauber runterskaliert).
+                # _icon_nsimage explizit auf 22pt Display-Größe (NSImage hat
+                # die volle Auflösung, wird sauber runterskaliert).
                 from AppKit import NSMakeSize  # type: ignore[import-not-found]
 
                 if self._app._icon_nsimage is not None:

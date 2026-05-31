@@ -12,9 +12,9 @@ Eintrag:
     "duration_s": 8.4,
   }
 
-KPIs (woechentlich, Mo–So lokaler Zeitzone):
-  - words_week: int       (Summe Woerter dieser Woche)
-  - speed_factor: float   (gesprochen vs. tippen-Schaetzung: ~40wpm tippen)
+KPIs (wöchentlich, Mo–So lokaler Zeitzone):
+  - words_week: int       (Summe Wörter dieser Woche)
+  - speed_factor: float   (gesprochen vs. tippen-Schätzung: ~40wpm tippen)
 """
 
 from __future__ import annotations
@@ -33,8 +33,8 @@ log = logging.getLogger(__name__)
 HISTORY_PATH = Path.home() / ".worknetic-flow" / "history.json"
 MAX_ITEMS = 500
 # Annahme für "schneller als tippen": Durchschnittstipper schafft 40 WPM
-# → 40/60 = 0.667 woerter pro sekunde. Wenn jemand schneller diktiert,
-# faellt der Faktor hoeher aus.
+# → 40/60 = 0.667 wörter pro sekunde. Wenn jemand schneller diktiert,
+# fällt der Faktor höher aus.
 TYPING_WPM = 40.0
 
 
@@ -89,7 +89,7 @@ def append(text: str, words: int, mode: str, duration_s: float) -> None:
 
 
 def recent(limit: int = 50) -> list[dict[str, Any]]:
-    """Gibt die letzten N Eintraege zurueck, neueste zuerst."""
+    """Gibt die letzten N Einträge zurück, neueste zuerst."""
     with _lock:
         items = _load_raw()
     items.sort(key=lambda it: it.get("ts", 0), reverse=True)
@@ -103,7 +103,7 @@ def clear() -> None:
 
 
 def kpis() -> dict[str, Any]:
-    """Berechnet woechentliche KPIs (Mo–So, lokale Zeit)."""
+    """Berechnet wöchentliche KPIs (Mo–So, lokale Zeit)."""
     with _lock:
         items = _load_raw()
 

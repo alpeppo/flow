@@ -14,7 +14,7 @@ States:
 WICHTIG Threading:
 - ALLE Methoden müssen vom Main-Thread aufgerufen werden
 - update_level / set_elapsed können hochfrequent (50Hz / 10Hz) gerufen werden
-- assert_main_thread() in jeder public Methode ausser hot-paths
+- assert_main_thread() in jeder public Methode außer hot-paths
 
 Klick-Verhalten:
 - NonactivatingPanel klaut keinen Focus.
@@ -55,7 +55,7 @@ from Foundation import (  # type: ignore[import-not-found]
 )
 
 def _monospace_font(size: float):
-    """Robuste Font-Aufloesung. Modern API mit Fallback."""
+    """Robuste Font-Auflösung. Modern API mit Fallback."""
     try:
         return NSFont.monospacedDigitSystemFontOfSize_weight_(size, 0.0)
     except Exception:
@@ -276,7 +276,7 @@ class PillView(NSView):
         try:
             return float(b.size.width), float(b.size.height)
         except AttributeError:
-            # Bundle-Fallback: bounds() ist als ((x,y),(w,h)) zurueckgegeben.
+            # Bundle-Fallback: bounds() ist als ((x,y),(w,h)) zurückgegeben.
             (_, _), (w, h) = b
             return float(w), float(h)
 

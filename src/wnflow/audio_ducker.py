@@ -1,4 +1,4 @@
-"""Audio-Ducker: pausiert Medien + drosselt System-Volume waehrend Recording.
+"""Audio-Ducker: pausiert Medien + drosselt System-Volume während Recording.
 
 Aktiviert via Config-Toggle (audio.mute_background). Beim Recording-Start:
 - Sendet System-Media-Pause (pausiert Spotify, Music, YouTube/Browser-Video etc.)
@@ -25,7 +25,7 @@ class AudioDucker:
     """System-Mute + Media-Pause Wrapper. Stateless wenn enabled=False.
 
     Beim Recording-Start: speichert was gerade spielt (Spotify / Music),
-    pausiert, mutet System-Volume. Beim Restore: setzt Volume zurueck und
+    pausiert, mutet System-Volume. Beim Restore: setzt Volume zurück und
     startet die zuvor spielenden Apps automatisch wieder.
     """
 
@@ -134,7 +134,7 @@ class AudioDucker:
         if not self._muted:
             return
 
-        # 1. Volume zurueck
+        # 1. Volume zurück
         if self._saved_volume is not None:
             try:
                 subprocess.run(

@@ -1,6 +1,6 @@
 """Hauptfenster mit WKWebView.
 
-NSWindow + WKWebView, der src/wnflow/web/index.html laedt. JavaScript
+NSWindow + WKWebView, der src/wnflow/web/index.html lädt. JavaScript
 spricht über `window.webkit.messageHandlers.flow.postMessage({action})`
 mit Python.
 
@@ -230,7 +230,7 @@ class MainWindow:
 
     def _deliver_test_result(self, ok: bool, message: str) -> None:
         """Wird vom Test-Worker aufgerufen (anderer Thread). Wir hoppen
-        zurueck auf Main für den JS-Call."""
+        zurück auf Main für den JS-Call."""
         def _push():
             if self._webview is None:
                 return
@@ -277,7 +277,7 @@ class MainWindow:
         frame = NSMakeRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
         self._webview = WKWebView.alloc().initWithFrame_configuration_(frame, config)
         try:
-            # Transparenter Hintergrund waehrend Ladens: Window hat eigene Farbe.
+            # Transparenter Hintergrund während Ladens: Window hat eigene Farbe.
             self._webview.setValue_forKey_(False, "drawsBackground")
         except Exception:
             pass

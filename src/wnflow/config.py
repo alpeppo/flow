@@ -88,7 +88,7 @@ waveform_bar_count = 5
 fade_out_ms = 200
 
 [audio]
-mute_background = false  # pausiert Medien + mutet Volume waehrend Recording
+mute_background = false  # pausiert Medien + mutet Volume während Recording
 """
 
 

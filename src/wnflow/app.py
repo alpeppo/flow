@@ -183,7 +183,7 @@ class WnflowApp(NSObject):
         # kein anderes Fenster sichtbar ist — auch beim allerersten Launch.
         self._activation_obs = None
 
-        # AudioDucker (mutet Hintergrund waehrend Recording, wenn aktiviert)
+        # AudioDucker (mutet Hintergrund während Recording, wenn aktiviert)
         self._audio_ducker = AudioDucker(
             enabled=self._config.audio.mute_background
         )
@@ -191,7 +191,7 @@ class WnflowApp(NSObject):
         # rumps App
         self._rumps_app = rumps.App("wnflow", quit_button=None)
         # Retina-Fix: wir laden das 64px-PNG (3x Retina) und lassen MenubarController
-        # das NSImage auf 22pt Display-Groesse skalieren. Das gibt scharfe Darstellung
+        # das NSImage auf 22pt Display-Größe skalieren. Das gibt scharfe Darstellung
         # auf Retina-Macs (Down-Sampling 64→44 = scharf, Up-Sampling 22→44 = blurry).
         # Im Bundle liegt 'brand/' direkt unter sys._MEIPASS (Resources/),
         # im Dev-Run unter repo/brand/. Beide Pfade probieren.
@@ -354,7 +354,7 @@ class WnflowApp(NSObject):
                     log.exception("MainWindow degraded-open failed")
             return
 
-        # ESC-Hotkey global: cancelt nur waehrend RECORDING; sonst no-op.
+        # ESC-Hotkey global: cancelt nur während RECORDING; sonst no-op.
         try:
             self._esc_monitor = NSEvent.addGlobalMonitorForEventsMatchingMask_handler_(
                 NSEventMaskKeyDown, self._on_global_keydown
@@ -461,7 +461,7 @@ class WnflowApp(NSObject):
             self._pending_paste = None
             self._handle_paste_done(future)
 
-        # 6. Pill-Level + Timer-Update (waehrend Recording)
+        # 6. Pill-Level + Timer-Update (während Recording)
         if self._pill is not None and self._state.current == State.RECORDING:
             if self._level_ring:
                 self._pill.update_level(self._level_ring[-1])
@@ -506,7 +506,7 @@ class WnflowApp(NSObject):
         self._consume_recording()
 
     def _on_global_keydown(self, event) -> None:
-        """Globaler KeyDown-Monitor. Reagiert nur auf ESC waehrend RECORDING."""
+        """Globaler KeyDown-Monitor. Reagiert nur auf ESC während RECORDING."""
         try:
             if event.keyCode() != KEYCODE_ESCAPE:
                 return

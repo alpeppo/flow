@@ -8,7 +8,7 @@ macOS speichert die fn-Taste-Aktion in com.apple.HIToolbox/AppleFnUsageType:
 
 Wenn Flow als Hotkey die fn-Taste nutzt und AppleFnUsageType != 0,
 kollidiert das mit der System-Aktion. Wir können das nicht selbst
-verändern (waere zu invasiv), aber wir können es **erkennen** und
+verändern (wäre zu invasiv), aber wir können es **erkennen** und
 den Nutzer freundlich informieren.
 """
 
@@ -48,7 +48,7 @@ def read_fn_usage() -> int:
 
 
 def fn_is_free() -> bool:
-    """True wenn die fn-Taste keine System-Aktion ausloest."""
+    """True wenn die fn-Taste keine System-Aktion auslöst."""
     return read_fn_usage() == 0
 
 
