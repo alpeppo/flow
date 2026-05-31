@@ -61,7 +61,7 @@ ICONSET_DIR="$BRAND_DIR/wnflow.iconset"
 rm -rf "$ICONSET_DIR"
 mkdir -p "$ICONSET_DIR"
 
-# macOS .icns Standardgroessen
+# macOS .icns Standardgrößen
 render "$APP_SVG" 16   "$ICONSET_DIR/icon_16x16.png"
 render "$APP_SVG" 32   "$ICONSET_DIR/icon_16x16@2x.png"
 render "$APP_SVG" 32   "$ICONSET_DIR/icon_32x32.png"
