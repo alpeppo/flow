@@ -17,3 +17,6 @@ poc_*.spec
 
 # POC-Audio-Fixtures (regenerierbar)
 poc/fixtures/
+
+# Git-Worktrees fuer Feature-Branches (Subagent-Driven-Development)
+.worktrees/
