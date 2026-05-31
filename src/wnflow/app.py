@@ -13,11 +13,13 @@ Threading bleibt: alle State-Transitions + UI auf Main, Workers in Queues.
 """
 
 import logging
+import os
 import queue
 import subprocess
 import threading
 import time
 from collections import deque
+from logging.handlers import RotatingFileHandler
 from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
@@ -216,17 +218,7 @@ class WnflowApp(NSObject):
         return self
 
     def _setup_logging(self) -> None:
-        log_dir = Path.home() / ".worknetic-flow" / "logs"
-        log_dir.mkdir(parents=True, exist_ok=True)
-        log_level = getattr(logging, self._config.logging.level.upper(), logging.INFO)
-        logging.basicConfig(
-            level=log_level,
-            format="%(asctime)s %(levelname)-7s %(name)s: %(message)s",
-            handlers=[
-                logging.FileHandler(log_dir / "wnflow.log"),
-                logging.StreamHandler(),
-            ],
-        )
+        _configure_logging(self._config.logging)
 
     # State + Menu callbacks
 
@@ -848,6 +840,42 @@ class WnflowApp(NSObject):
 
         # rumps.App.run() blockiert
         self._rumps_app.run()
+
+
+def _configure_logging(logging_config) -> None:
+    """Module-level so tests can call it directly. Idempotent: re-runs replace handlers."""
+    log_dir = Path.home() / ".worknetic-flow" / "logs"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_path = log_dir / "wnflow.log"
+    log_level = getattr(logging, logging_config.level.upper(), logging.INFO)
+
+    root = logging.getLogger()
+    # Remove existing handlers (otherwise re-init duplicates output)
+    for h in list(root.handlers):
+        root.removeHandler(h)
+
+    formatter = logging.Formatter(
+        "%(asctime)s %(levelname)-7s %(name)s: %(message)s"
+    )
+    rotating = RotatingFileHandler(
+        log_path, maxBytes=5 * 1024 * 1024, backupCount=3, encoding="utf-8"
+    )
+    rotating.setFormatter(formatter)
+    stream = logging.StreamHandler()
+    stream.setFormatter(formatter)
+
+    root.setLevel(log_level)
+    root.addHandler(rotating)
+    root.addHandler(stream)
+
+    try:
+        os.chmod(log_path, 0o600)
+    except OSError:
+        pass
+
+    # Silence chatty third-party libraries
+    for name in ("httpx", "httpcore", "urllib3", "huggingface_hub", "hf_xet"):
+        logging.getLogger(name).setLevel(logging.WARNING)
 
 
 def main() -> None:
