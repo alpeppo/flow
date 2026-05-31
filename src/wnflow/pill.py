@@ -347,7 +347,27 @@ class PillView(NSView):
         ss = int(self._elapsed_s) % 60
         text = f"{mm}:{ss:02d}"
         font = _monospace_font(12.0)
-        color = NSColor.colorWithCalibratedWhite_alpha_(1.0, 0.92)
+
+        # Warnstufen vor dem 10-min-Auto-Stop (v0.4.0 Finding 6).
+        if self._elapsed_s >= 585:  # 9:45 — rot, blinkend bei ~2 Hz
+            # Sichtbar 0.5s, gedimmt 0.5s — Timer bleibt lesbar, signalisiert klar.
+            if int(self._elapsed_s * 2) % 2 == 0:
+                color = NSColor.colorWithCalibratedRed_green_blue_alpha_(
+                    1.0, 0.36, 0.34, 1.0  # #ff5f57 traffic-red
+                )
+            else:
+                color = NSColor.colorWithCalibratedWhite_alpha_(1.0, 0.4)
+        elif self._elapsed_s >= 570:  # 9:30 — orange
+            color = NSColor.colorWithCalibratedRed_green_blue_alpha_(
+                1.0, 0.55, 0.18, 1.0  # #ff8c2e
+            )
+        elif self._elapsed_s >= 540:  # 9:00 — gelb
+            color = NSColor.colorWithCalibratedRed_green_blue_alpha_(
+                1.0, 0.74, 0.18, 1.0  # #febc2e traffic-yellow
+            )
+        else:
+            color = NSColor.colorWithCalibratedWhite_alpha_(1.0, 0.92)
+
         attrs = NSMutableDictionary.dictionary()
         attrs.setObject_forKey_(font, "NSFont")
         attrs.setObject_forKey_(color, "NSColor")
