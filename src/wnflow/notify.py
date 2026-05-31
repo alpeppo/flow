@@ -19,12 +19,19 @@ DEFAULT_SOUND_ERROR = "Funk.aiff"
 def notify(title: str, message: str) -> None:
     """Zeigt eine macOS Notification.
 
-    Verwendet osascript damit auch außerhalb von rumps-Context funktioniert.
+    Wir benutzen `osascript -e SCRIPT -- arg1 arg2`. Das Script greift
+    via `item N of argv` auf die Strings zu, sodass sie als AppleScript-
+    `text` ankommen — keine Interpolation in den Script-Body, kein
+    Injection-Vektor.
     """
-    script = f'display notification "{message}" with title "{title}"'
+    script = (
+        "on run argv\n"
+        "  display notification (item 1 of argv) with title (item 2 of argv)\n"
+        "end run"
+    )
     try:
         subprocess.run(
-            ["osascript", "-e", script],
+            ["osascript", "-e", script, "--", message, title],
             check=False,
             timeout=2.0,
             capture_output=True,
