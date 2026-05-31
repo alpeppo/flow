@@ -17,12 +17,10 @@ try:
     __version__ = _pkg_version("worknetic-flow")
 except Exception:
     # Source checkouts without install: fall back to reading pyproject.toml
-    import tomllib
-    from pathlib import Path
     _pyproject = Path(__file__).resolve().parents[2] / "pyproject.toml"
     try:
         __version__ = tomllib.loads(_pyproject.read_text())["project"]["version"]
-    except Exception:
+    except (OSError, tomllib.TOMLDecodeError, KeyError):
         __version__ = "0.0.0+unknown"
 
 DEFAULT_CONFIG_PATH = Path.home() / ".worknetic-flow" / "config.toml"
