@@ -22,7 +22,7 @@ elif command -v magick &> /dev/null; then
 elif command -v convert &> /dev/null; then
     RENDER_CMD="convert"
 else
-    echo "ERROR: rsvg-convert oder ImageMagick benoetigt."
+    echo "ERROR: rsvg-convert oder ImageMagick benötigt."
     echo "  brew install librsvg"
     echo "  oder: brew install imagemagick"
     exit 1
@@ -78,7 +78,7 @@ if command -v iconutil &> /dev/null; then
     iconutil -c icns "$ICONSET_DIR" -o "$BRAND_DIR/wnflow.icns"
     echo "App-Bundle-Icon: $BRAND_DIR/wnflow.icns"
 else
-    echo "WARN: iconutil nicht gefunden (macOS-only) — .icns uebersprungen"
+    echo "WARN: iconutil nicht gefunden (macOS-only) — .icns übersprungen"
 fi
 
 echo ""

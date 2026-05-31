@@ -6,7 +6,7 @@ Aktiviert via Config-Toggle (audio.mute_background). Beim Recording-Start:
 
 Beim Recording-Stop:
 - Stellt das gespeicherte Volume wieder her
-- Schickt KEIN auto-Play (User entscheidet selbst ob er weiter hoeren will)
+- Schickt KEIN auto-Play (User entscheidet selbst ob er weiter hören will)
 
 Implementierung via osascript — kein extra Permission, kein Audio-Routing.
 Side-Effect-frei wenn mute_background=False (Methoden sind no-ops).
@@ -36,17 +36,17 @@ class AudioDucker:
         self._muted = False
 
     def set_enabled(self, enabled: bool) -> None:
-        """Live-Reload Hook fuer Settings-Toggle."""
+        """Live-Reload Hook für Settings-Toggle."""
         if enabled == self._enabled:
             return
-        # Wenn gerade aktiv gemuted und User schaltet aus: aufraeumen.
+        # Wenn gerade aktiv gemuted und User schaltet aus: aufräumen.
         if not enabled and self._muted:
             self.restore()
         self._enabled = enabled
         log.info("AudioDucker enabled=%s", enabled)
 
     def _is_app_playing(self, app_name: str) -> bool:
-        """Pruefen ob App laeuft UND gerade spielt (via player state)."""
+        """Prüfen ob App laeuft UND gerade spielt (via player state)."""
         # 'running of application "X"' ist robust auch wenn App nicht offen.
         try:
             check = subprocess.run(
@@ -77,7 +77,7 @@ class AudioDucker:
             return
 
         # 1. Vor dem Pausieren: festhalten welche Apps gerade spielen,
-        # damit wir sie beim restore() gezielt wieder starten koennen.
+        # damit wir sie beim restore() gezielt wieder starten können.
         self._was_playing = []
         for app in ("Spotify", "Music"):
             if self._is_app_playing(app):

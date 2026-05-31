@@ -1,4 +1,4 @@
-"""Pure-Helpers fuer Settings-Werte (keine UI-Abhaengigkeiten).
+"""Pure-Helpers für Settings-Werte (keine UI-Abhaengigkeiten).
 
 Hier landen alle datenformenden Funktionen, die fueher in
 settings_window.py lagen. Die UI selbst lebt seit v0.3.2 im

@@ -1,7 +1,7 @@
 """Hauptfenster mit WKWebView.
 
 NSWindow + WKWebView, der src/wnflow/web/index.html laedt. JavaScript
-spricht ueber `window.webkit.messageHandlers.flow.postMessage({action})`
+spricht über `window.webkit.messageHandlers.flow.postMessage({action})`
 mit Python.
 
 Bridge-Actions:
@@ -230,7 +230,7 @@ class MainWindow:
 
     def _deliver_test_result(self, ok: bool, message: str) -> None:
         """Wird vom Test-Worker aufgerufen (anderer Thread). Wir hoppen
-        zurueck auf Main fuer den JS-Call."""
+        zurueck auf Main für den JS-Call."""
         def _push():
             if self._webview is None:
                 return
@@ -248,7 +248,7 @@ class MainWindow:
         )
 
     def activate_tab(self, tab: str) -> None:
-        """Wechselt den Tab im offenen Fenster (vor allem fuer Menubar
+        """Wechselt den Tab im offenen Fenster (vor allem für Menubar
         'Settings…' → tab=settings)."""
         if self._webview is None:
             return
@@ -283,7 +283,7 @@ class MainWindow:
             pass
 
         # 3. NSWindow — borderless, full-size content. Titlebar wird komplett
-        # vom HTML uebernommen (eigene Ampel-Controls + Drag-Region via
+        # vom HTML übernommen (eigene Ampel-Controls + Drag-Region via
         # CSS -webkit-app-region). Resizable + Miniaturizable bleiben aktiv,
         # damit Cmd+M und Edge-Resize funktionieren.
         style = (

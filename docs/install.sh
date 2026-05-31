@@ -5,7 +5,7 @@
 #   curl -fsSL https://alpeppo.github.io/flow/install.sh | bash
 #
 # Macht:
-#   1) Pruefe macOS + Apple Silicon
+#   1) Prüfe macOS + Apple Silicon
 #   2) Laedt die neueste DMG via curl (kein Quarantine vom Browser)
 #   3) Mountet das DMG
 #   4) Kopiert Flow.app nach /Applications
@@ -51,7 +51,7 @@ cat <<EOF
 EOF
 
 # ----- Preflight -----
-print_step "Pruefe System"
+print_step "Prüfe System"
 
 if [ "$(uname)" != "Darwin" ]; then
   print_fail "Flow laeuft nur auf macOS."
@@ -60,7 +60,7 @@ print_done "macOS erkannt"
 
 ARCH="$(uname -m)"
 if [ "$ARCH" != "arm64" ]; then
-  print_fail "Flow benoetigt Apple Silicon (M1/M2/M3/M4). Dieser Mac ist $ARCH."
+  print_fail "Flow benötigt Apple Silicon (M1/M2/M3/M4). Dieser Mac ist $ARCH."
 fi
 print_done "Apple Silicon ($ARCH)"
 
@@ -72,7 +72,7 @@ print_step "Suche neuestes Release"
 
 RELEASE_JSON=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest" 2>/dev/null || true)
 if [ -z "$RELEASE_JSON" ]; then
-  print_fail "Konnte Release-Info nicht laden. Pruefe Internet-Verbindung."
+  print_fail "Konnte Release-Info nicht laden. Prüfe Internet-Verbindung."
 fi
 
 DMG_URL=$(echo "$RELEASE_JSON" | grep '"browser_download_url"' | grep -oE 'https://[^"]+\.dmg' | head -1)
@@ -162,7 +162,7 @@ cat <<EOF
          • Bedienungshilfen → Systemeinstellungen
            öffnet sich automatisch, schalte ${BLUE}Flow${RESET} an.
     ${YELLOW}3)${RESET} ${DIM}(Optional)${RESET} Trage in der App deinen Groq-API-Key
-       ein fuer Formal-/Anti-Wut-Modus:
+       ein für Formal-/Anti-Wut-Modus:
          https://console.groq.com/keys
 
   ${DIM}Doppel-Tap auf fn startet die Aufnahme.${RESET}

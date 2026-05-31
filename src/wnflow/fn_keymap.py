@@ -7,8 +7,8 @@ macOS speichert die fn-Taste-Aktion in com.apple.HIToolbox/AppleFnUsageType:
     3 = Start Dictation
 
 Wenn Flow als Hotkey die fn-Taste nutzt und AppleFnUsageType != 0,
-kollidiert das mit der System-Aktion. Wir koennen das nicht selbst
-veraendern (waere zu invasiv), aber wir koennen es **erkennen** und
+kollidiert das mit der System-Aktion. Wir können das nicht selbst
+verändern (waere zu invasiv), aber wir können es **erkennen** und
 den Nutzer freundlich informieren.
 """
 

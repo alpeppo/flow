@@ -34,7 +34,7 @@ if [ ! -f "$INSTALLER_PATH" ]; then
   exit 1
 fi
 
-# Staging aufraeumen
+# Staging aufräumen
 rm -rf "$STAGE_DIR"
 mkdir -p "$STAGE_DIR"
 
@@ -46,7 +46,7 @@ ln -s /Applications "$STAGE_DIR/Applications"
 # Installer ausfuehrbar (sollte schon sein, aber sicher ist sicher)
 chmod +x "$STAGE_DIR/Install Flow.command"
 
-# Quarantine-Flag vorab loeschen (damit der Installer selbst nicht erst
+# Quarantine-Flag vorab löschen (damit der Installer selbst nicht erst
 # entkarantaeniert werden muss)
 xattr -cr "$STAGE_DIR/Install Flow.command" 2>/dev/null || true
 xattr -cr "$STAGE_DIR/Flow.app" 2>/dev/null || true

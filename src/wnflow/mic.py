@@ -131,7 +131,7 @@ class MicCapture:
     def discard(self) -> None:
         """Bricht laufende Aufnahme ab und verwirft das Audio.
 
-        Wie stop(), aber ohne Rueckgabe — fuer den Cancel-Pfad
+        Wie stop(), aber ohne Rueckgabe — für den Cancel-Pfad
         (ESC-Taste oder X-Klick).
         """
         if self._auto_stop_timer is not None:

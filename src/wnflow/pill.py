@@ -12,8 +12,8 @@ States:
 - DONE     — Checkmark (Erfolg)
 
 WICHTIG Threading:
-- ALLE Methoden muessen vom Main-Thread aufgerufen werden
-- update_level / set_elapsed koennen hochfrequent (50Hz / 10Hz) gerufen werden
+- ALLE Methoden müssen vom Main-Thread aufgerufen werden
+- update_level / set_elapsed können hochfrequent (50Hz / 10Hz) gerufen werden
 - assert_main_thread() in jeder public Methode ausser hot-paths
 
 Klick-Verhalten:
@@ -80,7 +80,7 @@ LEFT_PAD = 10
 DOT_RADIUS = 4
 GAP_DOT_WAVE = 6
 GAP_WAVE_TIMER = 12
-TIMER_WIDTH = 36          # reicht fuer "00:00" mono13
+TIMER_WIDTH = 36          # reicht für "00:00" mono13
 GAP_TIMER_X = 10
 CANCEL_RADIUS = 9
 RIGHT_PAD = 10
@@ -110,7 +110,7 @@ class PillState(Enum):
 
 
 class PillView(NSView):
-    """Custom-Drawing NSView fuer die Pill mit Hit-Testing fuer X-Button."""
+    """Custom-Drawing NSView für die Pill mit Hit-Testing für X-Button."""
 
     def initWithFrame_(self, frame):
         self = objc.super(PillView, self).initWithFrame_(frame)
@@ -180,7 +180,7 @@ class PillView(NSView):
     # ---------- Mouse --------------------------------------------------------
 
     def _cancel_button_rect(self):
-        """Returns NSRect-Tuple ((x,y),(w,h)) — wir nutzen es direkt fuer Drawing."""
+        """Returns NSRect-Tuple ((x,y),(w,h)) — wir nutzen es direkt für Drawing."""
         cx, cy = self._x_button_center()
         return NSRect((cx - CANCEL_RADIUS, cy - CANCEL_RADIUS),
                       (CANCEL_RADIUS * 2, CANCEL_RADIUS * 2))
@@ -461,7 +461,7 @@ class PillWindow:
         self._window.setLevel_(NSScreenSaverWindowLevel)
         self._window.setBackgroundColor_(NSColor.clearColor())
         self._window.setOpaque_(False)
-        # WICHTIG: jetzt klickbar fuer X-Button. NonactivatingPanel verhindert Focus-Steal.
+        # WICHTIG: jetzt klickbar für X-Button. NonactivatingPanel verhindert Focus-Steal.
         self._window.setIgnoresMouseEvents_(False)
         self._window.setFloatingPanel_(True)
         self._window.setHidesOnDeactivate_(False)

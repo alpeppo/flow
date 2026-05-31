@@ -145,7 +145,7 @@ class WnflowApp(NSObject):
         self._pending_pipeline: Future[PipelineResult] | None = None
         self._pending_paste: Future[bool] | None = None
         self._last_pipeline_result: PipelineResult | None = None
-        self._last_recording_duration_s: float = 0.0  # fuer History-Speed-KPI
+        self._last_recording_duration_s: float = 0.0  # für History-Speed-KPI
         self._done_timer: rumps.Timer | None = None  # rev2 C1-Fix: strong-ref gegen GC
 
         # v0.3.0 S-e Fix: eigener Executor für API-Key-Test
@@ -176,10 +176,10 @@ class WnflowApp(NSObject):
             on_open_keyboard_settings=self._open_keyboard_settings,
         )
 
-        # ESC-Hotkey-Monitor (global): laeuft permanent, prueft state.
+        # ESC-Hotkey-Monitor (global): laeuft permanent, prüft state.
         self._esc_monitor = None
-        # Activation-Observer fuer Dock-Click-Reopen.
-        # Wir wollen das Hauptfenster bei JEDER Aktivierung oeffnen, wenn
+        # Activation-Observer für Dock-Click-Reopen.
+        # Wir wollen das Hauptfenster bei JEDER Aktivierung öffnen, wenn
         # kein anderes Fenster sichtbar ist — auch beim allerersten Launch.
         self._activation_obs = None
 
@@ -264,11 +264,11 @@ class WnflowApp(NSObject):
 
     def _on_app_did_become_active(self) -> None:
         """Reopen-Handler: bei Dock-Click, Finder-Doppelklick oder
-        Cmd-Tab-Aktivierung oeffnen wir das Hauptfenster, sofern aktuell
+        Cmd-Tab-Aktivierung öffnen wir das Hauptfenster, sofern aktuell
         kein anderes sichtbar ist. Der Boot-Done-Handler triggert den
         Initial-Open einmal direkt nach Model-Warmup — der hier kuemmert
-        sich um spaetere Re-Activations."""
-        # Boot kann noch laufen — dann gar nichts oeffnen, das macht
+        sich um spätere Re-Activations."""
+        # Boot kann noch laufen — dann gar nichts öffnen, das macht
         # _handle_boot_done explizit.
         if self._state.current.name == "BOOT":
             return
@@ -332,7 +332,7 @@ class WnflowApp(NSObject):
             )
             self._state.try_transition(State.DEGRADED)
             # Trotz DEGRADED: Hauptfenster anzeigen, damit der User die App
-            # sieht (sonst wirkt sie tot) und ueber Settings-Tab nachvollziehen
+            # sieht (sonst wirkt sie tot) und über Settings-Tab nachvollziehen
             # kann was fehlt.
             if self._main_window is not None:
                 try:
@@ -364,7 +364,7 @@ class WnflowApp(NSObject):
             log.exception("ESC monitor failed (non-fatal — X-Button still works)")
 
         # Dock-Click-Trigger: wenn der User die App via Dock aktiviert und
-        # kein Fenster sichtbar ist, oeffnen wir das Hauptfenster.
+        # kein Fenster sichtbar ist, öffnen wir das Hauptfenster.
         try:
             from Foundation import NSNotificationCenter  # type: ignore[import-not-found]
             self._activation_obs = NSNotificationCenter.defaultCenter().addObserverForName_object_queue_usingBlock_(
@@ -407,7 +407,7 @@ class WnflowApp(NSObject):
             except Exception:
                 log.exception("Pill pre-warm failed (non-fatal)")
 
-        # Hauptfenster immer beim Launch oeffnen. Bei First-Run (kein API-Key)
+        # Hauptfenster immer beim Launch öffnen. Bei First-Run (kein API-Key)
         # direkt auf den Settings-Tab springen, sonst auf den Verlauf-Tab.
         if self._main_window is not None:
             try:
@@ -560,7 +560,7 @@ class WnflowApp(NSObject):
         if self._pill is not None:
             self._pill.update_state(PillState.LOADING)
 
-        # Recording-Dauer fuer History/KPI merken
+        # Recording-Dauer für History/KPI merken
         self._last_recording_duration_s = float(duration_s)
 
         # Pipeline mit current_mode
@@ -659,7 +659,7 @@ class WnflowApp(NSObject):
         self._main_window.activate_tab("settings")
 
     def _collect_settings_values(self) -> dict:
-        """Liefert das initial-values-Dict fuer das Settings-Form im HTML."""
+        """Liefert das initial-values-Dict für das Settings-Form im HTML."""
         from wnflow.settings_data import LANGUAGE_OPTIONS
         from wnflow.menubar import MODE_LABELS, MODES
         from wnflow.fn_keymap import fn_conflict_for
@@ -722,7 +722,7 @@ class WnflowApp(NSObject):
         new_hotkey_key = values.get("hotkey_key") or self._config.hotkey.key
         new_hotkey_mode = values.get("hotkey_mode") or self._config.hotkey.mode
         new_dtw = int(values.get("double_tap_window_ms") or self._config.hotkey.double_tap_window_ms)
-        # Validierung: nur erlaubte Werte uebernehmen
+        # Validierung: nur erlaubte Werte übernehmen
         from wnflow.hotkey import MODIFIER_FLAGS
         if new_hotkey_key in MODIFIER_FLAGS:
             self._config.hotkey.key = new_hotkey_key
@@ -757,7 +757,7 @@ class WnflowApp(NSObject):
         if err is not None:
             log.warning("Login-Item-Setzen fehlgeschlagen: %s", err)
 
-        # AudioDucker Live-Reload (Toggle wirkt ab naechstem Recording)
+        # AudioDucker Live-Reload (Toggle wirkt ab nächstem Recording)
         self._audio_ducker.set_enabled(self._config.audio.mute_background)
 
         # Default-Mode in Menubar widerspiegeln

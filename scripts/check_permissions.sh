@@ -13,7 +13,7 @@ echo "Stelle sicher dass folgende App aktiviert ist:"
 echo "  - Terminal (oder dein Code-Editor falls du via 'uv run' startest)"
 echo "  - Falls als .app gebaut: worknetic-flow.app"
 echo ""
-read -p "Drueck Enter um die Panels zu oeffnen..."
+read -p "Drueck Enter um die Panels zu öffnen..."
 
 open "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
 sleep 1

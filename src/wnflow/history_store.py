@@ -1,4 +1,4 @@
-"""History-Persistence fuer das Hauptfenster.
+"""History-Persistence für das Hauptfenster.
 
 JSON-File unter ~/.worknetic-flow/history.json. Append-only, mit cap
 auf MAX_ITEMS damit die Datei nicht explodiert.
@@ -32,7 +32,7 @@ log = logging.getLogger(__name__)
 
 HISTORY_PATH = Path.home() / ".worknetic-flow" / "history.json"
 MAX_ITEMS = 500
-# Annahme fuer "schneller als tippen": Durchschnittstipper schafft 40 WPM
+# Annahme für "schneller als tippen": Durchschnittstipper schafft 40 WPM
 # → 40/60 = 0.667 woerter pro sekunde. Wenn jemand schneller diktiert,
 # faellt der Faktor hoeher aus.
 TYPING_WPM = 40.0
@@ -131,5 +131,5 @@ def kpis() -> dict[str, Any]:
 
 
 def payload(limit: int = 50) -> dict[str, Any]:
-    """Bequeme Methode: Items + KPIs in einem Dict fuer JS."""
+    """Bequeme Methode: Items + KPIs in einem Dict für JS."""
     return {"items": recent(limit), "kpis": kpis()}

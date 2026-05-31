@@ -182,7 +182,7 @@
       flex: 1;
       min-width: 0;
       display: flex; flex-direction: column;
-      padding: 38px 32px 28px 28px;     /* +12px oben fuer Window-Top-Air */
+      padding: 38px 32px 28px 28px;     /* +12px oben für Window-Top-Air */
       overflow: hidden;
       -webkit-app-region: drag;          /* Top des Main-Bereichs auch draggable */
     }
@@ -666,7 +666,7 @@
 
     // ---------- Settings-Form ---------------------------------------------
 
-    // Banner: macOS hat die fn-Taste fuer eine System-Funktion belegt
+    // Banner: macOS hat die fn-Taste für eine System-Funktion belegt
     // (Emoji-Picker / Eingabequellen-Wechsel / Diktat). Solange das so ist,
     // sieht Flow den fn-Doppel-Tap nicht zuverlaessig.
     function makeFnConflictBanner(conflict) {
@@ -749,7 +749,7 @@
       const wrap = document.createElement('div');
       wrap.className = 'settings';
 
-      // fn-Konflikt-Banner (nur wenn Hotkey=fn UND System hat fn fuer was anderes belegt)
+      // fn-Konflikt-Banner (nur wenn Hotkey=fn UND System hat fn für was anderes belegt)
       if (v.fn_conflict) {
         wrap.appendChild(makeFnConflictBanner(v.fn_conflict));
       }
@@ -883,7 +883,7 @@
       // Double-Tap-Window Slider
       wrap.appendChild(makeField({
         label: 'Doppel-Tap-Fenster',
-        hint: 'Wie schnell die zwei Taps aufeinanderfolgen muessen. Kuerzer = schneller Toggle, aber mehr Fehl-Trigger.',
+        hint: 'Wie schnell die zwei Taps aufeinanderfolgen müssen. Kuerzer = schneller Toggle, aber mehr Fehl-Trigger.',
         build: () => {
           const row = document.createElement('div');
           row.className = 'field-row';
