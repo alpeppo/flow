@@ -63,6 +63,10 @@ def _save_raw(items: list[dict[str, Any]]) -> None:
     with tmp.open("w", encoding="utf-8") as f:
         json.dump(items, f, ensure_ascii=False, indent=2)
     os.replace(tmp, HISTORY_PATH)
+    try:
+        os.chmod(HISTORY_PATH, 0o600)
+    except OSError:
+        log.warning("Could not chmod %s to 0600", HISTORY_PATH)
 
 
 def append(text: str, words: int, mode: str, duration_s: float) -> None:
@@ -90,6 +94,12 @@ def recent(limit: int = 50) -> list[dict[str, Any]]:
         items = _load_raw()
     items.sort(key=lambda it: it.get("ts", 0), reverse=True)
     return items[:limit]
+
+
+def clear() -> None:
+    """Löscht den gesamten Diktat-Verlauf. Thread-sicher."""
+    with _lock:
+        _save_raw([])
 
 
 def kpis() -> dict[str, Any]:
