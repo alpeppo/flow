@@ -14,6 +14,11 @@
 
 import os
 
+import tomllib
+from pathlib import Path
+_pyproject = Path(SPEC).parent / "pyproject.toml"
+WNFLOW_VERSION = tomllib.loads(_pyproject.read_text())["project"]["version"]
+
 a = Analysis(
     ['src/wnflow/__main__.py'],
     pathex=['src'],
@@ -92,12 +97,12 @@ app = BUNDLE(
     name='Flow.app',
     icon='brand/wnflow.icns',
     bundle_identifier='de.worknetic.flow',
-    version='0.3.5',
+    version=WNFLOW_VERSION,
     info_plist={
         'CFBundleName': 'Flow',
         'CFBundleDisplayName': 'Flow.',
-        'CFBundleShortVersionString': '0.3.5',
-        'CFBundleVersion': '0.3.5',
+        'CFBundleShortVersionString': WNFLOW_VERSION,
+        'CFBundleVersion': WNFLOW_VERSION,
         'CFBundleIdentifier': 'de.worknetic.flow',
         'CFBundleExecutable': 'Flow',
         'CFBundleIconFile': 'wnflow.icns',

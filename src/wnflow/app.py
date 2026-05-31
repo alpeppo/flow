@@ -44,6 +44,7 @@ KEYCODE_ESCAPE = 53
 from wnflow import history_store
 from wnflow.audio_ducker import AudioDucker
 from wnflow.cleanup.groq_client import GroqClient
+from wnflow.config import __version__ as _wnflow_version
 from wnflow.config import load, save
 from wnflow.hotkey import HotkeyListener
 from wnflow.login_item import is_login_enabled, set_login_enabled
@@ -90,7 +91,7 @@ class WnflowApp(NSObject):
         self._config = load()
         self._setup_logging()
 
-        log.info("worknetic-flow v0.2.0 starting...")
+        log.info("worknetic-flow v%s starting...", _wnflow_version)
 
         # Domain
         self._state = StateMachine()
