@@ -5,12 +5,15 @@ Wenn Datei fehlt, wird sie mit Defaults erzeugt.
 ENV-Override nur für Secrets (GROQ_API_KEY).
 """
 
+import logging
 import os
 import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
 
 import tomli_w
+
+log = logging.getLogger(__name__)
 
 try:
     from importlib.metadata import version as _pkg_version
@@ -22,6 +25,10 @@ except Exception:
         __version__ = tomllib.loads(_pyproject.read_text())["project"]["version"]
     except (OSError, tomllib.TOMLDecodeError, KeyError):
         __version__ = "0.0.0+unknown"
+
+# v0.4.0 migration: bekannte alte Defaults werden beim Laden auf den neuen
+# 10-min-Cap angehoben. Explizite User-Werte (nicht in dieser Menge) bleiben.
+_STALE_MAX_DURATION_DEFAULTS = {0.0, 60.0}
 
 DEFAULT_CONFIG_PATH = Path.home() / ".worknetic-flow" / "config.toml"
 
@@ -47,7 +54,7 @@ double_tap_window_ms = 350
 
 [recording]
 min_duration_s = 0.5
-max_duration_s = 0.0  # 0 = unbegrenzt (kein Auto-Stop)
+max_duration_s = 600.0  # 10 minutes; pill warns at 9:00 / 9:30 / 9:45
 sample_rate = 16000
 
 [cleanup]
@@ -101,7 +108,7 @@ class HotkeyConfig:
 @dataclass
 class RecordingConfig:
     min_duration_s: float = 0.5
-    max_duration_s: float = 0.0  # 0 = unbegrenzt
+    max_duration_s: float = 600.0  # 10 minutes; pill warns at 9:00 / 9:30 / 9:45
     sample_rate: int = 16000
 
 
@@ -183,6 +190,14 @@ def load(config_path: Path | None = None) -> Config:
         cfg.hotkey = HotkeyConfig(**data["hotkey"])
     if "recording" in data:
         cfg.recording = RecordingConfig(**data["recording"])
+
+    if cfg.recording.max_duration_s in _STALE_MAX_DURATION_DEFAULTS:
+        log.info(
+            "Migrating recording.max_duration_s from %.1fs to 600.0s (v0.4.0 default)",
+            cfg.recording.max_duration_s,
+        )
+        cfg.recording.max_duration_s = 600.0
+
     if "cleanup" in data:
         cleanup_data = {k: v for k, v in data["cleanup"].items() if k != "hotwords"}
         cfg.cleanup = CleanupConfig(**cleanup_data)
@@ -213,7 +228,7 @@ def load(config_path: Path | None = None) -> Config:
 
 
 def save(config: Config, config_path: Path | None = None) -> None:
-    """Atomic write: tmpfile + rename."""
+    """Atomic write: tmpfile + rename. Result is chmod 0600 (Bearer token inside)."""
     path = config_path or DEFAULT_CONFIG_PATH
     path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -221,6 +236,10 @@ def save(config: Config, config_path: Path | None = None) -> None:
     tmp = path.with_suffix(".toml.tmp")
     tmp.write_bytes(tomli_w.dumps(data).encode("utf-8"))
     tmp.replace(path)  # atomic on POSIX
+    try:
+        os.chmod(path, 0o600)
+    except OSError:
+        log.warning("Could not chmod %s to 0600", path)
 
 
 def _serialize(config: Config) -> dict:
