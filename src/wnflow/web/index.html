@@ -712,8 +712,10 @@
     function renderComingSoon(label) {
       const c = document.getElementById('content');
       clear(c);
-      c.appendChild(makeEmptyState(`${label} folgt in einem nächsten Release.`,
-        'Hier wirst du bald deine Begriffe, Befehle und Korrekturen pflegen.'));
+      c.appendChild(makeEmptyState(
+        t("coming_soon.template", { label }),
+        t("coming_soon.sub")
+      ));
     }
 
     // ---------- Settings-Form ---------------------------------------------
@@ -1185,10 +1187,12 @@
         ph.className = 'empty-state-text';
         ph.style.padding = '20px';
         ph.style.color = 'var(--fg-tertiary)';
-        ph.textContent = 'Lade Einstellungen…';
+        ph.textContent = t("coming_soon.settings_loading");
         c.appendChild(ph);
-      } else {
-        renderComingSoon('Dieser Bereich');
+      } else if (tab === 'dictionary') {
+        renderComingSoon(t("tab.dictionary.title"));
+      } else if (tab === 'commands') {
+        renderComingSoon(t("tab.commands.title"));
       }
     }
 
