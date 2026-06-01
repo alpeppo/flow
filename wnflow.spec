@@ -1,5 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
-# PyInstaller-Spec fuer worknetic-flow v0.3.5
+# PyInstaller-Spec für worknetic-flow
 #
 # Build: pyinstaller wnflow.spec --noconfirm
 #
@@ -31,7 +31,7 @@ a = Analysis(
     pathex=['src'],
     binaries=[],
     datas=[
-        # Brand-Assets fuers Menubar-Icon und ggf. App-internes Logo
+        # Brand-Assets fürs Menubar-Icon und ggf. App-internes Logo
         ('brand/wnflow_icon_22.png', 'brand'),
         ('brand/wnflow_icon_16.png', 'brand'),
         ('brand/wnflow_icon_64.png', 'brand'),
@@ -121,9 +121,9 @@ app = BUNDLE(
         'LSMinimumSystemVersion': '13.0',  # SMAppService braucht macOS 13+
         # Permissions: Mic + Accessibility + Apple Events (osascript-Notify)
         'NSMicrophoneUsageDescription':
-            'worknetic-flow nutzt das Mikrofon fuer Push-to-Talk-Diktat.',
+            'worknetic-flow nutzt das Mikrofon für Push-to-Talk-Diktat.',
         'NSAppleEventsUsageDescription':
-            'worknetic-flow zeigt System-Notifications ueber osascript.',
+            'worknetic-flow zeigt System-Notifications über osascript.',
         # Keine Berechtigung im Plist, aber wichtig: Accessibility wird
         # via TCC-Prompt beim ersten Hotkey-Listener-Start angefragt.
     },
