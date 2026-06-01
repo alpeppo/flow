@@ -868,12 +868,12 @@
       }));
 
       // Section-Heading: Modus
-      wrap.appendChild(makeSectionHeading('Modus & Hotkey'));
+      wrap.appendChild(makeSectionHeading(t("settings.section.modes_hotkey")));
 
       // Default-Modus
       wrap.appendChild(makeField({
-        label: 'Standard-Modus',
-        hint: 'Wird genutzt, wenn beim Diktieren keine Modifier-Taste (Cmd/Ctrl/Shift) gedrückt wird.',
+        label: t("settings.default_mode.label"),
+        hint: t("settings.default_mode.hint"),
         build: () => {
           const sel = document.createElement('select');
           sel.className = 'select';
@@ -891,8 +891,8 @@
 
       // Hotkey-Taste
       wrap.appendChild(makeField({
-        label: 'Aktivierungs-Taste',
-        hint: 'Welche Taste startet die Aufnahme. fn ist Default — manche Tastaturen haben kein fn, dann right_cmd/right_shift.',
+        label: t("settings.hotkey_key.label"),
+        hint: t("settings.hotkey_key.hint"),
         build: () => {
           const sel = document.createElement('select');
           sel.className = 'select';
@@ -900,7 +900,7 @@
           const opts = (v.hotkey_key_options || [['fn','fn (Funktions-Taste)']]);
           for (const [code, label] of opts) {
             const o = document.createElement('option');
-            o.value = code; o.textContent = label;
+            o.value = code; o.textContent = t("hotkey_key." + code);
             if (code === v.hotkey_key) o.selected = true;
             sel.appendChild(o);
           }
@@ -910,19 +910,19 @@
 
       // Hotkey-Activation-Mode
       wrap.appendChild(makeField({
-        label: 'Aktivierungs-Verhalten',
-        hint: 'PTT = halten während du sprichst. Toggle = doppel-tap startet, doppel-tap stoppt. Both = beide gleichzeitig.',
+        label: t("settings.hotkey_mode.label"),
+        hint: t("settings.hotkey_mode.hint"),
         build: () => {
           const sel = document.createElement('select');
           sel.className = 'select';
           sel.id = 'st-hotkey-mode';
-          for (const [code, label] of [
-            ['both','Both (halten oder doppel-tap)'],
-            ['ptt','PTT (push-to-talk, halten)'],
-            ['toggle','Toggle (doppel-tap zum An/Aus)'],
+          for (const [code, labelKey] of [
+            ['both',   'settings.hotkey_mode.option.both'],
+            ['ptt',    'settings.hotkey_mode.option.ptt'],
+            ['toggle', 'settings.hotkey_mode.option.toggle'],
           ]) {
             const o = document.createElement('option');
-            o.value = code; o.textContent = label;
+            o.value = code; o.textContent = t(labelKey);
             if (code === v.hotkey_mode) o.selected = true;
             sel.appendChild(o);
           }
@@ -932,8 +932,8 @@
 
       // Double-Tap-Window Slider
       wrap.appendChild(makeField({
-        label: 'Doppel-Tap-Fenster',
-        hint: 'Wie schnell die zwei Taps aufeinanderfolgen müssen. Kürzer = schneller Toggle, aber mehr Fehl-Trigger.',
+        label: t("settings.double_tap.label"),
+        hint: t("settings.double_tap.hint"),
         build: () => {
           const row = document.createElement('div');
           row.className = 'field-row';
