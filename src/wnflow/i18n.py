@@ -64,13 +64,236 @@ def detect_locale() -> str:
     return _cached_locale
 
 
-# Seed translation: Task 2 expands this dict massively.
 TRANSLATIONS: Final[dict[str, dict[str, str]]] = {
     "en": {
+        # ─── notify / system notifications ────────────────────────────
         "notify.api_key_missing": "GROQ_API_KEY missing — cleanup disabled",
+        "notify.hotkey_listener_failed": "Hotkey listener failed: {error}",
+        "notify.model_load_failed": "Model load failed: {error}",
+        "notify.max_recording_reached": "Max recording length reached — processing",
+        "notify.transcription_failed": "Transcription failed: {error}",
+        "notify.paste_state_race": "State race on paste",
+        "notify.paste_failed": "Paste failed",
+        "notify.settings_save_failed": "Saving settings failed: {error}",
+        "notify.hotkey_change_pending_restart": "Hotkey change takes effect after restart",
+        "notify.settings_saved": "Settings saved",
+        "notify.permissions_missing": (
+            "Permissions missing. System Settings → Privacy → Accessibility + Input Monitoring"
+        ),
+        "notify.v020_legacy_plist": (
+            "v0.2.0 launchd agent found. Run 'launchctl unload && rm' "
+            "then restart — otherwise two instances run in parallel."
+        ),
+
+        # ─── menubar ──────────────────────────────────────────────────
+        "menubar.main_window": "Main Window…",
+        "menubar.settings": "Settings…",
+        "menubar.open_config": "Open Config",
+        "menubar.quit": "Quit",
+        "menubar.mode_submenu": "Mode",
+        "menubar.mode.verbatim": "Verbatim",
+        "menubar.mode.formal": "Formal",
+        "menubar.mode.rage": "Anti-Rage",
+
+        # ─── main window — tabs ───────────────────────────────────────
+        "tab.history.title": "History",
+        "tab.history.sub": "This week",
+        "tab.dictionary.title": "Dictionary",
+        "tab.dictionary.sub": "Your terms and corrections",
+        "tab.commands.title": "Commands",
+        "tab.commands.sub": "Custom modes and voice triggers",
+        "tab.settings.title": "Settings",
+        "tab.settings.sub": "API key, language, and hotkeys",
+
+        # ─── main window — history ────────────────────────────────────
+        "history.empty.title": "No dictations yet.",
+        "history.empty.sub": "Double-tap fn to start recording.",
+        "history.kpi.words": "Words",
+        "history.kpi.speed": "faster",
+        "history.unit.word.one": "word",
+        "history.unit.word.other": "words",
+        "history.meta.yesterday": "Yesterday",
+
+        # ─── main window — coming soon ────────────────────────────────
+        "coming_soon.template": "{label} is coming in a future release.",
+        "coming_soon.sub": "Your terms, commands, and corrections will live here.",
+        "coming_soon.settings_loading": "Loading settings…",
+
+        # ─── settings form ────────────────────────────────────────────
+        "settings.api_key.label": "Groq API key",
+        "settings.api_key.hint": "Create one at console.groq.com/keys. Used to clean up dictations (Formal/Anti-Rage).",
+        "settings.api_key.show": "Show",
+        "settings.api_key.hide": "Hide",
+        "settings.api_key.test": "Test",
+        "settings.api_key.testing": "Testing…",
+        "settings.api_key.empty": "Please paste an API key.",
+        "settings.api_key.valid": "✓ Valid",
+        "settings.api_key.invalid_prefix": "✗",
+        "settings.language.label": "Dictation language",
+        "settings.section.modes_hotkey": "Mode & Hotkey",
+        "settings.default_mode.label": "Default mode",
+        "settings.default_mode.hint": "Used when you record without holding a modifier key (Cmd/Ctrl/Shift).",
+        "settings.hotkey_key.label": "Activation key",
+        "settings.hotkey_key.hint": "Which key starts the recording. fn is the default — if your keyboard has no fn, pick right-Cmd / right-Shift.",
+        "settings.hotkey_mode.label": "Activation behavior",
+        "settings.hotkey_mode.hint": (
+            "PTT = hold while speaking. Toggle = double-tap on/off. Both = either works."
+        ),
+        "settings.hotkey_mode.option.both": "Both (hold or double-tap)",
+        "settings.hotkey_mode.option.ptt": "PTT (push-to-talk, hold)",
+        "settings.hotkey_mode.option.toggle": "Toggle (double-tap to start/stop)",
+        "settings.double_tap.label": "Double-tap window",
+        "settings.double_tap.hint": "How quickly the two taps have to follow each other. Shorter = faster toggle, but more accidental triggers.",
+        "settings.section.system": "System",
+        "settings.login_item.label": "Launch on login",
+        "settings.login_item.sub": "Flow loads into the menubar automatically when you sign in.",
+        "settings.mute_bg.label": "Mute background while recording",
+        "settings.mute_bg.sub": "Pauses Apple Music & co. while you dictate. Resumes after.",
+        "settings.section.history": "History",
+        "settings.history.empty": "No history yet",
+        "settings.history.count.one": "{n} dictation saved",
+        "settings.history.count.other": "{n} dictations saved",
+        "settings.history.path": "Stored locally in ~/.worknetic-flow/history.json",
+        "settings.history.clear_btn": "Delete all",
+        "settings.history.clear_confirm": "{n} dictations will be deleted permanently. Continue?",
+        "settings.save": "Save",
+        "settings.back": "Back",
+        "settings.saved_toast": "Saved ✓",
+
+        # ─── hotkey-key option labels ────────────────────────────────
+        "hotkey_key.fn": "fn (function key)",
+        "hotkey_key.right_cmd": "Right Cmd",
+        "hotkey_key.right_shift": "Right Shift",
+        "hotkey_key.right_option": "Right Option",
+        "hotkey_key.caps_lock": "Caps Lock",
+
+        # ─── fn-conflict banner ──────────────────────────────────────
+        "fn_banner.title": "fn key is reserved by macOS",
+        "fn_banner.body": (
+            "Your Mac is using fn for {usage}. While that setting is active, Flow "
+            "cannot reliably detect the fn double-tap. Either change the system "
+            "setting or pick a different hotkey."
+        ),
+        "fn_banner.usage.emoji": "the Emoji picker",
+        "fn_banner.usage.input_source": "switching the input source",
+        "fn_banner.usage.dictation": "macOS Dictation",
+        "fn_banner.usage.fallback": "a system action",
+        "fn_banner.open_settings": "Open keyboard settings",
+        "fn_banner.pick_other": "Pick another hotkey",
     },
     "de": {
+        # ─── notify / system notifications ────────────────────────────
         "notify.api_key_missing": "GROQ_API_KEY fehlt — Cleanup deaktiviert",
+        "notify.hotkey_listener_failed": "Hotkey-Listener fehlgeschlagen: {error}",
+        "notify.model_load_failed": "Modell-Load fehlgeschlagen: {error}",
+        "notify.max_recording_reached": "Max-Aufnahmelänge erreicht — wird verarbeitet",
+        "notify.transcription_failed": "Transkription fehlgeschlagen: {error}",
+        "notify.paste_state_race": "State-Race beim Paste",
+        "notify.paste_failed": "Paste fehlgeschlagen",
+        "notify.settings_save_failed": "Settings-Speichern fehlgeschlagen: {error}",
+        "notify.hotkey_change_pending_restart": "Hotkey-Änderung wirkt nach Neustart",
+        "notify.settings_saved": "Einstellungen gespeichert",
+        "notify.permissions_missing": (
+            "Berechtigungen fehlen. Systemeinstellungen → Datenschutz → Bedienungshilfen + Eingabeüberwachung"
+        ),
+        "notify.v020_legacy_plist": (
+            "v0.2.0 launchd-Agent gefunden. Bitte 'launchctl unload && rm' "
+            "und neu starten — sonst laufen 2 Instanzen parallel."
+        ),
+
+        # ─── menubar ──────────────────────────────────────────────────
+        "menubar.main_window": "Hauptfenster…",
+        "menubar.settings": "Einstellungen…",
+        "menubar.open_config": "Konfigurationsdatei öffnen",
+        "menubar.quit": "Beenden",
+        "menubar.mode_submenu": "Modus",
+        "menubar.mode.verbatim": "Verbatim",
+        "menubar.mode.formal": "Formal",
+        "menubar.mode.rage": "Anti-Wut",
+
+        # ─── main window — tabs ───────────────────────────────────────
+        "tab.history.title": "Verlauf",
+        "tab.history.sub": "Diese Woche",
+        "tab.dictionary.title": "Wörterbuch",
+        "tab.dictionary.sub": "Eigene Begriffe und Korrekturen",
+        "tab.commands.title": "Befehle",
+        "tab.commands.sub": "Custom-Modi und Sprach-Triggers",
+        "tab.settings.title": "Einstellungen",
+        "tab.settings.sub": "API-Key, Sprache und Hotkeys",
+
+        # ─── main window — history ────────────────────────────────────
+        "history.empty.title": "Noch keine Diktate.",
+        "history.empty.sub": "Doppel-Tap auf fn startet die Aufnahme.",
+        "history.kpi.words": "Wörter",
+        "history.kpi.speed": "schneller",
+        "history.unit.word.one": "Wort",
+        "history.unit.word.other": "Wörter",
+        "history.meta.yesterday": "Gestern",
+
+        # ─── main window — coming soon ────────────────────────────────
+        "coming_soon.template": "{label} folgt in einem nächsten Release.",
+        "coming_soon.sub": "Hier wirst du bald deine Begriffe, Befehle und Korrekturen pflegen.",
+        "coming_soon.settings_loading": "Lade Einstellungen…",
+
+        # ─── settings form ────────────────────────────────────────────
+        "settings.api_key.label": "Groq API-Key",
+        "settings.api_key.hint": "Auf console.groq.com/keys erstellen. Wird zum Bereinigen der Diktate (Formal/Anti-Wut) verwendet.",
+        "settings.api_key.show": "Zeigen",
+        "settings.api_key.hide": "Verbergen",
+        "settings.api_key.test": "Testen",
+        "settings.api_key.testing": "Teste…",
+        "settings.api_key.empty": "Bitte API-Key einfügen.",
+        "settings.api_key.valid": "✓ Valide",
+        "settings.api_key.invalid_prefix": "✗",
+        "settings.language.label": "Diktat-Sprache",
+        "settings.section.modes_hotkey": "Modus & Hotkey",
+        "settings.default_mode.label": "Standard-Modus",
+        "settings.default_mode.hint": "Wird genutzt, wenn beim Diktieren keine Modifier-Taste (Cmd/Ctrl/Shift) gedrückt wird.",
+        "settings.hotkey_key.label": "Aktivierungs-Taste",
+        "settings.hotkey_key.hint": "Welche Taste startet die Aufnahme. fn ist Default — manche Tastaturen haben kein fn, dann right_cmd/right_shift.",
+        "settings.hotkey_mode.label": "Aktivierungs-Verhalten",
+        "settings.hotkey_mode.hint": "PTT = halten während du sprichst. Toggle = doppel-tap startet, doppel-tap stoppt. Both = beide gleichzeitig.",
+        "settings.hotkey_mode.option.both": "Both (halten oder doppel-tap)",
+        "settings.hotkey_mode.option.ptt": "PTT (push-to-talk, halten)",
+        "settings.hotkey_mode.option.toggle": "Toggle (doppel-tap zum An/Aus)",
+        "settings.double_tap.label": "Doppel-Tap-Fenster",
+        "settings.double_tap.hint": "Wie schnell die zwei Taps aufeinanderfolgen müssen. Kürzer = schneller Toggle, aber mehr Fehl-Trigger.",
+        "settings.section.system": "System",
+        "settings.login_item.label": "Beim Login automatisch starten",
+        "settings.login_item.sub": "Flow lädt sich beim Anmelden in die Menüleiste.",
+        "settings.mute_bg.label": "Hintergrund stummschalten während Aufnahme",
+        "settings.mute_bg.sub": "Pausiert Apple Music & Co. solange du diktierst. Wird danach automatisch fortgesetzt.",
+        "settings.section.history": "Verlauf",
+        "settings.history.empty": "Kein Verlauf vorhanden",
+        "settings.history.count.one": "{n} Diktat gespeichert",
+        "settings.history.count.other": "{n} Diktate gespeichert",
+        "settings.history.path": "Liegt lokal in ~/.worknetic-flow/history.json",
+        "settings.history.clear_btn": "Alle löschen",
+        "settings.history.clear_confirm": "{n} Diktate werden unwiderruflich gelöscht. Fortfahren?",
+        "settings.save": "Speichern",
+        "settings.back": "Zurück",
+        "settings.saved_toast": "Gespeichert ✓",
+
+        # ─── hotkey-key option labels ────────────────────────────────
+        "hotkey_key.fn": "fn (Funktions-Taste)",
+        "hotkey_key.right_cmd": "Rechte Cmd-Taste",
+        "hotkey_key.right_shift": "Rechte Shift-Taste",
+        "hotkey_key.right_option": "Rechte Option-Taste",
+        "hotkey_key.caps_lock": "Caps Lock",
+
+        # ─── fn-conflict banner ──────────────────────────────────────
+        "fn_banner.title": "fn-Taste ist von macOS belegt",
+        "fn_banner.body": (
+            "Dein Mac nutzt die fn-Taste aktuell für {usage}. Solange diese Einstellung "
+            "aktiv ist, kann Flow den fn-Doppel-Tap nicht zuverlässig erkennen. "
+            "Ändere entweder die System-Einstellung oder wähle einen anderen Hotkey."
+        ),
+        "fn_banner.usage.emoji": "den Emoji-Picker",
+        "fn_banner.usage.input_source": "den Wechsel der Eingabequelle",
+        "fn_banner.usage.dictation": "das macOS-Diktat",
+        "fn_banner.usage.fallback": "eine System-Aktion",
+        "fn_banner.open_settings": "Tastatur-Einstellungen öffnen",
+        "fn_banner.pick_other": "Anderen Hotkey wählen",
     },
 }
 
