@@ -22,6 +22,9 @@ from pathlib import Path
 
 import objc  # type: ignore[import-not-found]
 from AppKit import (  # type: ignore[import-not-found]
+    NSAlert,
+    NSAlertFirstButtonReturn,
+    NSAlertStyleWarning,
     NSApp,
     NSBackingStoreBuffered,
     NSColor,
@@ -109,6 +112,43 @@ class _BridgeHandler(NSObject):
             log.error("Bridge handler failed:\n%s", traceback.format_exc())
 
 
+class _UIDelegate(NSObject):
+    """WKUIDelegate — implements native dialogs for JS alert/confirm/prompt.
+
+    WKWebView ships with NO default UI for these. Without this delegate,
+    `confirm()` returns false silently — the user clicks, nothing happens.
+    See: https://developer.apple.com/documentation/webkit/wkuidelegate
+    """
+
+    def webView_runJavaScriptConfirmPanelWithMessage_initiatedByFrame_completionHandler_(
+        self, webview, message, frame, completion_handler
+    ):
+        try:
+            alert = NSAlert.alloc().init()
+            alert.setMessageText_(str(message))
+            alert.setAlertStyle_(NSAlertStyleWarning)
+            alert.addButtonWithTitle_("OK")
+            alert.addButtonWithTitle_("Cancel")
+            response = alert.runModal()
+            completion_handler(response == NSAlertFirstButtonReturn)
+        except Exception:
+            log.exception("confirm panel failed")
+            completion_handler(False)
+
+    def webView_runJavaScriptAlertPanelWithMessage_initiatedByFrame_completionHandler_(
+        self, webview, message, frame, completion_handler
+    ):
+        try:
+            alert = NSAlert.alloc().init()
+            alert.setMessageText_(str(message))
+            alert.addButtonWithTitle_("OK")
+            alert.runModal()
+            completion_handler()
+        except Exception:
+            log.exception("alert panel failed")
+            completion_handler()
+
+
 class MainWindow:
     """Wrapper um NSWindow + WKWebView mit Lazy-Creation."""
 
@@ -123,6 +163,7 @@ class MainWindow:
         self._window: NSWindow | None = None
         self._webview: WKWebView | None = None
         self._bridge: _BridgeHandler | None = None
+        self._ui_delegate: _UIDelegate | None = None
         self._on_load_settings = on_load_settings
         self._on_save_settings = on_save_settings
         self._on_test_api_key = on_test_api_key
@@ -317,6 +358,10 @@ class MainWindow:
         from AppKit import NSMakeRect  # type: ignore[import-not-found]
         frame = NSMakeRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
         self._webview = WKWebView.alloc().initWithFrame_configuration_(frame, config)
+        # UIDelegate so dass alert()/confirm()/prompt() echte Dialoge zeigen.
+        # Ohne den returnt WKWebView still false und der User klickt ins Leere.
+        self._ui_delegate = _UIDelegate.alloc().init()
+        self._webview.setUIDelegate_(self._ui_delegate)
         try:
             # Transparenter Hintergrund während Ladens: Window hat eigene Farbe.
             self._webview.setValue_forKey_(False, "drawsBackground")
@@ -398,6 +443,13 @@ class MainWindow:
             except Exception:
                 pass
             self._bridge = None
+        if self._ui_delegate is not None:
+            try:
+                if self._webview is not None:
+                    self._webview.setUIDelegate_(None)
+            except Exception:
+                pass
+            self._ui_delegate = None
         self._on_load_settings = None
         self._on_save_settings = None
         self._on_test_api_key = None
