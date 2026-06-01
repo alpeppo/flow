@@ -747,24 +747,20 @@
       icon.appendChild(tri); icon.appendChild(bang1); icon.appendChild(bang2);
       wrap.appendChild(icon);
 
-      const usageMap = {
-        emoji: 'den Emoji-Picker',
-        input_source: 'den Wechsel der Eingabequelle',
-        dictation: 'das macOS-Diktat',
+      const usageKeyMap = {
+        emoji: "fn_banner.usage.emoji",
+        input_source: "fn_banner.usage.input_source",
+        dictation: "fn_banner.usage.dictation",
       };
-      const usageLabel = usageMap[conflict.label] || 'eine System-Aktion';
+      const usageLabel = t(usageKeyMap[conflict.label] || "fn_banner.usage.fallback");
 
       const body = document.createElement('div');
       body.className = 'banner-warning-body';
       const h4 = document.createElement('h4');
-      h4.textContent = 'fn-Taste ist von macOS belegt';
+      h4.textContent = t("fn_banner.title");
       body.appendChild(h4);
       const p = document.createElement('p');
-      p.textContent =
-        `Dein Mac nutzt die fn-Taste aktuell für ${usageLabel}. ` +
-        `Solange diese Einstellung aktiv ist, kann Flow den fn-Doppel-Tap ` +
-        `nicht zuverlässig erkennen. Ändere entweder die System-Einstellung ` +
-        `oder wähle einen anderen Hotkey.`;
+      p.textContent = t("fn_banner.body", { usage: usageLabel });
       body.appendChild(p);
 
       const actions = document.createElement('div');
@@ -772,13 +768,13 @@
       const openBtn = document.createElement('button');
       openBtn.type = 'button';
       openBtn.className = 'btn primary';
-      openBtn.textContent = 'Tastatur-Einstellungen öffnen';
+      openBtn.textContent = t("fn_banner.open_settings");
       openBtn.addEventListener('click', () => callPython('openKeyboardSettings'));
       actions.appendChild(openBtn);
       const switchBtn = document.createElement('button');
       switchBtn.type = 'button';
       switchBtn.className = 'btn ghost';
-      switchBtn.textContent = 'Anderen Hotkey wählen';
+      switchBtn.textContent = t("fn_banner.pick_other");
       switchBtn.addEventListener('click', () => {
         const sel = document.getElementById('st-hotkey-key');
         if (sel) {
