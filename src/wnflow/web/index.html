@@ -963,7 +963,9 @@
       clearBtn.type = 'button';
       clearBtn.className = 'btn ghost';
       clearBtn.style.color = '#b03a2a';
-      clearBtn.style.borderColor = 'rgba(176, 58, 42, 0.3)';
+      // .btn.ghost has no base border — set the whole shorthand here so the red
+      // outline actually renders. Border-color alone is invisible without a style.
+      clearBtn.style.border = '1px solid rgba(176, 58, 42, 0.3)';
       clearBtn.textContent = 'Alle löschen';
       clearBtn.disabled = histCount === 0;
       clearBtn.addEventListener('click', () => {
