@@ -1,5 +1,46 @@
 # Changelog
 
+## v0.5.1 — UI-language picker with live-reload (2026-06-01)
+
+### What changed
+
+- **In-app UI-language picker** in Settings → "Interface language" / "Sprache
+  der Oberfläche". Three options: **Auto (system)**, **English**, **Deutsch**.
+  Auto follows the macOS locale (existing v0.5.0 behavior); the two explicit
+  choices override it.
+- **Live-reload**: switching the language doesn't require restarting Flow.
+  The menubar rebuilds, the main window's i18n table is pushed via
+  `applyLocale`, the active tab re-renders. Done in under a second.
+- **`UIConfig` block in `config.toml`** persists the choice across restarts.
+- **5 new tests** in `tests/test_i18n.py` covering override precedence,
+  invalid values, cache invalidation. Suite: 135/135 green.
+
+### Bug fixes
+
+- **TOML save failure when editing hotwords** — pre-existing since v0.3.2.
+  WKWebView delivered the list as `NSArray`, which `tomli_w` couldn't
+  serialize. `app._on_settings_save` now coerces to `list()` before
+  assigning to the config. Fixes the `__NSArrayM is not TOML serializable`
+  traceback in the log.
+- **Sidebar nav items stayed in German** when switching the UI language to
+  English. The four items (History / Dictionary / Commands / Settings)
+  plus the "Start recording" hotkey card now go through `data-i18n` and
+  re-render on locale change.
+- **"Delete all" history button didn't react.** WKWebView ships without a
+  default handler for JS `confirm()` / `alert()`, so the dialog silently
+  returned `false` and the bridge call never fired. Added a `WKUIDelegate`
+  that surfaces native `NSAlert` dialogs for confirm/alert.
+
+### Engineering
+
+- `MenubarController.rebuild_menu()` extracted as a public method;
+  `_build_menu()` is the internal builder, called from `__init__` and from
+  `rebuild_menu()`. Mode-checkmarks survive locale switches.
+- `i18n.set_user_override()` resets the cache so the next `detect_locale()`
+  re-resolves. Documented precedence: explicit override > macOS locale > EN.
+
+---
+
 ## v0.5.0 — Internationalization (2026-06-01)
 
 Flow now speaks English as its canonical language. German users on a macOS
