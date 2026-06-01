@@ -996,7 +996,7 @@
       }));
 
       // Section: Verlauf
-      wrap.appendChild(makeSectionHeading('Verlauf'));
+      wrap.appendChild(makeSectionHeading(t("settings.section.history")));
 
       const histCount = Number(v.history_count || 0);
       const histRow = document.createElement('div');
@@ -1004,13 +1004,15 @@
       const histLabel = document.createElement('div');
       histLabel.className = 'switch-label';
       const histTitle = document.createElement('div');
-      histTitle.textContent = histCount === 0
-        ? 'Kein Verlauf vorhanden'
-        : `${histCount} ${histCount === 1 ? 'Diktat' : 'Diktate'} gespeichert`;
+      if (histCount === 0) {
+        histTitle.textContent = t("settings.history.empty");
+      } else {
+        histTitle.textContent = tPlural("settings.history.count", histCount, { n: histCount });
+      }
       histLabel.appendChild(histTitle);
       const histSub = document.createElement('div');
       histSub.className = 'switch-sub';
-      histSub.textContent = 'Liegt lokal in ~/.worknetic-flow/history.json';
+      histSub.textContent = t("settings.history.path");
       histLabel.appendChild(histSub);
       histRow.appendChild(histLabel);
 
@@ -1021,10 +1023,11 @@
       // .btn.ghost has no base border — set the whole shorthand here so the red
       // outline actually renders. Border-color alone is invisible without a style.
       clearBtn.style.border = '1px solid rgba(176, 58, 42, 0.3)';
-      clearBtn.textContent = 'Alle löschen';
+      clearBtn.textContent = t("settings.history.clear_btn");
       clearBtn.disabled = histCount === 0;
       clearBtn.addEventListener('click', () => {
-        if (!confirm(`${histCount} Diktate werden unwiderruflich gelöscht. Fortfahren?`)) return;
+        const confirmMsg = t("settings.history.clear_confirm", { n: histCount });
+        if (!confirm(confirmMsg)) return;
         callPython('clearHistory');
         // Re-render after a short delay (Python clears + refreshes history)
         setTimeout(() => callPython('loadSettings'), 200);
@@ -1039,13 +1042,13 @@
       const cancel = document.createElement('button');
       cancel.type = 'button';
       cancel.className = 'btn ghost';
-      cancel.textContent = 'Zurück';
+      cancel.textContent = t("settings.back");
       cancel.addEventListener('click', () => showTab('history'));
       bar.appendChild(cancel);
       const save = document.createElement('button');
       save.type = 'button';
       save.className = 'btn';
-      save.textContent = 'Speichern';
+      save.textContent = t("settings.save");
       save.addEventListener('click', collectAndSaveSettings);
       bar.appendChild(save);
       wrap.appendChild(bar);
@@ -1140,14 +1143,17 @@
 
     // Bridge → JS: Test-Ergebnis und Save-Erfolg
     window.applyApiKeyTestResult = function(ok, message) {
-      setTestStatus(ok ? '✓ Valide' : `✗ ${message || 'Fehler'}`, ok ? 'ok' : 'fail');
+      setTestStatus(
+        ok ? t("settings.api_key.valid") : `${t("settings.api_key.invalid_prefix")} ${message || 'Error'}`,
+        ok ? 'ok' : 'fail'
+      );
     };
     window.applySettingsSaved = function() {
       setTestStatus('', '');
       const bar = document.querySelector('.save-bar');
       if (bar) {
         const toast = document.createElement('div');
-        toast.textContent = 'Gespeichert ✓';
+        toast.textContent = t("settings.saved_toast");
         toast.style.color = '#1f7a3b';
         toast.style.fontSize = '12px';
         toast.style.alignSelf = 'center';
