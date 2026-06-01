@@ -304,6 +304,11 @@ class WnflowApp(NSObject):
         self._pipeline_executor.shutdown(wait=False)
         self._paste_executor.shutdown(wait=False)
         self._test_executor.shutdown(wait=False)  # v0.3.0
+        if self._main_window is not None:
+            try:
+                self._main_window.dispose()
+            except Exception:
+                log.exception("MainWindow.dispose failed")
         rumps.quit_application()
 
     # Boot

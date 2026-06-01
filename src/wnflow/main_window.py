@@ -72,7 +72,16 @@ def _html_path() -> Path | None:
 
 
 class _BridgeHandler(NSObject):
-    """WKScriptMessageHandler — empfaengt JS → Python Calls."""
+    """WKScriptMessageHandler — empfängt JS → Python Calls.
+
+    THREADING / LIFECYCLE NOTE
+    --------------------------
+    MainWindow -> _bridge -> _owner == MainWindow forms an intentional
+    retain cycle. It's harmless in the current single-window architecture
+    (MainWindow lives until app quit, then the OS frees everything).
+    If a future feature reuses MainWindow instances, call MainWindow.dispose()
+    before dropping the reference to break the cycle cleanly.
+    """
 
     def initWithOwner_(self, owner):
         self = objc.super(_BridgeHandler, self).init()
@@ -355,4 +364,19 @@ class MainWindow:
             req = NSURLRequest.requestWithURL_(url)
             self._webview.loadRequest_(req)
         self._loaded = True
+
+    def dispose(self) -> None:
+        """Break the retain cycle. Call this from app shutdown when the
+        window is no longer needed."""
+        if self._bridge is not None:
+            try:
+                self._bridge._owner = None  # noqa: SLF001 — intentional
+            except Exception:
+                pass
+            self._bridge = None
+        self._on_load_settings = None
+        self._on_save_settings = None
+        self._on_test_api_key = None
+        self._on_open_keyboard_settings = None
+        self._on_clear_history = None
         log.info("MainWindow ready (loaded %s)", html_path)
