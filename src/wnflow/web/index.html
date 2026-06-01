@@ -854,7 +854,27 @@
         },
       }));
 
-      // Language
+      // Interface language (v0.5.1): auto / English / Deutsch
+      wrap.appendChild(makeField({
+        label: t("settings.ui_locale.label"),
+        hint: t("settings.ui_locale.hint"),
+        build: () => {
+          const sel = document.createElement('select');
+          sel.className = 'select';
+          sel.id = 'st-ui-locale';
+          const opts = (v.ui_locale_options || [['auto','Auto (system)']]);
+          const current = v.ui_locale || 'auto';
+          for (const [code, label] of opts) {
+            const o = document.createElement('option');
+            o.value = code; o.textContent = label;
+            if (code === current) o.selected = true;
+            sel.appendChild(o);
+          }
+          return sel;
+        },
+      }));
+
+      // Dictation language (Whisper STT)
       wrap.appendChild(makeField({
         label: t("settings.language.label"),
         build: () => {
@@ -1127,6 +1147,7 @@
     function collectAndSaveSettings() {
       const apiKey = (document.getElementById('st-api-key').value || '').trim();
       const language = document.getElementById('st-lang').value;
+      const ui_locale = (document.getElementById('st-ui-locale') || { value: 'auto' }).value;
       const hotwordsText = document.getElementById('st-hotwords').value || '';
       const hotwords = hotwordsText.split('\n').map(s => s.trim()).filter(s => s.length > 0);
       const login_item = document.getElementById('st-login-item').dataset.on === '1';
@@ -1136,7 +1157,7 @@
       const hotkey_mode = document.getElementById('st-hotkey-mode').value;
       const double_tap_window_ms = parseInt(document.getElementById('st-double-tap').value, 10) || 350;
       callPython('saveSettings', {
-        api_key: apiKey, language, hotwords, login_item, mute_background,
+        api_key: apiKey, language, ui_locale, hotwords, login_item, mute_background,
         default_mode, hotkey_key, hotkey_mode, double_tap_window_ms,
       });
     }

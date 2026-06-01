@@ -159,6 +159,16 @@ class AudioConfig:
 
 
 @dataclass
+class UIConfig:
+    """User-facing UI settings. Currently only the interface language.
+
+    `locale` is one of "auto" | "en" | "de". "auto" follows the macOS
+    system locale at app boot; "en" / "de" override it explicitly.
+    """
+    locale: str = "auto"
+
+
+@dataclass
 class Config:
     stt: STTConfig = field(default_factory=STTConfig)
     hotkey: HotkeyConfig = field(default_factory=HotkeyConfig)
@@ -167,9 +177,10 @@ class Config:
     commands: CommandsConfig = field(default_factory=CommandsConfig)
     output: OutputConfig = field(default_factory=OutputConfig)
     logging: LoggingConfig = field(default_factory=LoggingConfig)
-    modes: ModesConfig = field(default_factory=ModesConfig)  # NEU
-    pill: PillConfig = field(default_factory=PillConfig)  # NEU
-    audio: AudioConfig = field(default_factory=AudioConfig)  # NEU v0.3.0
+    modes: ModesConfig = field(default_factory=ModesConfig)
+    pill: PillConfig = field(default_factory=PillConfig)
+    audio: AudioConfig = field(default_factory=AudioConfig)
+    ui: UIConfig = field(default_factory=UIConfig)  # NEU v0.5.1
 
 
 def load(config_path: Path | None = None) -> Config:
@@ -215,6 +226,8 @@ def load(config_path: Path | None = None) -> Config:
         cfg.pill = PillConfig(**data["pill"])
     if "audio" in data:
         cfg.audio = AudioConfig(**data["audio"])
+    if "ui" in data:
+        cfg.ui = UIConfig(**data["ui"])
 
     # API-Key-Priorität: ENV > TOML > leer
     env_key = os.environ.get("GROQ_API_KEY", "")
@@ -290,5 +303,8 @@ def _serialize(config: Config) -> dict:
         },
         "audio": {
             "mute_background": config.audio.mute_background,
+        },
+        "ui": {
+            "locale": config.ui.locale,
         },
     }

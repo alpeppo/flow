@@ -279,6 +279,15 @@ class MainWindow:
             "window.applySettingsSaved && window.applySettingsSaved()", None
         )
 
+    def push_locale(self) -> None:
+        """Pushes the current locale + translation dict to JS.
+
+        Called from app._on_settings_save after the user switches the UI
+        language. JS `applyLocale` drains its queue and re-renders the
+        active tab.
+        """
+        self._send_locale()
+
     def activate_tab(self, tab: str) -> None:
         """Wechselt den Tab im offenen Fenster (vor allem für Menubar
         'Settings…' → tab=settings)."""

@@ -56,6 +56,11 @@ class MenubarController:
         self._on_mode_change = on_mode_change
         self._current_mode = initial_mode
         self._has_logo = False  # rev2 S3-Fix: eigenes Flag statt _icon-Check
+        # Keep callbacks so rebuild_menu() can re-wire them after locale change.
+        self._on_open_config = on_open_config
+        self._on_quit = on_quit
+        self._on_open_settings = on_open_settings
+        self._on_open_main = on_open_main
 
         # Logo falls vorhanden, sonst Unicode-Text
         if logo_path is not None and logo_path.exists():
@@ -80,37 +85,58 @@ class MenubarController:
         else:
             self._app.title = STATE_ICONS[State.BOOT]
 
-        # Mode-MenuItems mit Checkmark
+        self._build_menu()
+
+    def _build_menu(self) -> None:
+        """Constructs the menubar tree with the current locale.
+
+        Called once from __init__ and again from rebuild_menu() after the
+        user switches the UI locale. Mode-checkmarks are preserved across
+        rebuilds via `self._current_mode`.
+        """
         self._mode_items: dict[str, rumps.MenuItem] = {}
         for mode in MODES:
             item = rumps.MenuItem(
                 mode_label(mode),
                 callback=self._make_mode_callback(mode),
             )
-            if mode == initial_mode:
-                item.state = 1  # Checkmark
+            if mode == self._current_mode:
+                item.state = 1
             self._mode_items[mode] = item
 
-        # Mode-Submenu
         mode_submenu = rumps.MenuItem(t("menubar.mode_submenu"))
         for mode in MODES:
             mode_submenu.add(self._mode_items[mode])
 
         menu_items: list = []
-        if on_open_main is not None:
+        if self._on_open_main is not None:
             menu_items.append(
-                rumps.MenuItem(t("menubar.main_window"), callback=lambda _: on_open_main())
+                rumps.MenuItem(t("menubar.main_window"),
+                               callback=lambda _: self._on_open_main())
             )
             menu_items.append(None)
         menu_items += [
             mode_submenu,
             None,
-            rumps.MenuItem(t("menubar.settings"), callback=lambda _: on_open_settings()),
-            rumps.MenuItem(t("menubar.open_config"), callback=lambda _: on_open_config()),
+            rumps.MenuItem(t("menubar.settings"),
+                           callback=lambda _: self._on_open_settings()),
+            rumps.MenuItem(t("menubar.open_config"),
+                           callback=lambda _: self._on_open_config()),
             None,
-            rumps.MenuItem(t("menubar.quit"), callback=lambda _: on_quit()),
+            rumps.MenuItem(t("menubar.quit"),
+                           callback=lambda _: self._on_quit()),
         ]
+        # rumps clears the menu and accepts the new list as-is.
+        self._app.menu.clear()
         self._app.menu = menu_items
+
+    def rebuild_menu(self) -> None:
+        """Re-renders the menu after the UI locale changed.
+
+        Called from app._on_settings_save when ui_locale changes. Idempotent.
+        """
+        assert_main_thread("MenubarController.rebuild_menu")
+        self._build_menu()
 
     def _make_mode_callback(self, mode: str) -> Callable:
         def cb(_):

@@ -79,3 +79,49 @@ def test_menubar_mode_label_lookup_respects_runtime_locale_change(monkeypatch) -
     with patch("wnflow.i18n._read_system_locale", return_value="de_DE"):
         i18n._reset_cache()
         assert mode_label("rage") == "Anti-Wut"  # German-only string
+
+
+# ─── User-override (v0.5.1) ──────────────────────────────────────────────
+
+
+def test_user_override_en_wins_over_german_system() -> None:
+    """User explicitly chose English — Flow must show EN even on a German Mac."""
+    with patch("wnflow.i18n._read_system_locale", return_value="de_DE"):
+        i18n._reset_cache()
+        i18n.set_user_override("en")
+        assert i18n.detect_locale() == "en"
+        assert i18n.t("settings.save") == "Save"
+
+
+def test_user_override_de_wins_over_english_system() -> None:
+    """Inverse: English Mac, user picks German."""
+    with patch("wnflow.i18n._read_system_locale", return_value="en_US"):
+        i18n._reset_cache()
+        i18n.set_user_override("de")
+        assert i18n.detect_locale() == "de"
+        assert i18n.t("settings.save") == "Speichern"
+
+
+def test_user_override_auto_falls_back_to_system() -> None:
+    """`auto` is the documented default. Behaves as if no override set."""
+    with patch("wnflow.i18n._read_system_locale", return_value="de_DE"):
+        i18n._reset_cache()
+        i18n.set_user_override("auto")
+        assert i18n.detect_locale() == "de"
+
+
+def test_user_override_invalid_value_falls_back_to_auto() -> None:
+    """Defensive: garbage TOML value (e.g., 'fr') must not crash; treat as auto."""
+    with patch("wnflow.i18n._read_system_locale", return_value="en_US"):
+        i18n._reset_cache()
+        i18n.set_user_override("fr")  # not supported
+        assert i18n.detect_locale() == "en"  # because system is en
+
+
+def test_set_user_override_resets_cache() -> None:
+    """Calling set_user_override mid-session must invalidate the cached locale."""
+    with patch("wnflow.i18n._read_system_locale", return_value="en_US"):
+        i18n._reset_cache()
+        assert i18n.detect_locale() == "en"
+        i18n.set_user_override("de")
+        assert i18n.detect_locale() == "de"  # cache cleared, override wins

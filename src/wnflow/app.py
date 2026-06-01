@@ -92,6 +92,11 @@ class WnflowApp(NSObject):
             return None
         load_dotenv()
         self._config = load()
+        # Apply UI-locale override BEFORE _setup_logging or anything that
+        # might call t() — otherwise the cached locale would freeze before
+        # we know the user's choice.
+        from wnflow.i18n import set_user_override
+        set_user_override(self._config.ui.locale)
         self._setup_logging()
 
         log.info("worknetic-flow v%s starting...", _wnflow_version)
@@ -660,15 +665,20 @@ class WnflowApp(NSObject):
         from wnflow.settings_data import LANGUAGE_OPTIONS
         from wnflow.menubar import MODES, mode_label
         from wnflow.fn_keymap import fn_conflict_for
+        from wnflow.i18n import t
         mode_options = [[m, mode_label(m)] for m in MODES]
-        # Reihenfolge: empfohlene Modifier zuerst, fn am Ende (kann durch
-        # macOS-Emoji-Funktion blockiert sein).
         hotkey_key_options = [
-            ["fn", "fn (Funktions-Taste)"],
-            ["right_cmd", "Rechte Cmd-Taste"],
-            ["right_shift", "Rechte Shift-Taste"],
-            ["right_option", "Rechte Option-Taste"],
-            ["caps_lock", "Caps Lock"],
+            ["fn", t("hotkey_key.fn")],
+            ["right_cmd", t("hotkey_key.right_cmd")],
+            ["right_shift", t("hotkey_key.right_shift")],
+            ["right_option", t("hotkey_key.right_option")],
+            ["caps_lock", t("hotkey_key.caps_lock")],
+        ]
+        # UI-locale picker (v0.5.1): auto / en / de
+        ui_locale_options = [
+            ["auto", t("settings.ui_locale.option.auto")],
+            ["en", t("settings.ui_locale.option.en")],
+            ["de", t("settings.ui_locale.option.de")],
         ]
         return {
             "api_key": self._config.cleanup.api_key or "",
@@ -688,6 +698,9 @@ class WnflowApp(NSObject):
             "fn_conflict": fn_conflict_for(self._config.hotkey.key),
             # v0.4.0: Anzahl gespeicherter Diktate (für Verlauf-Section)
             "history_count": len(history_store.recent(limit=10000)),
+            # v0.5.1: UI-locale picker
+            "ui_locale": self._config.ui.locale,
+            "ui_locale_options": ui_locale_options,
         }
 
     def _clear_history(self) -> None:
@@ -715,8 +728,15 @@ class WnflowApp(NSObject):
         # Config-State updaten
         self._config.cleanup.api_key = values["api_key"]
         self._config.stt.language = values["language"]
-        self._config.cleanup.hotwords = values["hotwords"]
+        # Hotwords aus dem WKWebView-Bridge kommen als NSArray. tomli_w
+        # akzeptiert nur reine list/dict, deshalb hier zu list() coercen.
+        self._config.cleanup.hotwords = list(values.get("hotwords") or [])
         self._config.audio.mute_background = values.get("mute_background", False)
+
+        # v0.5.1: UI-Sprache (auto/en/de) — live-reload nach dem Save
+        new_ui_locale = values.get("ui_locale") or "auto"
+        ui_locale_changed = new_ui_locale != self._config.ui.locale
+        self._config.ui.locale = new_ui_locale
 
         # Modi + Hotkey
         new_default_mode = values.get("default_mode")
@@ -793,6 +813,23 @@ class WnflowApp(NSObject):
             except Exception:
                 log.exception("Hotkey re-bind failed — please restart Flow")
                 notify("Flow", t("notify.hotkey_change_pending_restart"))
+
+        # v0.5.1: Live-reload UI when ui_locale changed. We push the new
+        # translation dict to JS via the existing getLocale-style call, and
+        # rebuild the menubar so Hauptfenster…/Settings…/Mode pick up the
+        # new locale immediately. No app restart needed.
+        if ui_locale_changed:
+            from wnflow.i18n import set_user_override
+            set_user_override(self._config.ui.locale)
+            try:
+                self._menubar.rebuild_menu()
+            except Exception:
+                log.exception("Menubar rebuild after locale change failed")
+            if self._main_window is not None:
+                try:
+                    self._main_window.push_locale()
+                except Exception:
+                    log.exception("MainWindow push_locale failed")
 
         notify("Flow", t("notify.settings_saved"))
 

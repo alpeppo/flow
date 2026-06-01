@@ -46,18 +46,44 @@ def _read_system_locale() -> str:
 
 
 _cached_locale: str | None = None
+# User override from settings ("auto" | "en" | "de"). "auto" means follow
+# system locale. Set via set_user_override() from app startup or settings save.
+_user_override: str = "auto"
 
 
 def _reset_cache() -> None:
     """Test hook — clears the locale cache so tests can swap the value."""
-    global _cached_locale
+    global _cached_locale, _user_override
+    _cached_locale = None
+    _user_override = "auto"
+
+
+def set_user_override(value: str | None) -> None:
+    """Sets the explicit UI-language override from user settings.
+
+    `value` is one of "auto", "en", "de". Anything else is treated as "auto".
+    Side effect: clears the cache so the next `detect_locale()` re-resolves.
+    """
+    global _user_override, _cached_locale
+    if value not in ("auto", "en", "de"):
+        value = "auto"
+    _user_override = value
     _cached_locale = None
 
 
 def detect_locale() -> str:
-    """Returns the active locale string: `de` or `en`. Cached."""
+    """Returns the active locale string: `de` or `en`. Cached.
+
+    Resolution order:
+      1. user override (from settings) if explicit `en` / `de`
+      2. macOS system locale (defaults read -g AppleLocale)
+      3. fallback `en`
+    """
     global _cached_locale
     if _cached_locale is not None:
+        return _cached_locale
+    if _user_override in ("en", "de"):
+        _cached_locale = _user_override
         return _cached_locale
     raw = _read_system_locale().lower()
     _cached_locale = "de" if raw.startswith("de") else "en"
@@ -131,6 +157,11 @@ TRANSLATIONS: Final[dict[str, dict[str, str]]] = {
         "settings.api_key.valid": "✓ Valid",
         "settings.api_key.invalid_prefix": "✗",
         "settings.language.label": "Dictation language",
+        "settings.ui_locale.label": "Interface language",
+        "settings.ui_locale.hint": "Auto follows your macOS language. Change takes effect immediately.",
+        "settings.ui_locale.option.auto": "Auto (system)",
+        "settings.ui_locale.option.en": "English",
+        "settings.ui_locale.option.de": "Deutsch",
         "settings.hotwords.label": "Hotwords",
         "settings.hotwords.hint": "One per line. Whisper gets these as a bias list so your proper nouns are transcribed correctly.",
         "settings.section.modes_hotkey": "Mode & Hotkey",
@@ -250,6 +281,11 @@ TRANSLATIONS: Final[dict[str, dict[str, str]]] = {
         "settings.api_key.valid": "✓ Valide",
         "settings.api_key.invalid_prefix": "✗",
         "settings.language.label": "Diktat-Sprache",
+        "settings.ui_locale.label": "Sprache der Oberfläche",
+        "settings.ui_locale.hint": "Auto folgt deiner macOS-Sprache. Änderung wirkt sofort.",
+        "settings.ui_locale.option.auto": "Auto (System)",
+        "settings.ui_locale.option.en": "English",
+        "settings.ui_locale.option.de": "Deutsch",
         "settings.hotwords.label": "Hotwords",
         "settings.hotwords.hint": "Eine pro Zeile. Whisper bekommt die als Bias-Liste, damit deine Eigennamen korrekt erkannt werden.",
         "settings.section.modes_hotkey": "Modus & Hotkey",
