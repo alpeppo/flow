@@ -631,7 +631,7 @@ class WnflowApp(NSObject):
                 self._done_timer = rumps.Timer(self._hide_pill_after_done, 0.3)
                 self._done_timer.start()
         else:
-            notify("Flow", t("notify.paste_failed"))
+            notify("Flow", t("notify.paste_failed_clipboard"))
             play_error_sound()
             if self._pill is not None:
                 self._pill.hide()
