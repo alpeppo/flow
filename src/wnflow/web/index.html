@@ -579,6 +579,11 @@
       I18N_TABLE = payload.t || {};
       document.documentElement.lang = I18N_LOCALE;
       localeReady = true;
+      // Re-render any static element marked with data-i18n
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        el.textContent = t(key);
+      });
       // Drain anything that waited on the locale before rendering.
       while (pendingRenderQueue.length) {
         const fn = pendingRenderQueue.shift();
@@ -958,7 +963,7 @@
       }));
 
       // Section-Heading: System
-      wrap.appendChild(makeSectionHeading('System'));
+      wrap.appendChild(makeSectionHeading(t("settings.section.system")));
 
       // Hotwords
       wrap.appendChild(makeField({
@@ -977,16 +982,16 @@
       // Login-Item Switch
       wrap.appendChild(makeSwitchRow({
         id: 'st-login-item',
-        title: 'Beim Login automatisch starten',
-        sub: 'Flow lädt sich beim Anmelden in die Menüleiste.',
+        title: t("settings.login_item.label"),
+        sub: t("settings.login_item.sub"),
         on: !!v.login_item,
       }));
 
       // Mute-Background Switch
       wrap.appendChild(makeSwitchRow({
         id: 'st-mute-bg',
-        title: 'Hintergrund stummschalten während Aufnahme',
-        sub: 'Pausiert Apple Music & Co. solange du diktierst. Wird danach automatisch fortgesetzt.',
+        title: t("settings.mute_bg.label"),
+        sub: t("settings.mute_bg.sub"),
         on: !!v.mute_background,
       }));
 
