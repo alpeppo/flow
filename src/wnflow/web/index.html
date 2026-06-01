@@ -511,11 +511,11 @@
           <div class="kpis" id="kpis">
             <div>
               <div class="kpi-value" id="kpi-words">—</div>
-              <div class="kpi-label">Wörter</div>
+              <div class="kpi-label" data-i18n="history.kpi.words">Words</div>
             </div>
             <div>
               <div class="kpi-value" id="kpi-speed">—</div>
-              <div class="kpi-label">schneller</div>
+              <div class="kpi-label" data-i18n="history.kpi.speed">faster</div>
             </div>
           </div>
         </header>
@@ -605,10 +605,10 @@
     }
 
     const TABS = {
-      history:    { title: 'Verlauf',       sub: 'Diese Woche',                       showKpis: true  },
-      dictionary: { title: 'Wörterbuch',    sub: 'Eigene Begriffe und Korrekturen',   showKpis: false },
-      commands:   { title: 'Befehle',       sub: 'Custom-Modi und Sprach-Triggers',   showKpis: false },
-      settings:   { title: 'Einstellungen', sub: 'API-Key, Sprache und Hotkeys',      showKpis: false },
+      history:    { title: () => t("tab.history.title"),    sub: () => t("tab.history.sub"),    showKpis: true  },
+      dictionary: { title: () => t("tab.dictionary.title"), sub: () => t("tab.dictionary.sub"), showKpis: false },
+      commands:   { title: () => t("tab.commands.title"),   sub: () => t("tab.commands.sub"),   showKpis: false },
+      settings:   { title: () => t("tab.settings.title"),   sub: () => t("tab.settings.sub"),   showKpis: false },
     };
 
     let currentTab = 'history';
@@ -624,11 +624,12 @@
       if (isToday) {
         time = d.toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit'});
       } else if (isYest) {
-        time = 'Gestern';
+        time = t("history.meta.yesterday");
       } else {
         time = d.toLocaleDateString('de-DE', {day: '2-digit', month: '2-digit'});
       }
-      return `${time}  ·  ${words} ${words === 1 ? 'Wort' : 'Wörter'}`;
+      const wordLabel = tPlural("history.unit.word", words);
+      return `${time}  ·  ${words} ${wordLabel}`;
     }
 
     // SVG-Wave per DOM, nicht via innerHTML — kein User-Input drin, aber konsistent
@@ -676,7 +677,7 @@
       const c = document.getElementById('content');
       clear(c);
       if (!items || items.length === 0) {
-        c.appendChild(makeEmptyState('Noch keine Diktate.', 'Doppel-Tap auf fn startet die Aufnahme.'));
+        c.appendChild(makeEmptyState(t("history.empty.title"), t("history.empty.sub")));
       } else {
         for (const it of items) {
           const row = document.createElement('div');
@@ -1170,8 +1171,8 @@
       document.querySelectorAll('.nav-item').forEach(el => {
         el.classList.toggle('active', el.dataset.tab === tab);
       });
-      document.getElementById('tab-title').textContent = TABS[tab].title;
-      document.getElementById('tab-sub').textContent = TABS[tab].sub;
+      document.getElementById('tab-title').textContent = TABS[tab].title();
+      document.getElementById('tab-sub').textContent = TABS[tab].sub();
       document.getElementById('kpis').style.display = TABS[tab].showKpis ? 'flex' : 'none';
       if (tab === 'history') {
         loadHistory();
