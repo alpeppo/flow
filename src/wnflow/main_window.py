@@ -169,6 +169,8 @@ class MainWindow:
             self._send_history()
         elif action == "loadSettings":
             self._send_settings()
+        elif action == "getLocale":
+            self._send_locale()
         elif action == "saveSettings":
             payload = self._body_to_dict(body).get("payload") or {}
             if self._on_save_settings is not None:
@@ -243,6 +245,19 @@ class MainWindow:
         js_payload = json.dumps(values, ensure_ascii=False)
         self._webview.evaluateJavaScript_completionHandler_(
             f"window.applySettings({js_payload})", None
+        )
+
+    def _send_locale(self) -> None:
+        """Tells JS the active locale + the translation dict for that locale only.
+        We don't ship both — JS gets the single dict it needs."""
+        if self._webview is None:
+            return
+        from wnflow.i18n import detect_locale, TRANSLATIONS
+        locale = detect_locale()
+        table = TRANSLATIONS.get(locale, TRANSLATIONS["en"])
+        payload = json.dumps({"locale": locale, "t": table}, ensure_ascii=False)
+        self._webview.evaluateJavaScript_completionHandler_(
+            f"window.applyLocale({payload})", None
         )
 
     def _deliver_test_result(self, ok: bool, message: str) -> None:

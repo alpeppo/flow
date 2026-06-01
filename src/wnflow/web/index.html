@@ -553,6 +553,57 @@
         <rect x="216" y="93.6" width="18" height="52.7" rx="9" fill="currentColor"/>
       </svg>`;
 
+    // i18n harness ----------------------------------------------------
+    // `window.applyLocale({locale, t})` is called once by Python at boot.
+    // All visible strings go through `t(key, vars)`.
+    let I18N_TABLE = {};
+    let I18N_LOCALE = "en";
+    let localeReady = false;
+    const pendingRenderQueue = [];
+
+    function whenLocaleReady(fn) {
+      if (localeReady) fn();
+      else pendingRenderQueue.push(fn);
+    }
+
+    function renderCurrentTab() {
+      // Tab dispatch — used by both initial render and re-render after locale swap.
+      if (typeof currentTab === "undefined") return;
+      if (currentTab === "history" && typeof loadHistory === "function") loadHistory();
+      else if (currentTab === "settings" && typeof callPython === "function") callPython("loadSettings");
+      else if (typeof showTab === "function") showTab(currentTab);
+    }
+
+    window.applyLocale = function(payload) {
+      I18N_LOCALE = payload.locale || "en";
+      I18N_TABLE = payload.t || {};
+      document.documentElement.lang = I18N_LOCALE;
+      localeReady = true;
+      // Drain anything that waited on the locale before rendering.
+      while (pendingRenderQueue.length) {
+        const fn = pendingRenderQueue.shift();
+        try { fn(); } catch (e) { console.warn("queued render failed:", e); }
+      }
+      // Plus always re-render the active tab in case it rendered with EN fallback.
+      renderCurrentTab();
+    };
+
+    function t(key, vars) {
+      let str = I18N_TABLE[key] || ("[" + key + "]");
+      if (vars) {
+        for (const [k, v] of Object.entries(vars)) {
+          str = str.replace(new RegExp("\\{" + k + "\\}", "g"), String(v));
+        }
+      }
+      return str;
+    }
+
+    // Plural helper. For keys named `<base>.one` / `<base>.other`.
+    function tPlural(baseKey, n, vars) {
+      const suffix = n === 1 ? ".one" : ".other";
+      return t(baseKey + suffix, { ...(vars || {}), n });
+    }
+
     const TABS = {
       history:    { title: 'Verlauf',       sub: 'Diese Woche',                       showKpis: true  },
       dictionary: { title: 'Wörterbuch',    sub: 'Eigene Begriffe und Korrekturen',   showKpis: false },
@@ -1187,8 +1238,20 @@
       }
     });
 
-    document.addEventListener('DOMContentLoaded', loadHistory);
-    if (document.readyState !== 'loading') loadHistory();
+    // Fire getLocale FIRST so applyLocale can drain the queue.
+    if (typeof callPython === "function") callPython("getLocale");
+
+    // Initial render — queued, runs as soon as locale arrives.
+    function _bootstrapInitialRender() {
+      whenLocaleReady(() => {
+        if (typeof loadHistory === "function") loadHistory();
+      });
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", _bootstrapInitialRender);
+    } else {
+      _bootstrapInitialRender();
+    }
   </script>
 </body>
 </html>
