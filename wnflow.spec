@@ -16,8 +16,15 @@ import os
 
 import tomllib
 from pathlib import Path
+from PyInstaller.utils.hooks import copy_metadata
+
+# SPEC is PyInstaller-injected: path to this .spec file
 _pyproject = Path(SPEC).parent / "pyproject.toml"
 WNFLOW_VERSION = tomllib.loads(_pyproject.read_text())["project"]["version"]
+
+# Bundle the package's dist-info so importlib.metadata.version("worknetic-flow")
+# works at runtime (otherwise __version__ falls back to "0.0.0+unknown").
+_metadata = copy_metadata("worknetic-flow")
 
 a = Analysis(
     ['src/wnflow/__main__.py'],
@@ -30,7 +37,7 @@ a = Analysis(
         ('brand/wnflow_icon_64.png', 'brand'),
         # Hauptfenster-HTML
         ('src/wnflow/web/index.html', 'wnflow/web'),
-    ],
+    ] + _metadata,
     hiddenimports=[
         # Sichergehen, dass alle wnflow-Submodule da sind
         'wnflow.app',
