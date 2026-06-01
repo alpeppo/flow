@@ -967,8 +967,8 @@
 
       // Hotwords
       wrap.appendChild(makeField({
-        label: 'Hotwords',
-        hint: 'Eine pro Zeile. Whisper bekommt die als Bias-Liste, damit deine Eigennamen korrekt erkannt werden.',
+        label: t("settings.hotwords.label"),
+        hint: t("settings.hotwords.hint"),
         build: () => {
           const ta = document.createElement('textarea');
           ta.className = 'textarea';
