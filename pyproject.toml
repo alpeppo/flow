@@ -1,6 +1,6 @@
 [project]
 name = "worknetic-flow"
-version = "0.4.0"
+version = "0.5.0"
 description = "Lokaler Wispr-Flow-Klon: System-weites Push-to-Talk-Diktat mit mlx-whisper"
 readme = "README.md"
 requires-python = ">=3.11"

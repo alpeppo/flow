@@ -46,6 +46,7 @@ a = Analysis(
         'wnflow.history_store',
         'wnflow.hotkey',
         'wnflow.fn_keymap',
+        'wnflow.i18n',
         'wnflow.login_item',
         'wnflow.main_window',
         'wnflow.menubar',
