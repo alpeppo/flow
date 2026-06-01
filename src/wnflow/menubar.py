@@ -13,6 +13,7 @@ from pathlib import Path
 
 import rumps
 
+from wnflow.i18n import t
 from wnflow.state import State
 from wnflow.threading_guard import assert_main_thread
 
@@ -26,11 +27,15 @@ STATE_ICONS = {
 }
 
 MODES = ["verbatim", "formal", "rage"]
-MODE_LABELS = {
-    "verbatim": "Verbatim",
-    "formal": "Formal",
-    "rage": "Anti-Wut",
-}
+
+
+def mode_label(mode: str) -> str:
+    """Returns the localized label for a mode code.
+
+    Function, not a dict, so the locale is re-resolved every call.
+    Tests rely on this — see test_i18n.test_menubar_mode_label_*.
+    """
+    return t(f"menubar.mode.{mode}")
 
 
 class MenubarController:
@@ -79,7 +84,7 @@ class MenubarController:
         self._mode_items: dict[str, rumps.MenuItem] = {}
         for mode in MODES:
             item = rumps.MenuItem(
-                MODE_LABELS[mode],
+                mode_label(mode),
                 callback=self._make_mode_callback(mode),
             )
             if mode == initial_mode:
@@ -87,23 +92,23 @@ class MenubarController:
             self._mode_items[mode] = item
 
         # Mode-Submenu
-        mode_submenu = rumps.MenuItem("Mode")
+        mode_submenu = rumps.MenuItem(t("menubar.mode_submenu"))
         for mode in MODES:
             mode_submenu.add(self._mode_items[mode])
 
         menu_items: list = []
         if on_open_main is not None:
             menu_items.append(
-                rumps.MenuItem("Hauptfenster…", callback=lambda _: on_open_main())
+                rumps.MenuItem(t("menubar.main_window"), callback=lambda _: on_open_main())
             )
             menu_items.append(None)
         menu_items += [
             mode_submenu,
             None,
-            rumps.MenuItem("Settings…", callback=lambda _: on_open_settings()),
-            rumps.MenuItem("Open Config", callback=lambda _: on_open_config()),
+            rumps.MenuItem(t("menubar.settings"), callback=lambda _: on_open_settings()),
+            rumps.MenuItem(t("menubar.open_config"), callback=lambda _: on_open_config()),
             None,
-            rumps.MenuItem("Quit", callback=lambda _: on_quit()),
+            rumps.MenuItem(t("menubar.quit"), callback=lambda _: on_quit()),
         ]
         self._app.menu = menu_items
 

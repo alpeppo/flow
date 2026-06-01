@@ -66,3 +66,16 @@ def test_both_languages_have_identical_key_sets() -> None:
     missing_in_en = de - en
     assert not missing_in_de, f"Keys missing in DE: {missing_in_de}"
     assert not missing_in_en, f"Keys missing in EN: {missing_in_en}"
+
+
+def test_menubar_mode_label_lookup_respects_runtime_locale_change(monkeypatch) -> None:
+    """If MODE_LABELS were a frozen module-level dict, this would fail.
+    The fix is to make it a function. This test guards against
+    re-introducing the freeze."""
+    from wnflow.menubar import mode_label
+    with patch("wnflow.i18n._read_system_locale", return_value="en_US"):
+        i18n._reset_cache()
+        assert mode_label("verbatim") == "Verbatim"  # same in both, but exists
+    with patch("wnflow.i18n._read_system_locale", return_value="de_DE"):
+        i18n._reset_cache()
+        assert mode_label("rage") == "Anti-Wut"  # German-only string

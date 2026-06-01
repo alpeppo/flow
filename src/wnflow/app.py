@@ -49,6 +49,7 @@ from wnflow.cleanup.groq_client import GroqClient
 from wnflow.config import __version__ as _wnflow_version
 from wnflow.config import load, save
 from wnflow.hotkey import HotkeyListener
+from wnflow.i18n import t
 from wnflow.login_item import is_login_enabled, set_login_enabled
 from wnflow.main_window import MainWindow
 from wnflow.menubar import MenubarController
@@ -321,21 +322,14 @@ class WnflowApp(NSObject):
         # v0.3.0 Migration-Check: warne wenn alte v0.2.0 launchd-plist da ist
         legacy_plist = Path.home() / "Library/LaunchAgents/de.worknetic.flow.plist"
         if legacy_plist.exists():
-            notify(
-                "worknetic-flow",
-                "v0.2.0 launchd-Agent gefunden. Bitte 'launchctl unload && rm' "
-                "und neu starten — sonst laufen 2 Instanzen parallel.",
-            )
+            notify("Flow", t("notify.v020_legacy_plist"))
 
         if not self._config.cleanup.api_key:
-            notify("worknetic-flow", "GROQ_API_KEY fehlt — Cleanup deaktiviert")
+            notify("Flow", t("notify.api_key_missing"))
             self._config.cleanup.enabled = False
 
         if not ensure_permissions():
-            notify(
-                "worknetic-flow",
-                "Berechtigungen fehlen. Systemeinstellungen → Datenschutz → Bedienungshilfen + Eingabeüberwachung",
-            )
+            notify("Flow", t("notify.permissions_missing"))
             self._state.try_transition(State.DEGRADED)
             # Trotz DEGRADED: Hauptfenster anzeigen, damit der User die App
             # sieht (sonst wirkt sie tot) und über Settings-Tab nachvollziehen
@@ -351,7 +345,7 @@ class WnflowApp(NSObject):
             self._hotkey.start()
         except Exception as exc:
             log.exception("Hotkey listener failed")
-            notify("worknetic-flow", f"Hotkey-Listener failed: {exc}")
+            notify("Flow", t("notify.hotkey_listener_failed").format(error=exc))
             self._state.try_transition(State.DEGRADED)
             if self._main_window is not None:
                 try:
@@ -396,7 +390,7 @@ class WnflowApp(NSObject):
         self._boot_executor.shutdown(wait=False)
 
         if not result.success:
-            notify("worknetic-flow", f"Modell-Load fehlgeschlagen: {result.error}")
+            notify("Flow", t("notify.model_load_failed").format(error=result.error))
             self._state.try_transition(State.DEGRADED)
             return
 
@@ -508,7 +502,7 @@ class WnflowApp(NSObject):
         assert_main_thread("WnflowApp._handle_auto_stop")
         if self._state.current != State.RECORDING:
             return
-        notify("worknetic-flow", "Max-Aufnahmelänge erreicht — wird verarbeitet")
+        notify("Flow", t("notify.max_recording_reached"))
         self._consume_recording()
 
     def _on_global_keydown(self, event) -> None:
@@ -580,7 +574,7 @@ class WnflowApp(NSObject):
             result = future.result()
         except Exception as exc:
             log.exception("Pipeline failed")
-            notify("worknetic-flow", f"Transkription fehlgeschlagen: {exc}")
+            notify("Flow", t("notify.transcription_failed").format(error=exc))
             play_error_sound()
             if self._pill is not None:
                 self._pill.hide()
@@ -590,7 +584,7 @@ class WnflowApp(NSObject):
         if not self._state.try_transition(State.PASTING):
             log.warning("Cannot transition to PASTING from %s — recovering",
                         self._state.current.name)
-            notify("worknetic-flow", "State-Race beim Paste")
+            notify("Flow", t("notify.paste_state_race"))
             play_error_sound()
             if self._pill is not None:
                 self._pill.hide()
@@ -619,7 +613,7 @@ class WnflowApp(NSObject):
             success = future.result()
         except Exception:
             log.exception("Paste failed")
-            notify("worknetic-flow", "Paste fehlgeschlagen")
+            notify("Flow", t("notify.paste_failed"))
             play_error_sound()
             if self._pill is not None:
                 self._pill.hide()
@@ -637,10 +631,7 @@ class WnflowApp(NSObject):
                 self._done_timer = rumps.Timer(self._hide_pill_after_done, 0.3)
                 self._done_timer.start()
         else:
-            notify(
-                "worknetic-flow",
-                "Paste fehlgeschlagen — Text bleibt im Clipboard für manuelles Cmd+V",
-            )
+            notify("Flow", t("notify.paste_failed"))
             play_error_sound()
             if self._pill is not None:
                 self._pill.hide()
@@ -667,9 +658,9 @@ class WnflowApp(NSObject):
     def _collect_settings_values(self) -> dict:
         """Liefert das initial-values-Dict für das Settings-Form im HTML."""
         from wnflow.settings_data import LANGUAGE_OPTIONS
-        from wnflow.menubar import MODE_LABELS, MODES
+        from wnflow.menubar import MODES, mode_label
         from wnflow.fn_keymap import fn_conflict_for
-        mode_options = [[m, MODE_LABELS.get(m, m)] for m in MODES]
+        mode_options = [[m, mode_label(m)] for m in MODES]
         # Reihenfolge: empfohlene Modifier zuerst, fn am Ende (kann durch
         # macOS-Emoji-Funktion blockiert sein).
         hotkey_key_options = [
@@ -753,7 +744,7 @@ class WnflowApp(NSObject):
             save(self._config)
         except Exception as exc:
             log.exception("Config save failed")
-            notify("worknetic-flow", f"Settings-Speichern fehlgeschlagen: {exc}")
+            notify("Flow", t("notify.settings_save_failed").format(error=exc))
             return
 
         # Cleanup wieder aktivieren falls jetzt API-Key da
@@ -801,9 +792,9 @@ class WnflowApp(NSObject):
                          *new_hotkey)
             except Exception:
                 log.exception("Hotkey re-bind failed — please restart Flow")
-                notify("Flow", "Hotkey-Aenderung wirkt nach Neustart")
+                notify("Flow", t("notify.hotkey_change_pending_restart"))
 
-        notify("Flow", "Einstellungen gespeichert")
+        notify("Flow", t("notify.settings_saved"))
 
     def _on_test_api_key(self, key: str, result_callback) -> None:
         """Worker-Thread: testet API-Key via minimalem Groq-Request.
