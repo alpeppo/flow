@@ -806,8 +806,8 @@
 
       // API-Key + Test
       wrap.appendChild(makeField({
-        label: 'Groq API-Key',
-        hint: 'Auf console.groq.com/keys erstellen. Wird zum Bereinigen der Diktate (Formal/Rage) verwendet.',
+        label: t("settings.api_key.label"),
+        hint: t("settings.api_key.hint"),
         build: () => {
           const row = document.createElement('div');
           row.className = 'field-row';
@@ -821,21 +821,21 @@
           const showBtn = document.createElement('button');
           showBtn.type = 'button';
           showBtn.className = 'btn ghost';
-          showBtn.textContent = 'Zeigen';
+          showBtn.textContent = t("settings.api_key.show");
           showBtn.addEventListener('click', () => {
-            const t = input.type === 'password' ? 'text' : 'password';
-            input.type = t;
-            showBtn.textContent = t === 'password' ? 'Zeigen' : 'Verbergen';
+            const isPwd = input.type === 'password';
+            input.type = isPwd ? 'text' : 'password';
+            showBtn.textContent = isPwd ? t("settings.api_key.hide") : t("settings.api_key.show");
           });
           row.appendChild(showBtn);
           const testBtn = document.createElement('button');
           testBtn.type = 'button';
           testBtn.className = 'btn secondary';
-          testBtn.textContent = 'Testen';
+          testBtn.textContent = t("settings.api_key.test");
           testBtn.addEventListener('click', () => {
             const k = (input.value || '').trim();
-            if (!k) { setTestStatus('Bitte API-Key einfügen.', 'fail'); return; }
-            setTestStatus('Teste...', '');
+            if (!k) { setTestStatus(t("settings.api_key.empty"), 'fail'); return; }
+            setTestStatus(t("settings.api_key.testing"), '');
             callPython('testApiKey', { key: k });
           });
           row.appendChild(testBtn);
@@ -851,7 +851,7 @@
 
       // Language
       wrap.appendChild(makeField({
-        label: 'Diktat-Sprache',
+        label: t("settings.language.label"),
         build: () => {
           const sel = document.createElement('select');
           sel.className = 'select';
