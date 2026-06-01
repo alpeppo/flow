@@ -751,7 +751,7 @@
             </svg>
           </div>
           <h3 data-i18n="features.f2.title">Three cleanup modes</h3>
-          <p data-i18n="features.f2.body" data-i18n-html><strong>Verbatim</strong> for the raw transcript, <strong>Formal</strong> for polished prose, <strong>Anti-Wut</strong> to de-escalate heated messages. Switch with a modifier key mid-tap.</p>
+          <p data-i18n="features.f2.body" data-i18n-html><strong>Verbatim</strong> for the raw transcript, <strong>Formal</strong> for polished prose, <strong>Anti-Rage</strong> to de-escalate heated messages. Switch with a modifier key mid-tap.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">
@@ -912,7 +912,7 @@
             <span class="privacy-check"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l3 3 7-7"/></svg></span>
             <div>
               <h3 data-i18n="privacy.p2.title">Cleanup is opt-in</h3>
-              <p data-i18n="privacy.p2.body">Verbatim mode never contacts Groq. Formal/Anti-Wut send only the transcribed text — not the audio — and only if you've entered an API key.</p>
+              <p data-i18n="privacy.p2.body">Verbatim mode never contacts Groq. Formal/Anti-Rage send only the transcribed text — not the audio — and only if you've entered an API key.</p>
             </div>
           </li>
           <li>
@@ -1021,9 +1021,9 @@
           <p data-i18n="install.s3.body2" data-i18n-html>With a free <a href="https://console.groq.com/keys" style="color: var(--fg-primary);">Groq API key</a>, you unlock:</p>
           <ul class="compact">
             <li data-i18n="install.s3.li1" data-i18n-html><strong>Formal</strong> (<kbd>Ctrl</kbd>+<kbd>fn</kbd>) — Llama rewrites your speech as polished prose.</li>
-            <li data-i18n="install.s3.li2" data-i18n-html><strong>Anti-Wut</strong> (<kbd>Shift</kbd>+<kbd>fn</kbd>) — de-escalates emotionally-charged dictations before paste.</li>
+            <li data-i18n="install.s3.li2" data-i18n-html><strong>Anti-Rage</strong> (<kbd>Shift</kbd>+<kbd>fn</kbd>) — de-escalates emotionally-charged dictations before paste.</li>
           </ul>
-          <p data-i18n="install.s3.body3" data-i18n-html>Paste the key under <kbd>Einstellungen</kbd> → <kbd>Speichern</kbd>.</p>
+          <p data-i18n="install.s3.body3" data-i18n-html>Paste the key under <kbd>Settings</kbd> → <kbd>Save</kbd>.</p>
         </div>
       </div>
 
@@ -1052,11 +1052,11 @@
       <div class="faq">
         <details>
           <summary data-i18n="faq.q1.q">Is any audio sent to a server?</summary>
-          <p data-i18n="faq.q1.a" data-i18n-html>No, never. Whisper runs on-device via MLX. Even when you use Formal or Anti-Wut cleanup, only the transcribed <em>text</em> is sent to Groq — the audio buffer never leaves your Mac.</p>
+          <p data-i18n="faq.q1.a" data-i18n-html>No, never. Whisper runs on-device via MLX. Even when you use Formal or Anti-Rage cleanup, only the transcribed <em>text</em> is sent to Groq — the audio buffer never leaves your Mac.</p>
         </details>
         <details>
           <summary data-i18n="faq.q2.q">Why would I need a Groq API key?</summary>
-          <p data-i18n="faq.q2.a">Only if you want Formal or Anti-Wut cleanup. Verbatim mode (the default) works completely offline without any key. Groq has a generous free tier that's more than enough for personal use.</p>
+          <p data-i18n="faq.q2.a">Only if you want Formal or Anti-Rage cleanup. Verbatim mode (the default) works completely offline without any key. Groq has a generous free tier that's more than enough for personal use.</p>
         </details>
         <details>
           <summary data-i18n="faq.q3.q">What are the system requirements?</summary>
@@ -1123,7 +1123,7 @@
         "features.f1.title": "On-device transcription",
         "features.f1.body": "MLX-Whisper Large v3 Turbo runs locally on your Apple Silicon Mac. No upload, no streaming to a server — your voice never leaves the device.",
         "features.f2.title": "Three cleanup modes",
-        "features.f2.body": "<strong>Verbatim</strong> for the raw transcript, <strong>Formal</strong> for polished prose, <strong>Anti-Wut</strong> to de-escalate heated messages. Switch with a modifier key mid-tap.",
+        "features.f2.body": "<strong>Verbatim</strong> for the raw transcript, <strong>Formal</strong> for polished prose, <strong>Anti-Rage</strong> to de-escalate heated messages. Switch with a modifier key mid-tap.",
         "features.f3.title": "Works in any app",
         "features.f3.body": "Flow types the result wherever your cursor is — email, Slack, IDE, browser, terminal. No integrations, no plugins. It just pastes.",
 
@@ -1174,7 +1174,7 @@
         "privacy.p1.title": "Audio never leaves your Mac",
         "privacy.p1.body": "MLX-Whisper runs entirely on Apple Silicon. The recorded audio buffer is held in memory, transcribed, then discarded. No upload, no streaming, no cache.",
         "privacy.p2.title": "Cleanup is opt-in",
-        "privacy.p2.body": "Verbatim mode never contacts Groq. Formal/Anti-Wut send only the transcribed text — not the audio — and only if you've entered an API key.",
+        "privacy.p2.body": "Verbatim mode never contacts Groq. Formal/Anti-Rage send only the transcribed text — not the audio — and only if you've entered an API key.",
         "privacy.p3.title": "History stays on your disk",
         "privacy.p3.body": "Past dictations live in <code class=\"mono\">~/.worknetic-flow/history.json</code>. Plain JSON, easy to inspect, easy to delete.",
         "privacy.p4.title": "No telemetry",
@@ -1209,7 +1209,7 @@
         "install.s3.body1": "Without a key, you get <strong>Verbatim mode</strong> — the raw Whisper transcript. That works for most cases.",
         "install.s3.body2": "With a free <a href=\"https://console.groq.com/keys\" style=\"color: var(--fg-primary);\">Groq API key</a>, you unlock:",
         "install.s3.li1": "<strong>Formal</strong> (<kbd>Ctrl</kbd>+<kbd>fn</kbd>) — Llama rewrites your speech as polished prose.",
-        "install.s3.li2": "<strong>Anti-Wut</strong> (<kbd>Shift</kbd>+<kbd>fn</kbd>) — de-escalates emotionally-charged dictations before paste.",
+        "install.s3.li2": "<strong>Anti-Rage</strong> (<kbd>Shift</kbd>+<kbd>fn</kbd>) — de-escalates emotionally-charged dictations before paste.",
         "install.s3.body3": "Paste the key under <kbd>Settings</kbd> → <kbd>Save</kbd>.",
         "install.s4.title": "Try it",
         "install.s4.li1": "<strong>Start recording:</strong> double-tap <kbd>fn</kbd>. The pill appears at the bottom of your screen.",
@@ -1220,9 +1220,9 @@
         "faq.eyebrow": "FAQ",
         "faq.title": "Frequently asked.",
         "faq.q1.q": "Is any audio sent to a server?",
-        "faq.q1.a": "No, never. Whisper runs on-device via MLX. Even when you use Formal or Anti-Wut cleanup, only the transcribed <em>text</em> is sent to Groq — the audio buffer never leaves your Mac.",
+        "faq.q1.a": "No, never. Whisper runs on-device via MLX. Even when you use Formal or Anti-Rage cleanup, only the transcribed <em>text</em> is sent to Groq — the audio buffer never leaves your Mac.",
         "faq.q2.q": "Why would I need a Groq API key?",
-        "faq.q2.a": "Only if you want Formal or Anti-Wut cleanup. Verbatim mode (the default) works completely offline without any key. Groq has a generous free tier that's more than enough for personal use.",
+        "faq.q2.a": "Only if you want Formal or Anti-Rage cleanup. Verbatim mode (the default) works completely offline without any key. Groq has a generous free tier that's more than enough for personal use.",
         "faq.q3.q": "What are the system requirements?",
         "faq.q3.a": "macOS 13 (Ventura) or newer, on Apple Silicon (M1, M2, M3, M4). Intel Macs aren't supported because MLX-Whisper needs the Metal backend that ships with Apple Silicon.",
         "faq.q4.q": "Why isn't Flow signed and notarized?",
@@ -1256,7 +1256,7 @@
         "features.f1.title": "Transkription auf dem Gerät",
         "features.f1.body": "MLX-Whisper Large v3 Turbo läuft lokal auf deinem Apple-Silicon-Mac. Kein Upload, kein Streaming zu einem Server — deine Stimme verlässt das Gerät nie.",
         "features.f2.title": "Drei Cleanup-Modi",
-        "features.f2.body": "<strong>Verbatim</strong> für das rohe Transkript, <strong>Formal</strong> für polierten Fließtext, <strong>Anti-Wut</strong> zum Entschärfen hitziger Nachrichten. Modifier-Taste hält gedrückt während du diktierst.",
+        "features.f2.body": "<strong>Verbatim</strong> für das rohe Transkript, <strong>Formal</strong> für polierten Fließtext, <strong>Anti-Rage</strong> zum Entschärfen hitziger Nachrichten. Modifier-Taste hält gedrückt während du diktierst.",
         "features.f3.title": "Funktioniert in jeder App",
         "features.f3.body": "Flow tippt das Ergebnis dorthin, wo dein Cursor steht — E-Mail, Slack, IDE, Browser, Terminal. Keine Integrationen, keine Plugins. Es fügt einfach ein.",
 
@@ -1307,7 +1307,7 @@
         "privacy.p1.title": "Audio verlässt deinen Mac nie",
         "privacy.p1.body": "MLX-Whisper läuft komplett auf Apple Silicon. Der Audio-Buffer bleibt im RAM, wird transkribiert, dann verworfen. Kein Upload, kein Streaming, kein Cache.",
         "privacy.p2.title": "Cleanup ist opt-in",
-        "privacy.p2.body": "Verbatim-Modus kontaktiert Groq nie. Formal/Anti-Wut senden nur den transkribierten Text — nicht das Audio — und nur wenn du einen API-Key eingetragen hast.",
+        "privacy.p2.body": "Verbatim-Modus kontaktiert Groq nie. Formal/Anti-Rage senden nur den transkribierten Text — nicht das Audio — und nur wenn du einen API-Key eingetragen hast.",
         "privacy.p3.title": "History bleibt auf deiner Platte",
         "privacy.p3.body": "Frühere Diktate liegen in <code class=\"mono\">~/.worknetic-flow/history.json</code>. Plain JSON, leicht zu inspizieren, leicht zu löschen.",
         "privacy.p4.title": "Keine Telemetrie",
@@ -1342,7 +1342,7 @@
         "install.s3.body1": "Ohne Key bekommst du <strong>Verbatim-Modus</strong> — das rohe Whisper-Transkript. Reicht für die meisten Fälle.",
         "install.s3.body2": "Mit einem kostenlosen <a href=\"https://console.groq.com/keys\" style=\"color: var(--fg-primary);\">Groq-API-Key</a> bekommst du zusätzlich:",
         "install.s3.li1": "<strong>Formal</strong> (<kbd>Ctrl</kbd>+<kbd>fn</kbd>) — Llama schreibt deine Sprache als polierte Prosa um.",
-        "install.s3.li2": "<strong>Anti-Wut</strong> (<kbd>Shift</kbd>+<kbd>fn</kbd>) — entschärft emotional aufgeladene Diktate vor dem Einfügen.",
+        "install.s3.li2": "<strong>Anti-Rage</strong> (<kbd>Shift</kbd>+<kbd>fn</kbd>) — entschärft emotional aufgeladene Diktate vor dem Einfügen.",
         "install.s3.body3": "Key einfügen unter <kbd>Einstellungen</kbd> → <kbd>Speichern</kbd>.",
         "install.s4.title": "Ausprobieren",
         "install.s4.li1": "<strong>Aufnahme starten:</strong> Doppel-Tap <kbd>fn</kbd>. Die Pille erscheint unten am Bildschirm.",
@@ -1353,9 +1353,9 @@
         "faq.eyebrow": "FAQ",
         "faq.title": "Häufig gefragt.",
         "faq.q1.q": "Wird irgendein Audio an einen Server geschickt?",
-        "faq.q1.a": "Nein, nie. Whisper läuft auf dem Gerät via MLX. Selbst bei Formal- oder Anti-Wut-Cleanup wird nur der transkribierte <em>Text</em> an Groq geschickt — der Audio-Buffer verlässt deinen Mac nie.",
+        "faq.q1.a": "Nein, nie. Whisper läuft auf dem Gerät via MLX. Selbst bei Formal- oder Anti-Rage-Cleanup wird nur der transkribierte <em>Text</em> an Groq geschickt — der Audio-Buffer verlässt deinen Mac nie.",
         "faq.q2.q": "Warum brauche ich einen Groq-API-Key?",
-        "faq.q2.a": "Nur wenn du Formal- oder Anti-Wut-Cleanup willst. Verbatim-Modus (Default) funktioniert komplett offline ohne Key. Groq hat einen großzügigen Free-Tier, der für private Nutzung mehr als ausreicht.",
+        "faq.q2.a": "Nur wenn du Formal- oder Anti-Rage-Cleanup willst. Verbatim-Modus (Default) funktioniert komplett offline ohne Key. Groq hat einen großzügigen Free-Tier, der für private Nutzung mehr als ausreicht.",
         "faq.q3.q": "Welche Systemvoraussetzungen?",
         "faq.q3.a": "macOS 13 (Ventura) oder neuer, auf Apple Silicon (M1, M2, M3, M4). Intel-Macs werden nicht unterstützt, weil MLX-Whisper das Metal-Backend braucht, das nur Apple Silicon hat.",
         "faq.q4.q": "Warum ist Flow nicht signiert und notarisiert?",

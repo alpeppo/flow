@@ -34,7 +34,7 @@ After Flow launches:
 
 1. **Grant Microphone** (system dialog) → allow.
 2. **Grant Accessibility** → System Settings → Privacy & Security → Accessibility → toggle **Flow** on. This lets Flow listen for the `fn` hotkey globally and paste text into any focused app.
-3. **(Optional) Drop in your Groq API key**: in Flow → **Einstellungen** tab → paste the key → **Speichern**. Without a key, you only get raw Whisper output (verbatim mode). With a key, formal/anti-wut cleanup gets enabled.
+3. **(Optional) Drop in your Groq API key**: in Flow → **Settings** tab → paste the key → **Save**. Without a key, you only get raw Whisper output (verbatim mode). With a key, Formal / Anti-Rage cleanup gets enabled.
 
 Then **double-tap `fn`** anywhere and start dictating.
 
@@ -54,9 +54,11 @@ The Terminal command works because `curl` downloads don't get the Gatekeeper qua
 | Stop & paste | Double-tap **fn** again | Audio transcribed, cleaned (if Groq key set), pasted into focused app |
 | Cancel recording | **ESC** or click the **X** on the pill | Audio discarded, nothing pasted |
 | Force formal cleanup | Hold **Ctrl** while tapping fn | Override: this recording gets the "Formal" prompt |
-| Force anti-wut cleanup | Hold **Shift** while tapping fn | Override: this recording gets the "Anti-Wut" prompt |
+| Force anti-rage cleanup | Hold **Shift** while tapping fn | Override: this recording gets the "Anti-Rage" prompt |
 
-The hotkey key, activation mode (push-to-talk / toggle / both), and default cleanup mode are all configurable in **Einstellungen**.
+The hotkey key, activation mode (push-to-talk / toggle / both), and default cleanup mode are all configurable in **Settings**.
+
+Flow's UI is in English by default; if your macOS locale starts with `de` (e.g., `de_DE`, `de_AT`, `de_CH`), the app auto-switches to German.
 
 ---
 
@@ -67,18 +69,19 @@ The hotkey key, activation mode (push-to-talk / toggle / both), and default clea
 - **Three cleanup modes**:
   - **Verbatim** — raw Whisper output, no LLM rewriting.
   - **Formal** — Groq Llama rewrites your speech as polished prose.
-  - **Anti-Wut** — same idea, but specifically de-escalates emotionally-charged dictations before paste.
+  - **Anti-Rage** — same idea, but specifically de-escalates emotionally-charged dictations before paste.
 - **Background audio ducking** — Apple Music / Spotify pause automatically while you dictate, resume after.
-- **Customizable hotkey** — fn, right-Cmd, or right-Shift; PTT or double-tap toggle.
+- **Customizable hotkey** — fn, right-Cmd, right-Shift, right-Option, or Caps Lock; PTT or double-tap toggle.
 - **History view** — your last 500 dictations with word counts and weekly stats.
-- **Borderless, themed window** — eigene Traffic-Light-Controls, beige card design, no Mac-default chrome clash.
+- **Bilingual** — English by default, German auto-fallback when macOS locale starts with `de`.
+- **Borderless, themed window** — custom traffic-light controls, beige card design, no Mac-default chrome clash.
 
 ---
 
 ## Privacy & data
 
 - **Audio never leaves your machine.** MLX-Whisper is local. Transcription happens before any network call.
-- **Cleanup mode (Formal / Anti-Wut)** sends the **transcribed text** (not audio) to Groq. If that worries you, stick to Verbatim mode and Groq is never contacted.
+- **Cleanup mode (Formal / Anti-Rage)** sends the **transcribed text** (not audio) to Groq. If that worries you, stick to Verbatim mode and Groq is never contacted.
 - **History** is stored locally in `~/.worknetic-flow/history.json`. Plain JSON, easy to inspect, easy to delete.
 - **No telemetry**, no analytics, no auto-update phone-home.
 
@@ -90,7 +93,7 @@ The hotkey key, activation mode (push-to-talk / toggle / both), and default clea
 Open System Settings → Privacy & Security → **Accessibility** → make sure Flow is in the list and toggled on. If you re-installed the DMG, macOS treats it as a new app and the permission resets — remove the old Flow entry and add the new one.
 
 **Some keyboards don't have an fn key.**
-Switch to right-Cmd or right-Shift in **Einstellungen → Aktivierungs-Taste**.
+Switch to right-Cmd, right-Shift, right-Option, or Caps Lock in **Settings → Activation key**.
 
 **App says "Flow is damaged and can't be opened" or "Apple could not verify it is free of malware".**
 You probably launched `Flow.app` directly from the DMG instead of running `Install Flow.command` first. Just run the installer — it clears the Gatekeeper quarantine flag automatically. If you've already copied the app manually, open Terminal and run:
@@ -101,11 +104,11 @@ xattr -cr /Applications/Flow.app
 
 Notarization with Apple is not planned — it requires a 99 USD/year developer account that I'm not paying for an open-source side project.
 
-**"GROQ_API_KEY fehlt" notification.**
+**"GROQ_API_KEY missing" notification.**
 You haven't entered a Groq key. Either grab one at [console.groq.com/keys](https://console.groq.com/keys) (the free tier is plenty for personal use) or just stay in Verbatim mode — it works without any key.
 
 **Pill doesn't show up.**
-Click the menubar icon → "Hauptfenster…" → check the **Verlauf** tab. If you see "Noch keine Diktate" but you just dictated, Whisper probably picked up silence — check your microphone input level.
+Click the menubar icon → "Main Window…" → check the **History** tab. If you see "No dictations yet" but you just dictated, Whisper probably picked up silence — check your microphone input level.
 
 ---
 
