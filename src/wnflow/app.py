@@ -174,6 +174,7 @@ class WnflowApp(NSObject):
             on_save_settings=self._on_settings_save,
             on_test_api_key=self._on_test_api_key,
             on_open_keyboard_settings=self._open_keyboard_settings,
+            on_clear_history=self._clear_history,
         )
 
         # ESC-Hotkey-Monitor (global): laeuft permanent, prüft state.
@@ -689,7 +690,19 @@ class WnflowApp(NSObject):
             "double_tap_window_ms": int(self._config.hotkey.double_tap_window_ms),
             # macOS-fn-Konflikt-Hint (v0.3.5)
             "fn_conflict": fn_conflict_for(self._config.hotkey.key),
+            # v0.4.0: Anzahl gespeicherter Diktate (für Verlauf-Section)
+            "history_count": len(history_store.recent(limit=10000)),
         }
+
+    def _clear_history(self) -> None:
+        """Bridge-Action: leert den lokalen Diktat-Verlauf."""
+        assert_main_thread("WnflowApp._clear_history")
+        history_store.clear()
+        if self._main_window is not None:
+            try:
+                self._main_window.refresh_history()
+            except Exception:
+                log.exception("refresh_history after clear failed")
 
     def _on_settings_save(self, values: dict) -> None:
         """Callback wenn der Settings-Tab 'Speichern' triggert."""

@@ -109,6 +109,7 @@ class MainWindow:
         on_save_settings=None,
         on_test_api_key=None,
         on_open_keyboard_settings=None,
+        on_clear_history=None,
     ) -> None:
         self._window: NSWindow | None = None
         self._webview: WKWebView | None = None
@@ -117,6 +118,7 @@ class MainWindow:
         self._on_save_settings = on_save_settings
         self._on_test_api_key = on_test_api_key
         self._on_open_keyboard_settings = on_open_keyboard_settings
+        self._on_clear_history = on_clear_history
         self._loaded = False
 
     # ---------- Public API --------------------------------------------------
@@ -195,6 +197,12 @@ class MainWindow:
                     self._on_open_keyboard_settings()
                 except Exception:
                     log.exception("openKeyboardSettings callback raised")
+        elif action == "clearHistory":
+            if self._on_clear_history is not None:
+                try:
+                    self._on_clear_history()
+                except Exception:
+                    log.exception("clearHistory callback raised")
         else:
             log.warning("Unknown bridge action: %s", action)
 

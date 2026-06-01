@@ -940,6 +940,42 @@
         on: !!v.mute_background,
       }));
 
+      // Section: Verlauf
+      wrap.appendChild(makeSectionHeading('Verlauf'));
+
+      const histCount = Number(v.history_count || 0);
+      const histRow = document.createElement('div');
+      histRow.className = 'switch-row';
+      const histLabel = document.createElement('div');
+      histLabel.className = 'switch-label';
+      const histTitle = document.createElement('div');
+      histTitle.textContent = histCount === 0
+        ? 'Kein Verlauf vorhanden'
+        : `${histCount} ${histCount === 1 ? 'Diktat' : 'Diktate'} gespeichert`;
+      histLabel.appendChild(histTitle);
+      const histSub = document.createElement('div');
+      histSub.className = 'switch-sub';
+      histSub.textContent = 'Liegt lokal in ~/.worknetic-flow/history.json';
+      histLabel.appendChild(histSub);
+      histRow.appendChild(histLabel);
+
+      const clearBtn = document.createElement('button');
+      clearBtn.type = 'button';
+      clearBtn.className = 'btn ghost';
+      clearBtn.style.color = '#b03a2a';
+      clearBtn.style.borderColor = 'rgba(176, 58, 42, 0.3)';
+      clearBtn.textContent = 'Alle löschen';
+      clearBtn.disabled = histCount === 0;
+      clearBtn.addEventListener('click', () => {
+        if (!confirm(`${histCount} Diktate werden unwiderruflich gelöscht. Fortfahren?`)) return;
+        callPython('clearHistory');
+        // Re-render after a short delay (Python clears + refreshes history)
+        setTimeout(() => callPython('loadSettings'), 200);
+      });
+      histRow.appendChild(clearBtn);
+
+      wrap.appendChild(histRow);
+
       // Save-Bar
       const bar = document.createElement('div');
       bar.className = 'save-bar';
