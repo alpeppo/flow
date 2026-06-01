@@ -1,5 +1,67 @@
 # Changelog
 
+## v0.5.0 — Internationalization (2026-06-01)
+
+Flow now speaks English as its canonical language. German users on a macOS
+locale starting with `de` (`de_DE`, `de_AT`, `de_CH`) keep the German UI;
+everyone else sees English. No in-app toggle — the system locale decides
+at app boot.
+
+### Why
+
+Flow is a public open-source / portfolio project. The repo, README, and
+landing page already spoke English; the app itself was German-only. English
+reviewers opening the repo and then the app would see the mismatch. v0.5.0
+removes that gap and makes the app shippable to non-German users.
+
+### What changed
+
+- **New `src/wnflow/i18n.py` module** with `detect_locale()`, `t(key)`, and
+  a flat dict of ~90 translation keys × 2 languages.
+- **All user-visible Python strings** route through `t()`: 13 `notify(...)`
+  calls in `app.py` (titles normalized `"worknetic-flow"` → `"Flow"` at the
+  same time), the 6 menubar entries, the 3 mode labels.
+- `MODE_LABELS` dict replaced with `mode_label(mode)` function so the
+  locale is re-resolved per call, not frozen at module import.
+- **All user-visible JS strings** in `web/index.html` use a JS-side
+  `t(key, vars)` / `tPlural(baseKey, n, vars)` resolver. The translation
+  dict is pushed once at boot by Python via the new `getLocale` bridge
+  action.
+- **Locale-ready render queue**: `whenLocaleReady(fn)` defers the first
+  `loadHistory` / `loadSettings` until `applyLocale` has arrived, so DE
+  users don't see an EN-flash on first open.
+- **Generic `data-i18n` re-render** in `applyLocale` keeps static HTML
+  attributes synced when locale changes.
+- **`docs/install.sh`** localizes terminal output via
+  `LC_ALL > LC_MESSAGES > LANG` (macOS override order). Curl-piped bash
+  with no env vars defaults to English. ~27 i18n keys covering every
+  user-visible echo.
+
+### Quality
+
+- 130 tests, all green (up from 120).
+- 10 new tests in `tests/test_i18n.py` — locale detection, EN/DE lookup,
+  defensive fallback for unknown keys, key-set parity enforcement, plus
+  a guard against `MODE_LABELS` frozen-dict regression.
+
+### Convention
+
+Commit messages on this release branch are written in English to match
+the release theme and to read naturally for international portfolio
+reviewers on GitHub. CLAUDE.md's "German conversation, English code" rule
+still applies to in-session discussion.
+
+### Known follow-ups
+
+- Settings → Language dropdown options come from Python as native language
+  names (`Deutsch`, `English`, `Français`, …) — convention for
+  language-name dropdowns; no translation needed.
+- TOML save failure when hotwords come back from the WKWebView bridge as
+  `NSArray` instead of `list` — pre-existing bug, not introduced here.
+  Tracked for v0.5.1.
+
+---
+
 ## v0.4.0 — Security hardening (2026-06-01)
 
 Triggered by an independent security audit (`docs/security-audit-v0.4.0.md`).
